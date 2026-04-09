@@ -47,9 +47,21 @@ export default function Home() {
 
   return (
     <main className="home-screen">
-      <img className="home-deco home-deco-top" src="/img/home/다각형.webp" alt="" />
-      <img className="home-deco home-deco-right" src="/img/home/사각형.webp" alt="" />
-      <img className="home-deco home-deco-bottom" src="/img/home/사각형2.webp" alt="" />
+      <img
+        className="home-deco home-deco-top"
+        src="/img/home/다각형.webp"
+        alt=""
+      />
+      <img
+        className="home-deco home-deco-right"
+        src="/img/home/사각형.webp"
+        alt=""
+      />
+      <img
+        className="home-deco home-deco-bottom"
+        src="/img/home/사각형2.webp"
+        alt=""
+      />
 
       <section className="home-shell">
         <header className="home-header">
@@ -91,7 +103,7 @@ export default function Home() {
           <div className="home-side">
             <article className="home-program home-program-small">
               <img
-                src="/img/home/팬톤컬러찾기.webp"
+                src="/img/home/독도.webp"
                 alt="장식 이미지"
                 loading="lazy"
               />
