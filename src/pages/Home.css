@@ -1,8 +1,53 @@
+@import url("https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Noto+Sans+KR:wght@300;400;700&family=Share+Tech+Mono&display=swap");
+
 .home-screen {
   position: relative;
   min-height: 100dvh;
   overflow: hidden;
   background: #07122a;
+}
+
+.home-screen .home-root {
+  position: fixed;
+  inset: 0;
+  pointer-events: none;
+  z-index: 50;
+}
+
+@keyframes flicker {
+
+  0%,
+  92%,
+  94%,
+  100% {
+    opacity: 1;
+  }
+
+  93% {
+    opacity: 0.88;
+  }
+}
+
+.home-screen .bg-glow {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  z-index: 0;
+}
+
+.home-screen .bg-glow-1 {
+  background: radial-gradient(ellipse 130% 70% at 50% 0%,
+      rgba(40, 100, 180, 0.12),
+      transparent 55%);
+}
+
+@media (prefers-reduced-motion: reduce) {
+
+  .home-info .card::before,
+  .home-program::before {
+    animation: none;
+    opacity: 1;
+  }
 }
 
 .home-shell {
@@ -28,6 +73,26 @@
   letter-spacing: -0.02em;
 }
 
+.home-header-sub {
+  margin: 12px 0 0;
+  font-family: "Share Tech Mono", monospace;
+  font-size: 10px;
+  letter-spacing: 2px;
+  color: #2a4a6a;
+  text-transform: uppercase;
+}
+
+.home-shell .footer {
+  text-align: center;
+  padding-bottom: 8px;
+  font-family: "Share Tech Mono", monospace;
+  font-size: 9px;
+  letter-spacing: 2px;
+  color: #3b5c86;
+  text-transform: uppercase;
+  margin-top: 40px;
+}
+
 .home-grid {
   margin-top: clamp(20px, 3vw, 36px);
   display: grid;
@@ -42,47 +107,134 @@
   align-self: start;
 }
 
-.home-info-card {
-  border-radius: 19px;
-  padding: clamp(18px, 2vw, 24px);
+.home-info .card {
+  border-radius: 14px;
+  overflow: hidden;
+  position: relative;
+  border: 1px solid rgba(60, 120, 200, 0.15);
+  background: rgba(8, 15, 26, 0.92);
+  transition: border-color 0.25s, transform 0.2s;
+  cursor: pointer;
   min-height: 227px;
   min-width: 233px;
-  display: grid;
-  align-content: space-between;
+  box-sizing: border-box;
 }
 
-.home-info-card p {
-  margin: 0;
-  width: 100%;
-  text-align: center;
-  color: rgba(255, 255, 255, 0.75);
-  font-size: 24px;
-  font-weight: 400;
+.home-info .card::before,
+.home-program::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  border-radius: inherit;
+  z-index: 2;
+  background: repeating-linear-gradient(0deg,
+      transparent,
+      transparent 2px,
+      rgba(0, 180, 255, 0.012) 2px,
+      rgba(0, 180, 255, 0.012) 4px);
+  animation: flicker 10s infinite;
 }
 
-.home-info-card strong {
-  margin-top: 8px;
-  margin-bottom: 35px;
+.home-info .card:hover {
+  border-color: rgba(60, 120, 200, 0.4);
+  transform: translateY(-2px);
+}
+
+.home-info .card::after {
+  content: "";
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 1px;
+  z-index: 4;
+  background: linear-gradient(90deg,
+      transparent,
+      rgba(80, 160, 255, 0.3),
+      transparent);
+}
+
+.home-info .clock-card {
+  padding: 22px 20px;
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-start;
+}
+
+.home-info .card-mono {
+  position: relative;
+  z-index: 3;
+  font-family: "Share Tech Mono", monospace;
+  font-size: 14px;
+  letter-spacing: 2.5px;
+  color: #2a5070;
+  text-transform: uppercase;
+  margin-bottom: 50px;
   text-align: center;
-  color: rgba(255, 255, 255, 0.75);
-  font-size: 80px;
-  font-weight: 400;
+}
+
+.home-info .time-display {
+  position: relative;
+  z-index: 3;
+  font-family: "Bebas Neue", sans-serif;
+  font-size: clamp(75px, 10vw, 75px);
   line-height: 1;
+  color: #50b8f0;
+  letter-spacing: 4px;
+  text-shadow: 0 0 40px rgba(60, 160, 255, 0.25);
+  text-align: center;
+  flex: 1;
+  display: flex;
+  align-items: baseline;
+  justify-content: center;
+  flex-wrap: nowrap;
 }
 
-.home-info-card-time {
-  background: #182d48;
+.home-info .time-secs {
+  font-size: 0.45em;
+  color: #1e5080;
+  vertical-align: baseline;
 }
 
-.home-info-card-day {
-  background: #504e4c;
-}
+@media (min-width: 981px) {
 
-.home-info-card-day strong {
-  font-size: clamp(5.5rem, 12vw, 6.5rem);
-  color: rgba(255, 255, 255);
-  margin-top: clamp(14px, 2.2vw, 22px);
-  margin-bottom: 22px;
+  .home-info .card,
+  .home-program-main.card,
+  .home-program-small.card,
+  .home-program-quiz.card {
+    border-radius: 19px;
+  }
+
+  .home-info .card-mono {
+    font-size: 9px;
+    margin-bottom: 45px;
+  }
+
+  .home-info .time-display {
+    font-size: clamp(52px, 8vw, 68px);
+  }
+
+  /* 오른쪽 열: 방탈출 퀴즈 타일을 예전(이미지 16:9)과 같이 열 너비에 맞춤 */
+  .home-side {
+    width: 100%;
+    min-width: 0;
+    justify-items: stretch;
+  }
+
+  .home-program-quiz,
+  .home-program-quiz.quiz-card {
+    width: 100%;
+    max-width: 100%;
+    min-width: 0;
+    min-height: 0;
+    aspect-ratio: 16 / 9;
+    box-sizing: border-box;
+  }
+
+  .home-program-small {
+    justify-self: start;
+  }
 }
 
 .home-program {
@@ -98,24 +250,210 @@
   object-fit: cover;
 }
 
-.home-program-main img {
-  width: 100%;
-  height: 100%;
-  object-fit: cover;
-  object-position: center center;
-}
-
 .home-program-main {
-  min-height: 470px;
-  min-width: 300px;
-  border-radius: 19px;
   align-self: start;
   margin-top: -2px;
+  width: 100%;
+  max-width: 100%;
+  min-width: 0;
+  box-sizing: border-box;
 }
 
-.home-program-main .home-program-link {
+@media (min-width: 981px) {
+  .home-program-main {
+    min-width: 300px;
+    align-self: start;
+    margin-top: -2px;
+  }
+}
+
+.home-program-main.card {
+  border-radius: 14px;
+  overflow: hidden;
+  position: relative;
+  border: 1px solid rgba(60, 120, 200, 0.15);
+  background: rgba(8, 15, 26, 0.92);
+  transition: border-color 0.25s, transform 0.2s;
+  cursor: pointer;
+}
+
+.home-program-main.card:hover {
+  border-color: rgba(60, 120, 200, 0.4);
+  transform: translateY(-2px);
+}
+
+.home-program-main.card::after {
+  content: "";
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 1px;
+  background: linear-gradient(90deg,
+      transparent,
+      rgba(80, 160, 255, 0.3),
+      transparent);
+}
+
+/* 레퍼런스: CENTER CARD (Pantone) — .home-program-main 안에만 적용 */
+.home-program-main.card.center-card {
+  min-height: 280px;
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-end;
+  background: #08141e;
+  border-color: rgba(50, 130, 210, 0.2);
+}
+
+@media (min-width: 640px) {
+  .home-program-main.card.center-card {
+    min-height: 100%;
+  }
+}
+
+@media (min-width: 981px) {
+  .home-program-main.card.center-card {
+    min-height: 470px;
+  }
+}
+
+.home-program-main.card.center-card .home-pantone-link {
+  flex: 1 1 auto;
+  align-self: stretch;
+  min-height: 280px;
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-end;
+  width: 100%;
   border-radius: inherit;
   overflow: hidden;
+  text-decoration: none;
+  color: inherit;
+}
+
+@media (min-width: 640px) {
+  .home-program-main.card.center-card .home-pantone-link {
+    min-height: 0;
+    height: 100%;
+  }
+}
+
+@media (min-width: 981px) {
+  .home-program-main.card.center-card .home-pantone-link {
+    min-height: 470px;
+    height: auto;
+  }
+}
+
+.home-program-main .center-bg {
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(160deg, #0a1a2e 0%, #081018 40%, #040810 100%);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.home-program-main .wave-lines {
+  position: absolute;
+  inset: 0;
+  overflow: hidden;
+  opacity: 0.25;
+}
+
+.home-program-main .wave-lines svg {
+  width: 100%;
+  height: 100%;
+}
+
+.home-program-main .pantone-visual {
+  position: relative;
+  width: clamp(120px, 30%, 160px);
+  background: #fff;
+  border-radius: 2px;
+  padding: 8px 8px 30px;
+  box-shadow: 0 20px 60px rgba(0, 0, 0, 0.7);
+  transform: rotate(-3deg);
+}
+
+@media (min-width: 981px) {
+  .home-program-main .center-bg {
+    align-items: center;
+    justify-content: center;
+    padding-top: 0;
+  }
+
+  .home-program-main .pantone-visual {
+    width: clamp(120px, 30%, 160px);
+    padding: 8px 8px 30px;
+    box-shadow: 0 20px 60px rgba(0, 0, 0, 0.7);
+    transform: rotate(-3deg);
+  }
+}
+
+.home-program-main .pantone-swatch {
+  width: 100%;
+  aspect-ratio: 1;
+  background: #19426a;
+  border-radius: 1px;
+  margin-bottom: 8px;
+  position: relative;
+  overflow: hidden;
+}
+
+.home-program-main .pantone-swatch::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(135deg,
+      rgba(255, 255, 255, 0.08) 0%,
+      transparent 60%);
+}
+
+.home-program-main .pantone-brand {
+  font-family: "Bebas Neue", sans-serif;
+  font-size: 16px;
+  letter-spacing: 2px;
+  color: #111;
+  line-height: 1;
+}
+
+.home-program-main .pantone-code {
+  font-size: 9px;
+  color: #555;
+  font-family: Arial, sans-serif;
+  margin-top: 2px;
+  line-height: 1.4;
+}
+
+.home-program-main .center-footer {
+  position: relative;
+  z-index: 2;
+  padding: 20px 22px;
+  background: linear-gradient(0deg, rgba(4, 8, 14, 0.98) 0%, transparent 100%);
+}
+
+.home-program-main .center-mission {
+  font-family: "Share Tech Mono", monospace;
+  font-size: 9px;
+  letter-spacing: 2px;
+  color: #2a6a9a;
+  text-transform: uppercase;
+  margin-bottom: 5px;
+}
+
+.home-program-main .center-title {
+  font-family: "Bebas Neue", sans-serif;
+  font-size: 28px;
+  letter-spacing: 3px;
+  color: #d0e8ff;
+}
+
+.home-program-main .center-desc {
+  font-size: 11px;
+  color: #2a4a6a;
+  margin-top: 4px;
 }
 
 .home-side {
@@ -130,17 +468,257 @@
   width: min(233px, 100%);
   aspect-ratio: 233 / 227;
   justify-self: start;
-  border-radius: 19px;
   overflow: hidden;
-  display: grid;
+  position: relative;
+}
+
+/* 레퍼런스: Dokdo 카드 (.card + .dokdo-card) */
+.home-program-small.card {
+  border-radius: 14px;
+  overflow: hidden;
+  position: relative;
+  border: 1px solid rgba(60, 120, 200, 0.15);
+  background: rgba(8, 15, 26, 0.92);
+  transition: border-color 0.25s, transform 0.2s;
+  cursor: pointer;
+}
+
+.home-program-small.card:hover {
+  border-color: rgba(60, 120, 200, 0.4);
+  transform: translateY(-2px);
+}
+
+.home-program-small.card::after {
+  content: "";
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 1px;
+  z-index: 4;
+  background: linear-gradient(90deg,
+      transparent,
+      rgba(80, 160, 255, 0.3),
+      transparent);
+  pointer-events: none;
+}
+
+.home-program-small.dokdo-card {
+  min-height: 140px;
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-end;
+  border-color: rgba(30, 150, 100, 0.2);
+  background: #040e0a;
+}
+
+.home-program-small .dokdo-bg {
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(135deg, #041810 0%, #08221a 100%);
+}
+
+.home-program-small .island-shapes {
+  position: absolute;
+  inset: 0;
+  overflow: hidden;
+  opacity: 0.3;
+}
+
+.home-program-small .island-shapes svg {
+  width: 100%;
+  height: 100%;
+}
+
+.home-program-small .dokdo-footer {
+  position: relative;
+  z-index: 2;
+  padding: 16px 18px;
+  background: linear-gradient(0deg, rgba(2, 8, 5, 0.97) 0%, transparent 100%);
+}
+
+.home-program-small .dokdo-mission {
+  font-family: "Share Tech Mono", monospace;
+  font-size: 9px;
+  letter-spacing: 2px;
+  color: #1a7a50;
+  text-transform: uppercase;
+  margin-bottom: 4px;
+}
+
+.home-program-small .dokdo-title {
+  font-family: "Bebas Neue", sans-serif;
+  font-size: 24px;
+  letter-spacing: 2px;
+  color: #80e8c0;
+}
+
+.home-program-small .dokdo-desc {
+  font-size: 10px;
+  color: #1a5040;
+  margin-top: 3px;
 }
 
 .home-program-quiz {
   aspect-ratio: 16 / 9;
+  position: relative;
+  overflow: hidden;
+}
+
+/* 레퍼런스: Quiz 카드 */
+.home-program-quiz.card {
+  border-radius: 14px;
+  overflow: hidden;
+  position: relative;
+  border: 1px solid rgba(60, 120, 200, 0.15);
+  background: rgba(8, 15, 26, 0.92);
+  transition: border-color 0.25s, transform 0.2s;
+  cursor: pointer;
+}
+
+.home-program-quiz.card:hover {
+  border-color: rgba(60, 120, 200, 0.4);
+  transform: translateY(-2px);
+}
+
+.home-program-quiz.card::after {
+  content: "";
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 1px;
+  z-index: 6;
+  background: linear-gradient(90deg,
+      transparent,
+      rgba(80, 160, 255, 0.3),
+      transparent);
+  pointer-events: none;
+}
+
+/* QUIZ CARD (레퍼런스 스펙 그대로, 홈 그리드용으로 .home-program-quiz 범위) */
+.home-program-quiz.quiz-card {
+  min-height: 140px;
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-end;
+  border-color: rgba(200, 40, 40, 0.3);
+  background: #0e0404;
+}
+
+.home-program-quiz .home-quiz-link {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-end;
+  flex: 1 1 auto;
+  width: 100%;
+  height: 100%;
+  min-height: 0;
+  text-decoration: none;
+  color: inherit;
+}
+
+.home-program-quiz .quiz-bg {
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(135deg, #120404 0%, #0a0202 100%);
+}
+
+.home-program-quiz .caution-lines {
+  position: absolute;
+  inset: 0;
+  overflow: hidden;
+  opacity: 0.18;
+}
+
+.home-program-quiz .caution-lines::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: repeating-linear-gradient(-45deg,
+      #f0c000 0px,
+      #f0c000 16px,
+      #111 16px,
+      #111 32px);
+}
+
+.home-program-quiz .quiz-live {
+  position: absolute;
+  top: 12px;
+  right: 12px;
+  z-index: 3;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  background: rgba(180, 20, 20, 0.9);
+  border-radius: 4px;
+  padding: 3px 8px;
+  font-family: "Share Tech Mono", monospace;
+  font-size: 9px;
+  letter-spacing: 2px;
+  color: #fff;
+  text-transform: uppercase;
+  pointer-events: none;
+}
+
+@keyframes blink {
+  0%,
+  100% {
+    opacity: 1;
+  }
+
+  50% {
+    opacity: 0.25;
+  }
+}
+
+.home-program-quiz .quiz-live-dot {
+  width: 5px;
+  height: 5px;
+  border-radius: 50%;
+  background: #ff8080;
+  animation: blink 0.7s infinite;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .home-program-quiz .quiz-live-dot {
+    animation: none;
+  }
+}
+
+.home-program-quiz .quiz-footer {
+  position: relative;
+  z-index: 2;
+  padding: 16px 18px;
+  background: linear-gradient(0deg, rgba(10, 2, 2, 0.98) 0%, transparent 100%);
+}
+
+.home-program-quiz .quiz-mission {
+  font-family: "Share Tech Mono", monospace;
+  font-size: 9px;
+  letter-spacing: 2px;
+  color: #882020;
+  text-transform: uppercase;
+  margin-bottom: 4px;
+}
+
+.home-program-quiz .quiz-title {
+  font-family: "Bebas Neue", sans-serif;
+  font-size: 24px;
+  letter-spacing: 2px;
+  color: #ff8070;
+}
+
+.home-program-quiz .quiz-desc {
+  font-size: 10px;
+  color: #4a1818;
+  margin-top: 3px;
 }
 
 .home-program-link {
   position: relative;
+  z-index: 1;
   display: block;
   width: 100%;
   height: 100%;
@@ -159,12 +737,6 @@
   margin-bottom: 55px;
   white-space: nowrap;
   text-shadow: 0 2px 10px rgba(0, 0, 0, 0.55);
-}
-
-.home-program-main .home-program-link h2 {
-  font-size: clamp(1.85rem, 2.5vw, 3rem);
-  line-height: 1.15;
-  letter-spacing: -0.02em;
 }
 
 .home-deco {
@@ -198,9 +770,10 @@
   .home-grid {
     grid-template-columns: 1fr;
     align-items: stretch;
+    justify-items: stretch;
   }
 
-  .home-info-card {
+  .home-info .card {
     min-width: 0;
   }
 
@@ -210,27 +783,34 @@
   }
 
   .home-program-main {
-    aspect-ratio: 16 / 8;
+    grid-column: 1 / -1;
+    width: 100%;
+    max-width: 100%;
     min-width: 0;
+    aspect-ratio: 16 / 8;
     min-height: 0;
     margin-top: 0;
-    border-radius: 19px;
+    border-radius: 14px;
     overflow: hidden;
     box-shadow: 0 0 0 1px rgba(255, 255, 255, 0.08);
+    justify-self: stretch;
   }
 
-  .home-program-main img {
-    width: 108%;
-    height: 108%;
-    object-position: center 42%;
-    transform: translateX(-4%);
+  .home-program-main.card.center-card .home-pantone-link {
+    max-width: 100%;
+    min-width: 0;
+  }
+
+  .home-program-main .center-footer {
+    min-width: 0;
+    max-width: 100%;
   }
 
   .home-program-small {
     width: 100%;
     aspect-ratio: 16 / 10;
     justify-self: stretch;
-    border-radius: 19px;
+    border-radius: 14px;
     overflow: hidden;
   }
 
@@ -240,6 +820,9 @@
 
   .home-info {
     grid-template-columns: 1fr 1fr;
+    width: 100%;
+    max-width: 100%;
+    min-width: 0;
   }
 }
 
