@@ -21,16 +21,50 @@ export default function Quiz1Game() {
 
   return (
     <div ref={rootRef} className="quiz1-game-root">
+      <svg
+        aria-hidden
+        style={{ position: "absolute", width: 0, height: 0 }}
+        xmlns="http://www.w3.org/2000/svg"
+      >
+        <defs>
+          <filter id="q1g-stamp-rough">
+            <feTurbulence type="fractalNoise" baseFrequency="0.065" numOctaves="4" seed="8" result="noise" />
+            <feDisplacementMap
+              in="SourceGraphic"
+              in2="noise"
+              scale="2.8"
+              xChannelSelector="R"
+              yChannelSelector="G"
+            />
+            <feGaussianBlur stdDeviation="0.3" />
+          </filter>
+          <filter id="stamp-rough">
+            <feTurbulence type="fractalNoise" baseFrequency="0.04" numOctaves="4" seed="5" result="noise" />
+            <feDisplacementMap
+              in="SourceGraphic"
+              in2="noise"
+              scale="1.8"
+              xChannelSelector="R"
+              yChannelSelector="G"
+            />
+            <feGaussianBlur stdDeviation="0.2" />
+          </filter>
+        </defs>
+      </svg>
       <canvas id="q1g-c-bg" />
       <canvas id="q1g-c-fx" aria-hidden />
       <div id="q1g-overlay" className="q1g-overlay q1g-bg-ocean" />
 
-      <Link to="/" className="q1g-home-btn" aria-label="홈으로 이동">
+      <Link
+        to="/"
+        className="app-home-link app-home-link--fixed"
+        aria-label="홈으로 이동"
+      >
         <img
-          src="https://api.iconify.design/mdi/home.svg?color=%23ffffff"
+          src="https://api.iconify.design/fluent/home-24-filled.svg?color=%23ffffff"
           alt=""
-          width={24}
-          height={24}
+          width={28}
+          height={28}
         />
       </Link>
 

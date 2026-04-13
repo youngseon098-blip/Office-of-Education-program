@@ -1,32 +1,14 @@
 import { Link } from "react-router-dom";
-import { useEffect, useId, useRef } from "react";
+import { useEffect, useRef, useState } from "react";
 import "./quiz1.css";
 
-type Star = {
-  x: number;
-  y: number;
-  r: number;
-  a: number;
-  p: number;
-  s: number;
-  bright?: boolean;
-};
-
-type FogPart = {
-  x: number;
-  y: number;
-  w: number;
-  h: number;
-  a: number;
-  dx: number;
-  p: number;
-};
+const MISSION_CODE_OK = "0817";
 
 export default function Quiz1() {
-  const svgUid = useId().replace(/[^a-zA-Z0-9]/g, "");
-  const starsRef = useRef<HTMLCanvasElement>(null);
-  const oceanRef = useRef<HTMLCanvasElement>(null);
-  const fogRef = useRef<HTMLCanvasElement>(null);
+  const bgRef = useRef<HTMLCanvasElement>(null);
+  const pageRef = useRef<HTMLDivElement>(null);
+  const [missionCode, setMissionCode] = useState("");
+  const canEnterGame = missionCode.trim() === MISSION_CODE_OK;
 
   useEffect(() => {
     document.title = "Quiz 1 · 개척령 어느 어부와의 시그널";
@@ -36,304 +18,239 @@ export default function Quiz1() {
   }, []);
 
   useEffect(() => {
-    const cs = starsRef.current;
-    const co = oceanRef.current;
-    const cf = fogRef.current;
-    if (!cs || !co || !cf) return;
+    const canvasEl = bgRef.current;
+    const pageEl = pageRef.current;
+    if (!canvasEl || !pageEl) return;
+    const ctxEl = canvasEl.getContext("2d");
+    if (!ctxEl) return;
+    const canvas = canvasEl;
+    const page = pageEl;
+    const ctx = ctxEl;
 
-    const xs = cs.getContext("2d");
-    const xo = co.getContext("2d");
-    const xf = cf.getContext("2d");
-    if (!xs || !xo || !xf) return;
-
-    const canvasStars = cs;
-    const canvasOcean = co;
-    const canvasFog = cf;
-    const starCtx = xs;
-    const oceanCtx = xo;
-    const fogCtx = xf;
-
-    let W = 0;
-    let H = 0;
-    let stars: Star[] = [];
-    let fogParts: FogPart[] = [];
-    let t = 0;
-    let raf = 0;
-    let cancelled = false;
-
-    const reduceMotion = window.matchMedia(
-      "(prefers-reduced-motion: reduce)",
-    ).matches;
-
-    const waves = Array.from({ length: 8 }, () => ({
-      offset: Math.random() * Math.PI * 2,
-      speed: 0.3 + Math.random() * 0.4,
-      amp: 2 + Math.random() * 4,
-      freq: 0.008 + Math.random() * 0.006,
-    }));
-
-    function buildStars() {
-      stars = [];
-      const n = Math.floor((W * H) / 600);
-      for (let i = 0; i < n; i++) {
-        stars.push({
-          x: Math.random() * W,
-          y: Math.random() * H * 0.55,
-          r: Math.random() * 1.2 + 0.2,
-          a: Math.random(),
-          p: Math.random() * Math.PI * 2,
-          s: Math.random() * 0.003 + 0.001,
-        });
+    function splat(sx: number, sy: number, maxR: number, al: number) {
+      const cols = ["#880404", "#aa0606", "#cc0808"];
+      function bl(
+        bx: number,
+        by: number,
+        rx: number,
+        ry: number,
+        rot: number,
+        a: number,
+        c: string,
+      ) {
+        ctx.save();
+        ctx.translate(bx, by);
+        ctx.rotate(rot);
+        ctx.globalAlpha = a;
+        ctx.fillStyle = c;
+        ctx.beginPath();
+        ctx.ellipse(0, 0, rx, ry, 0, 0, Math.PI * 2);
+        ctx.fill();
+        ctx.restore();
       }
-      for (let i = 0; i < 25; i++) {
-        stars.push({
-          x: Math.random() * W,
-          y: Math.random() * H * 0.5,
-          r: Math.random() * 1.6 + 1,
-          a: 0.6 + Math.random() * 0.4,
-          p: Math.random() * Math.PI * 2,
-          s: 0.002,
-          bright: true,
-        });
-      }
+      bl(sx, sy, maxR * 0.9, maxR * 0.45, -0.2, al * 0.9, cols[1]);
+      bl(sx - maxR * 0.12, sy - maxR * 0.06, maxR * 0.6, maxR * 0.32, 0.1, al * 0.8, cols[0]);
+      bl(sx + maxR * 0.15, sy + maxR * 0.05, maxR * 0.45, maxR * 0.24, -0.05, al * 0.75, cols[2]);
     }
 
-    function buildFog() {
-      fogParts = [];
-      for (let i = 0; i < 12; i++) {
-        fogParts.push({
-          x: Math.random() * W,
-          y: H * 0.45 + Math.random() * H * 0.15,
-          w: 200 + Math.random() * 300,
-          h: 40 + Math.random() * 60,
-          a: Math.random() * 0.06 + 0.02,
-          dx: (Math.random() - 0.5) * 0.15,
-          p: Math.random() * Math.PI * 2,
-        });
-      }
-    }
+    function drawBg() {
+      const w = window.innerWidth;
+      const h = Math.max(window.innerHeight, page.scrollHeight);
+      canvas.width = w;
+      canvas.height = h;
 
-    function resize() {
-      W = canvasStars.width = canvasOcean.width = canvasFog.width =
-        window.innerWidth;
-      H = canvasStars.height = canvasOcean.height = canvasFog.height =
-        window.innerHeight;
-      buildStars();
-      buildFog();
-    }
+      const g = ctx.createLinearGradient(0, 0, 0, h);
+      g.addColorStop(0, "#1e1510");
+      g.addColorStop(0.4, "#241a0e");
+      g.addColorStop(0.8, "#1c1208");
+      g.addColorStop(1, "#140e06");
+      ctx.fillStyle = g;
+      ctx.fillRect(0, 0, w, h);
 
-    function draw() {
-      if (cancelled) return;
-      if (!reduceMotion) t += 0.016;
-
-      /* STARS */
-      starCtx.clearRect(0, 0, W, H);
-      const sg = starCtx.createLinearGradient(0, 0, 0, H * 0.55);
-      sg.addColorStop(0, "#01050f");
-      sg.addColorStop(1, "rgba(2,8,20,0)");
-      starCtx.fillStyle = sg;
-      starCtx.fillRect(0, 0, W, H * 0.55);
-
-      for (const s of stars) {
-        const al = s.a * (0.4 + 0.6 * Math.sin(t * s.s * 60 + s.p));
-        starCtx.beginPath();
-        starCtx.arc(s.x, s.y, s.r, 0, Math.PI * 2);
-        if (s.bright) {
-          starCtx.fillStyle = `rgba(210,220,255,${al})`;
-          starCtx.shadowColor = "rgba(200,210,255,.7)";
-          starCtx.shadowBlur = 5;
-        } else {
-          starCtx.fillStyle = `rgba(160,170,220,${al * 0.6})`;
-          starCtx.shadowBlur = 0;
+      for (let i = 0; i < 18; i++) {
+        const y = (h / 18) * i + Math.sin(i * 1.3) * 12;
+        ctx.strokeStyle = `rgba(${i % 2 ? 255 : 200},${i % 2 ? 200 : 150},${i % 2 ? 80 : 60},0.04)`;
+        ctx.lineWidth = 2 + Math.sin(i * 0.7) * 1.5;
+        ctx.beginPath();
+        ctx.moveTo(0, y);
+        for (let x = 0; x <= w; x += 40) {
+          ctx.lineTo(x, y + Math.sin(x * 0.008 + i) * 6);
         }
-        starCtx.fill();
-      }
-      starCtx.shadowBlur = 0;
-
-      /* OCEAN */
-      oceanCtx.clearRect(0, 0, W, H);
-      const hor = H * 0.53;
-
-      const og = oceanCtx.createLinearGradient(0, hor, 0, H);
-      og.addColorStop(0, "#050d1e");
-      og.addColorStop(0.3, "#040b18");
-      og.addColorStop(1, "#020610");
-      oceanCtx.fillStyle = og;
-      oceanCtx.fillRect(0, hor, W, H);
-
-      const rc = oceanCtx.createLinearGradient(0, hor, 0, H);
-      rc.addColorStop(0, "rgba(140,160,240,0.25)");
-      rc.addColorStop(1, "rgba(80,100,180,0.0)");
-      oceanCtx.fillStyle = rc;
-      oceanCtx.fillRect(W / 2 - 50, hor, 100, H);
-
-      for (let wi = 0; wi < waves.length; wi++) {
-        const wv = waves[wi];
-        const y = hor + wi * ((H - hor) / 8) + 8;
-        oceanCtx.beginPath();
-        oceanCtx.moveTo(0, y);
-        for (let px = 0; px <= W; px += 4) {
-          oceanCtx.lineTo(
-            px,
-            y + Math.sin(px * wv.freq + t * wv.speed + wv.offset) * wv.amp,
-          );
-        }
-        const distFromHor = (y - hor) / (H - hor);
-        const wAlpha = Math.max(0, 0.15 - distFromHor * 0.12);
-        oceanCtx.strokeStyle = `rgba(120,150,220,${wAlpha})`;
-        oceanCtx.lineWidth = 0.8;
-        oceanCtx.stroke();
-
-        const shimX = W / 2 + Math.sin(t * 0.8 + wi) * 30;
-        const shimY =
-          y +
-          Math.sin(shimX * wv.freq + t * wv.speed + wv.offset) * wv.amp;
-        oceanCtx.beginPath();
-        oceanCtx.arc(shimX, shimY, 1.2, 0, Math.PI * 2);
-        oceanCtx.fillStyle = `rgba(200,220,255,${wAlpha * 4})`;
-        oceanCtx.fill();
+        ctx.stroke();
       }
 
-      const beamAngle = -35 + 70 * (0.5 + 0.5 * Math.sin(t / 4));
-      const rad = ((beamAngle - 90) * Math.PI) / 180;
-      const bGrad = oceanCtx.createLinearGradient(
-        W / 2,
-        hor,
-        W / 2 + Math.cos(rad) * 200,
-        hor + Math.sin(rad) * 200,
-      );
-      bGrad.addColorStop(0, "rgba(255,210,80,0.10)");
-      bGrad.addColorStop(1, "rgba(255,210,80,0)");
-      oceanCtx.fillStyle = bGrad;
-      oceanCtx.beginPath();
-      oceanCtx.moveTo(W / 2, hor);
-      oceanCtx.lineTo(W / 2 + Math.cos(rad - 0.15) * 280, hor + Math.sin(rad - 0.15) * 280);
-      oceanCtx.lineTo(W / 2 + Math.cos(rad + 0.15) * 280, hor + Math.sin(rad + 0.15) * 280);
-      oceanCtx.closePath();
-      oceanCtx.fill();
+      splat(w * 0.08, h * 0.12, 28, 0.55);
+      splat(w * 0.88, h * 0.08, 18, 0.45);
+      splat(w * 0.92, h * 0.4, 14, 0.35);
+      splat(w * 0.04, h * 0.55, 16, 0.3);
+      splat(w * 0.96, h * 0.7, 12, 0.3);
 
-      /* FOG */
-      fogCtx.clearRect(0, 0, W, H);
-      for (const f of fogParts) {
-        if (!reduceMotion) {
-          f.x += f.dx;
-          f.p += 0.003;
-        }
-        if (f.x > W + f.w / 2) f.x = -f.w / 2;
-        if (f.x < -f.w / 2) f.x = W + f.w / 2;
-        const fa = f.a * (0.6 + 0.4 * Math.sin(f.p));
-        const fg = fogCtx.createRadialGradient(f.x, f.y, 0, f.x, f.y, f.w / 2);
-        fg.addColorStop(0, `rgba(80,100,160,${fa})`);
-        fg.addColorStop(1, "rgba(80,100,160,0)");
-        fogCtx.fillStyle = fg;
-        fogCtx.beginPath();
-        fogCtx.ellipse(f.x, f.y, f.w / 2, f.h / 2, 0, 0, Math.PI * 2);
-        fogCtx.fill();
-      }
-
-      if (!reduceMotion) {
-        raf = requestAnimationFrame(draw);
-      }
+      const vig = ctx.createRadialGradient(w / 2, h / 2, h * 0.15, w / 2, h / 2, h * 0.8);
+      vig.addColorStop(0, "rgba(0,0,0,0)");
+      vig.addColorStop(1, "rgba(0,0,0,0.65)");
+      ctx.fillStyle = vig;
+      ctx.fillRect(0, 0, w, h);
     }
 
-    resize();
-    draw();
-    const onResize = () => {
-      resize();
-      if (reduceMotion) {
-        cancelAnimationFrame(raf);
-        draw();
-      }
-    };
-    window.addEventListener("resize", onResize);
-
-    return () => {
-      cancelled = true;
-      cancelAnimationFrame(raf);
-      window.removeEventListener("resize", onResize);
-    };
+    drawBg();
+    window.addEventListener("resize", drawBg);
+    return () => window.removeEventListener("resize", drawBg);
   }, []);
 
-  const mgId = `quiz1-mg-${svgUid}`;
-  const glowId = `quiz1-glow-${svgUid}`;
-
   return (
-    <main className="quiz1-scene">
-      <canvas ref={starsRef} className="quiz1-canvas quiz1-canvas-stars" aria-hidden />
-      <canvas ref={oceanRef} className="quiz1-canvas quiz1-canvas-ocean" aria-hidden />
-      <canvas ref={fogRef} className="quiz1-canvas quiz1-canvas-fog" aria-hidden />
+    <main className="quiz1-page" ref={pageRef}>
+      <canvas ref={bgRef} className="quiz1-bgc" aria-hidden />
+      <svg
+        aria-hidden
+        style={{ position: "absolute", width: 0, height: 0 }}
+        xmlns="http://www.w3.org/2000/svg"
+      >
+        <defs>
+          <filter id="stamp-rough">
+            <feTurbulence type="fractalNoise" baseFrequency="0.065" numOctaves="4" seed="8" result="noise" />
+            <feDisplacementMap
+              in="SourceGraphic"
+              in2="noise"
+              scale="2.8"
+              xChannelSelector="R"
+              yChannelSelector="G"
+            />
+            <feGaussianBlur stdDeviation="0.3" />
+          </filter>
+        </defs>
+      </svg>
 
-      <div className="quiz1-moon-glow" aria-hidden />
-      <div className="quiz1-moon" aria-hidden>
-        <svg viewBox="0 0 70 70" xmlns="http://www.w3.org/2000/svg" width={70} height={70}>
-          <defs>
-            <radialGradient id={mgId} cx="40%" cy="40%">
-              <stop offset="0%" stopColor="#d0d8ff" />
-              <stop offset="60%" stopColor="#9090d0" />
-              <stop offset="100%" stopColor="#404080" />
-            </radialGradient>
-            <filter id={glowId}>
-              <feGaussianBlur stdDeviation="3" result="blur" />
-              <feMerge>
-                <feMergeNode in="blur" />
-                <feMergeNode in="SourceGraphic" />
-              </feMerge>
-            </filter>
-          </defs>
-          <circle cx="35" cy="35" r="28" fill={`url(#${mgId})`} filter={`url(#${glowId})`} opacity={0.9} />
-          <circle cx="46" cy="30" r="22" fill="#020810" />
-        </svg>
-      </div>
+      <Link
+        className="app-home-link app-home-link--fixed"
+        to="/"
+        aria-label="홈으로 이동"
+      >
+        <img
+          src="https://api.iconify.design/fluent/home-24-filled.svg?color=%23ffffff"
+          alt=""
+          width={28}
+          height={28}
+        />
+      </Link>
 
-      <div className="quiz1-signal-beam" aria-hidden />
-      <div className="quiz1-signal-beam-2" aria-hidden />
-      <div className="quiz1-horizon-glow" aria-hidden />
+      <section className="quiz1-dossier">
+        <div className="quiz1-folder-tab">Confidential</div>
+        <div className="quiz1-paper">
+          <div className="quiz1-pin-red" />
+          <div className="quiz1-tape-h" />
+          <div className="quiz1-paperclip" />
 
-      <div className="quiz1-morse" aria-hidden>
-        <div className="quiz1-morse-dot" style={{ width: 4, height: 4 }} />
-        <div className="quiz1-morse-dot dash" style={{ width: 12, height: 4 }} />
-        <div className="quiz1-morse-dot" style={{ width: 4, height: 4 }} />
-        <div className="quiz1-morse-dot" style={{ width: 4, height: 4 }} />
-        <div className="quiz1-morse-dot dash" style={{ width: 12, height: 4 }} />
-        <div className="quiz1-morse-dot dash" style={{ width: 12, height: 4 }} />
-        <div className="quiz1-morse-dot" style={{ width: 4, height: 4 }} />
-      </div>
-
-      <div className="quiz1-ui">
-        <Link to="/" className="quiz1-home-btn" aria-label="홈으로 이동">
-          <img
-            src="https://api.iconify.design/mdi/home.svg?color=%23ffffff"
-            alt=""
-            width={24}
-            height={24}
-          />
-        </Link>
-
-        <div className="quiz1-content">
-          <div className="quiz1-crest">
-            <div className="quiz1-crest-line" />
-            <div className="quiz1-crest-diamond" />
-            <div className="quiz1-crest-line" />
+          <div className="quiz1-hdr">
+            <div className="quiz1-hdr-title">Secret Mission</div>
+            <div className="quiz1-hdr-num">Case No. 1882-UL</div>
           </div>
 
-          <div className="quiz1-quiz-num">Quiz 1</div>
-
-          <div className="quiz1-divider-deco">
-            <div className="quiz1-div-line" />
-            <div className="quiz1-div-star">✦ ✦ ✦</div>
-            <div className="quiz1-div-line quiz1-div-line-r" />
+          <div className="quiz1-stamp-row">
+            <div className="quiz1-stamp quiz1-stamp-red">
+              <span className="quiz1-stamp-text">기밀</span>
+            </div>
+            <div className="quiz1-stamp quiz1-stamp-blk">
+              <span className="quiz1-stamp-text">Classified</span>
+            </div>
           </div>
 
-          <div className="quiz1-quiz-sub">개척령 어느 어부와의 시그널</div>
+          <div className="quiz1-mission-title">
+            <div className="quiz1-mt-code">Mission 01 · The Fisherman's Signal</div>
+            <div className="quiz1-mt-kr">
+              <span className="quiz1-mt-line quiz1-mt-line-1">개척령</span>
+              <span className="quiz1-mt-line quiz1-mt-line-2">어느 어부와의</span>
+              <span className="quiz1-mt-line quiz1-mt-line-3">시그널</span>
+            </div>
+            <div className="quiz1-mt-sub">당신의 한계를 시험하라!</div>
+          </div>
 
-          <Link to="/quiz1/game" className="quiz1-start-btn">
-            시작하기
+          <div className="quiz1-info-grid">
+            <div className="quiz1-info-cell">
+              <div className="quiz1-ic-label">Date</div>
+              <div className="quiz1-ic-val">1882 · 개척령 시대</div>
+            </div>
+            <div className="quiz1-info-cell">
+              <div className="quiz1-ic-label">Status</div>
+              <div className="quiz1-ic-val red">Active · 해독 필요</div>
+            </div>
+          </div>
+
+          <div className="quiz1-cut-line">
+            <div className="quiz1-cut-icon">✂</div>
+            <div className="quiz1-cut-dashes" />
+            <div className="quiz1-cut-label">Mission Brief</div>
+            <div className="quiz1-cut-dashes" />
+            <div className="quiz1-cut-icon">✂</div>
+          </div>
+
+          <div className="quiz1-step-block">
+            <div className="quiz1-step-num">
+              STEP <span>1</span>
+            </div>
+            <div className="quiz1-step-title">
+              <em>박사의 브리핑!</em> 시그널의 정체를 파악하라!
+            </div>
+            <div className="quiz1-step-desc quiz1-step-desc-strong">
+              이규원검찰일기 연구소에 도착한 당신, 이대환 박사의 브리핑을 듣고 과거에서 온 시그널의 의미를 이해하라.
+            </div>
+          </div>
+
+          <div className="quiz1-step-block">
+            <div className="quiz1-step-num">
+              STEP <span>2</span>
+            </div>
+            <div className="quiz1-step-title">
+              <em>시그널 수신!</em> 어부의 위치를 해독하라!
+            </div>
+            <div className="quiz1-step-desc quiz1-step-desc-strong">
+              과거에서 온 어부의 암호 전화를 수신하고, 힌트를 조합해 그의 위치를 파악하라. 주어진 시간은 단 60분이다.
+            </div>
+          </div>
+
+          <div className="quiz1-step-block quiz1-step-input">
+            <div className="quiz1-field-row">
+              <input
+                className="quiz1-field-input"
+                placeholder="미션 코드를 입력하라..."
+                autoComplete="off"
+                value={missionCode}
+                onChange={(e) => setMissionCode(e.target.value)}
+                inputMode="numeric"
+                maxLength={8}
+              />
+              <button className="quiz1-field-btn quiz1-field-btn-red" type="button" aria-label="코드 확인">
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none">
+                  <path
+                    d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"
+                    stroke="#f8e8c0"
+                    strokeWidth="2"
+                    strokeLinecap="round"
+                  />
+                </svg>
+              </button>
+            </div>
+          </div>
+
+          <div className="quiz1-tear-bot" />
+        </div>
+      </section>
+
+      <div className="quiz1-cta-area">
+        <div className="quiz1-caution" />
+        {canEnterGame ? (
+          <Link className="quiz1-cta-btn" to="/quiz1/game">
+            지금, 입장하시겠습니까?
           </Link>
-        </div>
+        ) : (
+          <button type="button" className="quiz1-cta-btn quiz1-cta-btn-locked" disabled>
+            지금, 입장하시겠습니까?
+          </button>
+        )}
+        <div className="quiz1-caution" />
+      </div>
 
-        <div className="quiz1-bottom-stamp">
-          Classified Mission · Signal Intercept · 1882
-        </div>
+      <div className="quiz1-bottom-lbl">
+        Office of Education · Escape Room Program · 1882
       </div>
     </main>
   );

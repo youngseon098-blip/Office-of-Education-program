@@ -16,25 +16,14 @@ export default function Quiz3() {
     >
       <Link
         to="/"
+        className="app-home-link app-home-link--fixed"
         aria-label="홈으로 이동"
-        style={{
-          position: "absolute",
-          top: "20px",
-          right: "20px",
-          width: "44px",
-          height: "44px",
-          borderRadius: "12px",
-          background: "rgba(255, 255, 255, 0.16)",
-          display: "grid",
-          placeItems: "center",
-          backdropFilter: "blur(2px)",
-        }}
       >
         <img
-          src="https://api.iconify.design/mdi/home.svg?color=%23ffffff"
+          src="https://api.iconify.design/fluent/home-24-filled.svg?color=%23ffffff"
           alt=""
-          width={24}
-          height={24}
+          width={28}
+          height={28}
         />
       </Link>
       <section>
