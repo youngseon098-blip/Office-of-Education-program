@@ -1,4 +1,4 @@
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import { useEffect, useState } from "react";
 import "./Home.css";
 
@@ -20,6 +20,7 @@ const programs = [
 ];
 
 export default function Home() {
+  const navigate = useNavigate();
   const [now, setNow] = useState(new Date());
 
   useEffect(() => {
@@ -89,7 +90,19 @@ export default function Home() {
             </article>
           </aside>
 
-          <article className="home-program home-program-main card center-card">
+          <article
+            className="home-program home-program-main card center-card"
+            role="link"
+            tabIndex={0}
+            aria-label="팬톤 컬러 찾기 페이지로 이동"
+            onClick={() => navigate("/pantone")}
+            onKeyDown={(e) => {
+              if (e.key === "Enter" || e.key === " ") {
+                e.preventDefault();
+                navigate("/pantone");
+              }
+            }}
+          >
             <Link
               className="home-program-link home-pantone-link"
               to={programs[0].to}
