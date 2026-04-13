@@ -206,19 +206,23 @@ export default function QuizHome() {
       <div className="quiz-home-fog" aria-hidden="true" />
 
       <div className="quiz-home-ui">
+        <Link
+          to="/"
+          className="app-home-link app-home-link--fixed"
+          aria-label="홈으로 이동"
+        >
+          <img
+            src="https://api.iconify.design/fluent/home-24-filled.svg?color=%23ffffff"
+            alt=""
+            width={28}
+            height={28}
+          />
+        </Link>
         <div className="quiz-home-topbar">
           <div className="quiz-home-rec-badge" aria-hidden="true">
             <span className="quiz-home-rec-dot" />
             <span>REC</span>
           </div>
-          <Link to="/" className="quiz-home-home-btn" aria-label="홈으로 이동">
-            <img
-              src="https://api.iconify.design/mdi/home.svg?color=%23ffffff"
-              alt=""
-              width={24}
-              height={24}
-            />
-          </Link>
         </div>
 
         <div className="quiz-home-cards-area">

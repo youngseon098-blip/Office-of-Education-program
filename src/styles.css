@@ -117,3 +117,38 @@ body {
   }
 }
 
+/* Quiz 홈 — 배경 없이 아이콘만 (Iconify: fluent home-24-filled, 면 채움) */
+.app-home-link {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 6px;
+  font-size: 0;
+  line-height: 0;
+  cursor: pointer;
+  text-decoration: none;
+  flex-shrink: 0;
+  color: inherit;
+  box-sizing: border-box;
+  background: none;
+  border: none;
+  transition: opacity 0.2s, filter 0.2s;
+}
+
+.app-home-link:hover {
+  opacity: 0.88;
+}
+
+.app-home-link--fixed {
+  position: fixed;
+  top: max(14px, env(safe-area-inset-top, 0px));
+  right: max(14px, env(safe-area-inset-right, 0px));
+  z-index: 100;
+}
+
+.app-home-link img {
+  display: block;
+  width: 28px;
+  height: 28px;
+}
+

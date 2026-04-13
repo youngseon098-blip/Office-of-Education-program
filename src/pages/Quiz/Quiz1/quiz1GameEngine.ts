@@ -108,140 +108,102 @@ export function initQuiz1Game(root: HTMLElement): () => void {
       });
   }
 
+  /* 혈흔 스플래터 — 최초 1회 pre-render 후 재사용 */
+  let bloodCanvas: HTMLCanvasElement | null = null;
+
+  function buildBloodCanvas() {
+    const bc = document.createElement("canvas");
+    bc.width = W; bc.height = H;
+    const ctxRaw = bc.getContext("2d");
+    if (!ctxRaw) return bc;
+    const bctx: CanvasRenderingContext2D = ctxRaw;
+    const R = "#c00808", RD = "#880404", RL = "#e00a0a";
+    function blob(cx: number, cy: number, rx: number, ry: number, rot: number, al: number, col: string) {
+      bctx.save(); bctx.translate(cx, cy); bctx.rotate(rot);
+      bctx.globalAlpha = al; bctx.fillStyle = col;
+      bctx.beginPath(); bctx.ellipse(0, 0, rx, ry, 0, 0, Math.PI * 2); bctx.fill(); bctx.restore();
+    }
+    function splat(sx: number, sy: number, maxR: number, al: number) {
+      blob(sx, sy, maxR * 0.9, maxR * 0.44, -0.28, al * 0.95, R);
+      blob(sx - maxR * 0.04, sy - maxR * 0.01, maxR * 0.62, maxR * 0.33, 0.12, al * 0.86, RD);
+      blob(sx + maxR * 0.05, sy + maxR * 0.01, maxR * 0.45, maxR * 0.25, -0.08, al * 0.80, RL);
+      for (let i = 0; i < 10; i++) {
+        const a = (i / 10) * Math.PI * 2 + sx * 0.01;
+        const d = maxR * (0.42 + Math.sin(i * 2.2) * 0.28);
+        const r = maxR * (0.04 + Math.abs(Math.sin(i * 1.9)) * 0.10);
+        blob(sx + Math.cos(a) * d, sy + Math.sin(a) * d, r, r * 0.62, a, al * 0.45, R);
+      }
+      for (let i = 0; i < 3; i++) {
+        const dx = sx + Math.sin(i * 2 + sx) * maxR * 0.32;
+        const dlen = maxR * (0.38 + Math.sin(i * 1.8) * 0.18);
+        const w = maxR * 0.08;
+        bctx.save(); bctx.globalAlpha = al * 0.72; bctx.fillStyle = RD;
+        bctx.beginPath();
+        bctx.moveTo(dx - w / 2, sy + maxR * 0.26);
+        bctx.quadraticCurveTo(dx + w * 0.3, sy + maxR * 0.26 + dlen * 0.5, dx - w * 0.2, sy + maxR * 0.26 + dlen);
+        bctx.quadraticCurveTo(dx - w, sy + maxR * 0.26 + dlen * 0.8, dx - w / 2, sy + maxR * 0.26);
+        bctx.fill();
+        bctx.beginPath(); bctx.ellipse(dx - w * 0.1, sy + maxR * 0.26 + dlen + w * 1.1, w * 0.78, w * 1.15, 0, 0, Math.PI * 2); bctx.fill();
+        bctx.restore();
+      }
+    }
+    splat(W * 0.14, H * 0.07, Math.min(W, H) * 0.072, 0.82);
+    splat(W * 0.06, H * 0.12, Math.min(W, H) * 0.042, 0.68);
+    splat(W * 0.86, H * 0.08, Math.min(W, H) * 0.034, 0.60);
+    splat(W * 0.92, H * 0.22, Math.min(W, H) * 0.024, 0.48);
+    splat(W * 0.04, H * 0.48, Math.min(W, H) * 0.022, 0.35);
+    splat(W * 0.95, H * 0.62, Math.min(W, H) * 0.018, 0.30);
+    splat(W * 0.08, H * 0.82, Math.min(W, H) * 0.020, 0.32);
+    splat(W * 0.88, H * 0.88, Math.min(W, H) * 0.018, 0.28);
+    return bc;
+  }
+
   let bgT = 0;
   function drawBg() {
     if (disposed) return;
     bgT += 0.016;
-    dom.ctx.clearRect(0, 0, W, H);
-    const hor = H * 0.55;
+    const ctx2 = dom.ctx;
+    ctx2.clearRect(0, 0, W, H);
 
-    /* sky */
-    if (bgMode === "ocean") {
-      const sg = dom.ctx.createLinearGradient(0, 0, 0, hor);
-      sg.addColorStop(0, "#01050f");
-      sg.addColorStop(0.6, "#050d18");
-      sg.addColorStop(1, "#080e16");
-      dom.ctx.fillStyle = sg;
-      dom.ctx.fillRect(0, 0, W, hor);
-      const arc = dom.ctx.createRadialGradient(W * 0.5, hor, 0, W * 0.5, hor, W * 0.4);
-      arc.addColorStop(0, "rgba(80,140,220,0.10)");
-      arc.addColorStop(1, "rgba(0,0,0,0)");
-      dom.ctx.fillStyle = arc;
-      dom.ctx.fillRect(0, 0, W, hor);
-    } else if (bgMode === "lab") {
-      const sg = dom.ctx.createLinearGradient(0, 0, 0, H);
-      sg.addColorStop(0, "#020510");
-      sg.addColorStop(1, "#040818");
-      dom.ctx.fillStyle = sg;
-      dom.ctx.fillRect(0, 0, W, H);
-      // desk lamp glow
-      const lg = dom.ctx.createRadialGradient(W * 0.42, H * 0.38, 0, W * 0.42, H * 0.38, 300);
-      lg.addColorStop(0, "rgba(100,160,255,0.08)");
-      lg.addColorStop(1, "rgba(0,0,0,0)");
-      dom.ctx.fillStyle = lg;
-      dom.ctx.fillRect(0, 0, W, H);
+    /* ── 나무 바닥 베이스 ── */
+    const bg = ctx2.createLinearGradient(0, 0, 0, H);
+    if (bgMode === "lab") {
+      bg.addColorStop(0, "#201508"); bg.addColorStop(0.5, "#281a0a"); bg.addColorStop(1, "#1a1006");
+    } else if (bgMode === "museum") {
+      bg.addColorStop(0, "#1c1208"); bg.addColorStop(0.5, "#221608"); bg.addColorStop(1, "#181006");
     } else {
-      const sg = dom.ctx.createLinearGradient(0, 0, 0, H);
-      sg.addColorStop(0, "#040204");
-      sg.addColorStop(1, "#0a0608");
-      dom.ctx.fillStyle = sg;
-      dom.ctx.fillRect(0, 0, W, H);
-      const ag = dom.ctx.createRadialGradient(W * 0.5, H * 0.35, 0, W * 0.5, H * 0.35, 350);
-      ag.addColorStop(0, "rgba(120,80,20,0.10)");
-      ag.addColorStop(1, "rgba(0,0,0,0)");
-      dom.ctx.fillStyle = ag;
-      dom.ctx.fillRect(0, 0, W, H);
+      bg.addColorStop(0, "#1e1510"); bg.addColorStop(0.4, "#241a0e"); bg.addColorStop(0.8, "#1c1208"); bg.addColorStop(1, "#140e06");
+    }
+    ctx2.fillStyle = bg; ctx2.fillRect(0, 0, W, H);
+
+    /* 나무 결 */
+    for (let i = 0; i < 22; i++) {
+      const yBase = (H / 22) * i + Math.sin(i * 1.3) * 10;
+      ctx2.beginPath(); ctx2.moveTo(0, yBase);
+      for (let px = 0; px <= W; px += 28)
+        ctx2.lineTo(px, yBase + Math.sin(px * 0.007 + i * 0.9 + bgT * 0.04) * 5);
+      ctx2.strokeStyle = `rgba(${i % 2 ? 200 : 160},${i % 2 ? 140 : 110},${i % 2 ? 50 : 40},0.032)`;
+      ctx2.lineWidth = 1.2 + Math.sin(i * 0.6) * 0.8;
+      ctx2.stroke();
     }
 
-    /* stars (ocean/museum only) */
-    if (bgMode !== "lab") {
-      for (const s of bgStars) {
-        const al = s.a * (0.4 + 0.6 * Math.sin(bgT * s.s * 60 + s.p));
-        dom.ctx.beginPath();
-        dom.ctx.arc(s.x, s.y, s.r, 0, Math.PI * 2);
-        if (s.bright) {
-          dom.ctx.fillStyle = `rgba(220,225,255,${al})`;
-          dom.ctx.shadowColor = "rgba(200,215,255,.5)";
-          dom.ctx.shadowBlur = 4;
-        } else {
-          dom.ctx.fillStyle = `rgba(160,175,220,${al * 0.6})`;
-          dom.ctx.shadowBlur = 0;
-        }
-        dom.ctx.fill();
-      }
-      dom.ctx.shadowBlur = 0;
+    /* lab 조명 글로우 */
+    if (bgMode === "lab") {
+      const lg = ctx2.createRadialGradient(W * 0.5, H * 0.3, 0, W * 0.5, H * 0.3, H * 0.5);
+      lg.addColorStop(0, "rgba(220,160,60,0.07)"); lg.addColorStop(1, "rgba(0,0,0,0)");
+      ctx2.fillStyle = lg; ctx2.fillRect(0, 0, W, H);
     }
 
-    /* moon */
-    if (bgMode === "ocean") {
-      const mx = W * 0.12,
-        my = H * 0.12;
-      const mg = dom.ctx.createRadialGradient(mx, my, 0, mx, my, 55);
-      mg.addColorStop(0, "rgba(200,210,255,0.20)");
-      mg.addColorStop(1, "rgba(0,0,0,0)");
-      dom.ctx.fillStyle = mg;
-      dom.ctx.beginPath();
-      dom.ctx.arc(mx, my, 55, 0, Math.PI * 2);
-      dom.ctx.fill();
-      dom.ctx.fillStyle = "rgba(190,205,255,0.75)";
-      dom.ctx.beginPath();
-      dom.ctx.arc(mx, my, 18, 0, Math.PI * 2);
-      dom.ctx.fill();
-      dom.ctx.fillStyle = "#05090e";
-      dom.ctx.beginPath();
-      dom.ctx.arc(mx + 8, my - 4, 14, 0, Math.PI * 2);
-      dom.ctx.fill();
-    }
+    /* 주변부 비네팅 */
+    const vig = ctx2.createRadialGradient(W / 2, H / 2, H * 0.12, W / 2, H / 2, H * 0.82);
+    vig.addColorStop(0, "rgba(0,0,0,0)"); vig.addColorStop(1, "rgba(0,0,0,0.68)");
+    ctx2.fillStyle = vig; ctx2.fillRect(0, 0, W, H);
 
-    /* ocean */
-    if (bgMode === "ocean") {
-      const og = dom.ctx.createLinearGradient(0, hor, 0, H);
-      og.addColorStop(0, "#060e1c");
-      og.addColorStop(1, "#020510");
-      dom.ctx.fillStyle = og;
-      dom.ctx.fillRect(0, hor, W, H);
-      // moon reflection
-      const rc = dom.ctx.createLinearGradient(0, hor, 0, H);
-      rc.addColorStop(0, "rgba(130,155,235,0.18)");
-      rc.addColorStop(1, "rgba(0,0,0,0)");
-      dom.ctx.fillStyle = rc;
-      dom.ctx.fillRect(W * 0.06, hor, W * 0.12, H);
-      for (let wi = 0; wi < waveDefs.length; wi++) {
-        const wv = waveDefs[wi];
-        const y = hor + wi * ((H - hor) / 10) + 6;
-        dom.ctx.beginPath();
-        dom.ctx.moveTo(0, y);
-        for (let px = 0; px <= W; px += 4)
-          dom.ctx.lineTo(px, y + Math.sin(px * wv.fr + bgT * wv.sp + wv.off) * wv.amp);
-        const dr = (y - hor) / (H - hor);
-        const wa = Math.max(0, 0.13 - dr * 0.1);
-        dom.ctx.strokeStyle = `rgba(100,135,215,${wa})`;
-        dom.ctx.lineWidth = 0.8;
-        dom.ctx.stroke();
-      }
-      // horizon line
-      dom.ctx.strokeStyle = "rgba(120,155,235,0.12)";
-      dom.ctx.lineWidth = 1;
-      dom.ctx.beginPath();
-      dom.ctx.moveTo(0, hor);
-      dom.ctx.lineTo(W, hor);
-      dom.ctx.stroke();
-      // fog
-      for (const f of bgFog) {
-        f.x += f.dx;
-        f.p += 0.002;
-        if (f.x > W + f.w / 2) f.x = -f.w / 2;
-        if (f.x < -f.w / 2) f.x = W + f.w / 2;
-        const fa = f.a * (0.5 + 0.5 * Math.sin(f.p));
-        const fg = dom.ctx.createRadialGradient(f.x, f.y, 0, f.x, f.y, f.w / 2);
-        fg.addColorStop(0, `rgba(70,95,155,${fa})`);
-        fg.addColorStop(1, "rgba(0,0,0,0)");
-        dom.ctx.fillStyle = fg;
-        dom.ctx.beginPath();
-        dom.ctx.ellipse(f.x, f.y, f.w / 2, f.h / 2, 0, 0, Math.PI * 2);
-        dom.ctx.fill();
-      }
+    /* 혈흔 오버레이 */
+    if (!bloodCanvas || bloodCanvas.width !== W || bloodCanvas.height !== H) {
+      bloodCanvas = buildBloodCanvas();
     }
+    ctx2.drawImage(bloodCanvas, 0, 0);
 
     rafId = requestAnimationFrame(drawBg);
   }
@@ -385,9 +347,42 @@ export function initQuiz1Game(root: HTMLElement): () => void {
       text: null,
       move: "📌 울릉역사문화체험센터 앞으로 이동하세요.\n단, 건물 안으로 들어가지 않습니다.",
     },
-    /* 14p - 전화 3단계 */
+    /* ── 추가: 현판 힌트 메모 ── */
+    {
+      bg: "ocean",
+      type: "memo",
+      title: "울릉역사문화체험센터 건물 현판 힌트",
+      hints: [
+        { num: "1", text: '등록문화재 제<span class="hint-key">___</span>호  → 정답 <span class="hint-key">235</span>호' },
+        { num: "2", text: '<span class="hint-key">___</span>층 목재주택  → <span class="hint-key">2</span>층' },
+        { num: "3", text: '2008년까지 <span class="hint-key">____</span>년간 개인주택으로 사용됐다  → <span class="hint-key">56</span>' },
+        { num: "4", text: '수식 : (힌트1) − (힌트2) − (힌트3) = <span class="hint-key">?</span>' },
+      ],
+      footer: "· BONUS HINT · 현판을 잘 살펴보세요 ·",
+    },
+    /* ── 추가: 177 퀴즈 ── */
+    {
+      bg: "ocean",
+      type: "quiz",
+      stage: "추가 단계 퀴즈",
+      question: "현판 힌트의 수식을 계산하여\n정답 숫자를 입력하세요.",
+      hint: "힌트1 − 힌트2 − 힌트3 = ?",
+      placeholder: "숫자 입력",
+      answer: "177",
+      answerAlt: [],
+    },
+    /* ── 추가: 177 정답 ── */
+    {
+      bg: "ocean",
+      type: "correct",
+      badge: "🔢",
+      title: "정답입니다!",
+      text: "235 − 2 − 56 = 177\n\n정답은 177입니다.",
+      move: null,
+    },
+    /* 전화 3단계 */
     { bg: "ocean", type: "phone", caller: "과거에서 온 전화", callerName: "어부 (전라도)" },
-    /* 15p */
+    /* 어부 대화 */
     {
       bg: "ocean",
       type: "dialogue",
@@ -399,7 +394,7 @@ export function initQuiz1Game(root: HTMLElement): () => void {
         "개척령이 내려졌다고는 허지만서도, 시방 요 근처에 일본 놈들이 워낙이 득실거릉게 나도 어쩔 수가 없었당게?",
       ],
     },
-    /* 16p - 나침반 (3단계) */
+    /* 나침반 — 북서 310도로 변경 */
     {
       bg: "ocean",
       type: "dialogue",
@@ -408,11 +403,11 @@ export function initQuiz1Game(root: HTMLElement): () => void {
       lines: [
         "어이구, 시방 내가 멋허느라 요로코롬 넋두리를 길게 늘어놨다냐. 미안허구만잉.",
         "자, 거그 그짝들 손에 들고 있는 나침반 좀 한 번 보드라고.",
-        "자네가 시방 서 있는 그 자리에서 말이여, 🧭 북위 43도에 동경 21도 딱 찍고 가 보드라고.",
+        '자네가 시방 서 있는 그 자리에서 말이여, 🧭 <strong class="q1g-dialogue-em">북서 310도</strong> 딱 찍고 가 보드라고.',
         "거그 가면 황금으로 번쩍번쩍한 나를 찾을 수 있을 것인게!",
       ],
     },
-    /* 17p - 4단계 (식당) */
+    /* 4단계 (식당) */
     {
       bg: "ocean",
       type: "dialogue",
@@ -426,28 +421,28 @@ export function initQuiz1Game(root: HTMLElement): () => void {
         "아따, 고놈 참 실하네잉! 내 저것 좀 허천나게 묵어보고 싶당게!",
       ],
     },
-    /* 18p - 퀴즈2 (식당) */
+    /* 식당 퀴즈 — 힌트4 추가, 정답 대박식당/따개비칼국수 */
     {
       bg: "ocean",
       type: "quiz",
       stage: "4단계 퀴즈",
-      question: "아래 설명에 해당하는 음식을 찾아 정답을 입력하세요.",
+      question: "아래 설명에 해당하는 식당과 메뉴를 찾아\n정답을 입력하세요.",
       hint:
-        "1. 조개껍데기가 삿갓 모양을 닮아 삿갓조개라고도 불린다.\n2. 전복과 비슷한 풍미를 지녀 작은 전복이라고 불린다.\n3. 거센 파도가 치는 해안가 절벽이나 바위에 서식한다.\n\n📍 식당의 위치는 황금 동상의 2시 방향이다.",
-      placeholder: "식당명 · 메뉴명 입력",
-      answer: "등대 삿갓조개",
-      answerAlt: [],
+        "1. 조개껍데기가 삿갓 모양을 닮아 삿갓조개라고도 불린다.\n2. 전복과 비슷한 풍미를 지녀 작은 전복이라고 불린다.\n3. 거센 파도가 치는 해안가 절벽이나 바위에 서식한다.\n4. 식당 이름은 ㄷㅂㅅㄷ\n\n📍 식당의 위치는 황금 동상의 2시 방향이다.",
+      placeholder: "식당명 입력 (예: ○○식당)",
+      answer: "대박식당",
+      answerAlt: ["따개비칼국수", "대박", "대박 식당"],
     },
-    /* 19p - 정답2 */
+    /* 정답 (식당) */
     {
       bg: "ocean",
       type: "correct",
       badge: "🍜",
       title: "정답입니다!",
-      text: "삿갓조개(홍합류)는 파도가 거센\n독도 인근 바위에서 자라는\n울릉도의 대표 해산물입니다.",
+      text: "대박식당의 따개비칼국수!\n따개비(삿갓조개)는 독도·울릉도 연안\n거센 파도 바위에 서식하는 특산물입니다.",
       move: null,
     },
-    /* 20p - 전화 + 클리어 */
+    /* 전화 + 클리어 */
     { bg: "ocean", type: "phone", caller: "미션 완료 신호", callerName: "이대환 박사" },
     /* 21p - 박사 에필로그 (일반 대사 UI) */
     {
@@ -516,8 +511,8 @@ export function initQuiz1Game(root: HTMLElement): () => void {
 
   function showStageBadge(text: string | null) {
     if (text) {
-      dom.badge.style.display = "block";
       dom.badge.textContent = text;
+      dom.badge.style.display = "flex";
     } else dom.badge.style.display = "none";
   }
 
@@ -773,7 +768,6 @@ export function initQuiz1Game(root: HTMLElement): () => void {
     const charVisual = s.char === "fisherman" ? FISHERMAN_CHAR_HTML : DOCTOR_CHAR_HTML;
     d.innerHTML = `
     <div class="char-area">
-      <div class="char-label">${s.charLabel || ""}</div>
       ${charVisual}
     </div>
     <div class="dialogue-box">
@@ -803,114 +797,38 @@ export function initQuiz1Game(root: HTMLElement): () => void {
     const caller = String(s.caller ?? "수신 전화").replace(/</g, "&lt;").replace(/>/g, "&gt;");
     const callerName = String(s.callerName ?? "???").replace(/</g, "&lt;").replace(/>/g, "&gt;");
     d.innerHTML = `
-    <div class="phone-device">
-      <div class="phone-ripple" aria-hidden="true"></div>
-      <div class="phone-screen">
-        <div class="phone-screen-title">휴대전화</div>
-        <div class="phone-screen-body">
-          <p class="phone-line-sub">${caller}</p>
-          <p class="phone-line-name">${callerName}</p>
-        </div>
-        <div class="phone-slide-outer">
-          <button type="button" class="phone-slide-track q1g-answer-btn" aria-label="밀어서 통화하기">
-            <span class="phone-slide-knob" aria-hidden="true">
-              <svg class="phone-slide-knob-icon" viewBox="0 0 24 24" width="22" height="22" fill="none" xmlns="http://www.w3.org/2000/svg">
-                <path d="M6.62 10.79c1.44 2.83 3.76 5.14 6.59 6.59l2.2-2.2c.27-.27.67-.36 1.02-.24 1.12.37 2.33.57 3.57.57.55 0 1 .45 1 1V21c0 .55-.45 1-1 1-9.39 0-17-7.61-17-17 0-.55.45-1 1-1h3.5c.55 0 1 .45 1 1 0 1.25.2 2.45.57 3.57.11.35.03.74-.25 1.02l-2.2 2.2z" fill="#22c55e"/>
-              </svg>
-            </span>
-            <span class="phone-slide-label">밀어서 통화하기</span>
-          </button>
-        </div>
+    <div class="phone-top">
+      <p class="phone-caller-type">${caller}</p>
+      <p class="phone-caller-name">${callerName}</p>
+    </div>
+    <div class="phone-bottom">
+      <div class="phone-btn-wrap">
+        <button type="button" class="phone-btn phone-btn-reject q1g-reject-btn" aria-label="거절">
+          <svg viewBox="0 0 24 24" width="32" height="32" fill="white"><path d="M12 9c-1.6 0-3.15.25-4.6.72v3.1c0 .39-.23.74-.56.9-.98.49-1.87 1.12-2.66 1.85-.18.18-.43.28-.7.28-.28 0-.53-.11-.71-.29L.29 13.08C.11 12.9 0 12.65 0 12.38c0-.28.11-.53.29-.71C3.34 8.78 7.46 7 12 7s8.66 1.78 11.71 4.67c.18.18.29.43.29.71 0 .28-.11.53-.29.71l-2.48 2.48c-.18.18-.43.29-.71.29-.27 0-.52-.1-.7-.28-.79-.73-1.68-1.36-2.66-1.85-.33-.16-.56-.51-.56-.9v-3.1C15.15 9.25 13.6 9 12 9z"/></svg>
+        </button>
+        <span class="phone-btn-label">거절</span>
+      </div>
+      <div class="phone-btn-wrap">
+        <button type="button" class="phone-btn phone-btn-answer q1g-answer-btn" aria-label="응답">
+          <svg viewBox="0 0 24 24" width="32" height="32" fill="white"><path d="M6.62 10.79c1.44 2.83 3.76 5.14 6.59 6.59l2.2-2.2c.27-.27.67-.36 1.02-.24 1.12.37 2.33.57 3.57.57.55 0 1 .45 1 1V20c0 .55-.45 1-1 1-9.39 0-17-7.61-17-17 0-.55.45-1 1-1h3.5c.55 0 1 .45 1 1 0 1.25.2 2.45.57 3.57.11.35.03.74-.25 1.02l-2.2 2.2z"/></svg>
+        </button>
+        <span class="phone-btn-label">응답</span>
       </div>
     </div>
   `;
     dom.stage.appendChild(d);
-    const track = d.querySelector(".q1g-answer-btn") as HTMLButtonElement | null;
-    const knob = d.querySelector(".phone-slide-knob") as HTMLElement | null;
-    if (!track) return;
 
-    let answered = false;
-    function completeAnswer() {
-      if (answered || disposed) return;
-      answered = true;
-      nextScene();
+    let settled = false;
+    function settle(fn: () => void) {
+      if (settled || disposed) return;
+      settled = true;
+      fn();
     }
 
-    /* 통화: 손잡이를 오른쪽 끝까지 밀었을 때만 진행 (트랙·손잡이 탭만으로는 넘어가지 않음) */
-
-    /* 손잡이: 오른쪽으로 밀어 통화 */
-    if (knob) {
-      const knobEl = knob;
-      const trackEl = track;
-      const labelEl = trackEl.querySelector(".phone-slide-label") as HTMLElement | null;
-      let dragStartX = 0;
-      let knobStartLeft = 0;
-      let dragging = false;
-      const maxSlide = () => Math.max(0, trackEl.clientWidth - knobEl.offsetWidth - 12);
-
-      function readKnobX(): number {
-        const m = knobEl.style.transform.match(/translateX\(([-0-9.]+)px\)/);
-        return m ? parseFloat(m[1]) : 0;
-      }
-
-      /** 슬라이드 거리에 비례해 레이블 서서히 숨김 (전체 구간의 앞부분에서 거의 사라짐) */
-      function syncSlideLabelOpacity(x: number) {
-        if (!labelEl) return;
-        const max = maxSlide();
-        if (max <= 0) {
-          labelEl.style.opacity = "1";
-          return;
-        }
-        const p = x / max;
-        const fadeEnd = 0.4;
-        labelEl.style.opacity = String(Math.max(0, Math.min(1, 1 - p / fadeEnd)));
-      }
-
-      function setKnobX(x: number) {
-        const max = maxSlide();
-        const clamped = Math.max(0, Math.min(max, x));
-        knobEl.style.transform = `translateX(${clamped}px)`;
-        syncSlideLabelOpacity(clamped);
-        return clamped;
-      }
-
-      knobEl.addEventListener("pointerdown", (e) => {
-        e.stopPropagation();
-        e.preventDefault();
-        dragging = true;
-        dragStartX = e.clientX;
-        knobStartLeft = readKnobX();
-        syncSlideLabelOpacity(knobStartLeft);
-        knobEl.setPointerCapture(e.pointerId);
-      });
-      knobEl.addEventListener("pointermove", (e) => {
-        if (!dragging) return;
-        const dx = e.clientX - dragStartX;
-        setKnobX(knobStartLeft + dx);
-      });
-      knobEl.addEventListener("pointerup", (e) => {
-        if (!dragging) return;
-        dragging = false;
-        try {
-          knobEl.releasePointerCapture(e.pointerId);
-        } catch {
-          /* ignore */
-        }
-        const max = maxSlide();
-        const x = readKnobX();
-        if (max > 0 && x >= max * 0.52) {
-          completeAnswer();
-        } else {
-          knobEl.style.transform = "translateX(0)";
-          syncSlideLabelOpacity(0);
-        }
-      });
-      knobEl.addEventListener("pointercancel", () => {
-        dragging = false;
-        knobEl.style.transform = "translateX(0)";
-        syncSlideLabelOpacity(0);
-      });
-    }
+    const rejectBtn = d.querySelector(".q1g-reject-btn") as HTMLButtonElement | null;
+    const answerBtn = d.querySelector(".q1g-answer-btn") as HTMLButtonElement | null;
+    rejectBtn?.addEventListener("click", () => settle(() => prevScene()));
+    answerBtn?.addEventListener("click", () => settle(() => nextScene()));
   }
 
   /* ── 메모 ── */
