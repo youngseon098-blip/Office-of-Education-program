@@ -84,10 +84,22 @@ export default function Quiz1Game() {
       <div id="q1g-scene" />
 
       <button type="button" id="q1g-prev-btn">
-        ← PREVIOUS
+        <img
+          src="https://api.iconify.design/ph/arrow-left-bold.svg?color=%23d8c39f"
+          alt=""
+          width={18}
+          height={18}
+        />
+        <span>PREVIOUS</span>
       </button>
       <button type="button" id="q1g-next-btn">
-        NEXT →
+        <span>NEXT</span>
+        <img
+          src="https://api.iconify.design/ph/arrow-right-bold.svg?color=%23d8c39f"
+          alt=""
+          width={18}
+          height={18}
+        />
       </button>
     </div>
   );
