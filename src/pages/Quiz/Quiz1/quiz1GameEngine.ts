@@ -9,8 +9,11 @@ interface SceneQuiz {
   question: string;
   hint?: string;
   placeholder?: string;
+  placeholder2?: string;
   answer?: string | null;
   answerAlt?: string[];
+  answer2?: string | null;
+  answerAlt2?: string[];
   freeform?: boolean;
 }
 
@@ -20,29 +23,35 @@ type Scene =
 
 export function initQuiz1Game(root: HTMLElement): () => void {
   const c = root.querySelector<HTMLCanvasElement>("#q1g-c-bg");
+  const fx = root.querySelector<HTMLCanvasElement>("#q1g-c-fx");
   const st = root.querySelector<HTMLElement>("#q1g-scene");
   const nx = root.querySelector<HTMLButtonElement>("#q1g-next-btn");
   const pv = root.querySelector<HTMLButtonElement>("#q1g-prev-btn");
   const bd = root.querySelector<HTMLElement>("#q1g-stage-badge");
   const ov = root.querySelector<HTMLElement>("#q1g-overlay");
+  const hm = root.querySelector<HTMLElement>(".app-home-link--fixed");
 
-  if (!c || !st || !nx || !pv || !bd || !ov) {
+  if (!c || !fx || !st || !nx || !pv || !bd || !ov) {
     return () => { };
   }
 
   const x = c.getContext("2d");
-  if (!x) {
+  const fxCtx = fx.getContext("2d");
+  if (!x || !fxCtx) {
     return () => { };
   }
 
   const dom = {
     canvas: c,
+    fxCanvas: fx,
     ctx: x,
+    fxCtx,
     stage: st,
     next: nx,
     prev: pv,
     badge: bd,
     overlay: ov,
+    home: hm,
   };
 
   let disposed = false;
@@ -54,6 +63,8 @@ export function initQuiz1Game(root: HTMLElement): () => void {
     bgStars: any[] = [],
     bgFog: any[] = [];
   let bgMode: BgMode = "ocean";
+  let detachPhoneCrackClick: (() => void) | null = null;
+  const crackStamps: HTMLImageElement[] = [];
 
   const waveDefs = Array.from({ length: 10 }, () => ({
     off: Math.random() * Math.PI * 2,
@@ -66,8 +77,45 @@ export function initQuiz1Game(root: HTMLElement): () => void {
     if (disposed) return;
     W = dom.canvas.width = window.innerWidth;
     H = dom.canvas.height = window.innerHeight;
+    dom.fxCanvas.width = window.innerWidth;
+    dom.fxCanvas.height = window.innerHeight;
     buildBgStars();
     buildBgFog();
+  }
+
+  function clearFxCanvas() {
+    dom.fxCtx.clearRect(0, 0, dom.fxCanvas.width, dom.fxCanvas.height);
+  }
+
+  function clearCrackStamps() {
+    while (crackStamps.length > 0) {
+      const el = crackStamps.pop();
+      el?.remove();
+    }
+  }
+
+  function spawnCrackStamp(clientX: number, clientY: number) {
+    const rr = root.getBoundingClientRect();
+    const x = clientX - rr.left;
+    const y = clientY - rr.top;
+    const minSide = Math.min(rr.width, rr.height);
+    const size = minSide * (0.5 + Math.random() * 0.22);
+    const rot = (Math.random() - 0.5) * 38;
+
+    const img = document.createElement("img");
+    img.src = "/img/Quiz/Quiz1/crack.webp";
+    img.onerror = () => {
+      if (!img.src.endsWith("/img/Quiz/Quiz1/crack.webp")) return;
+      img.src = "img/Quiz/Quiz1/crack.webp";
+    };
+    img.alt = "";
+    img.className = "q1g-crack-stamp";
+    img.style.width = `${size}px`;
+    img.style.left = `${x}px`;
+    img.style.top = `${y}px`;
+    img.style.transform = `translate(-50%, -50%) rotate(${rot}deg)`;
+    root.appendChild(img);
+    crackStamps.push(img);
   }
 
   function buildBgStars() {
@@ -238,7 +286,7 @@ export function initQuiz1Game(root: HTMLElement): () => void {
       ],
     },
     /* 3p - 전화 */
-    { bg: "ocean", type: "phone", caller: "과거에서 온 전화", callerName: "???" },
+    { bg: "ocean", type: "phone", caller: "휴대전화", callerName: "???" },
     /* 4p */
     {
       bg: "ocean",
@@ -294,11 +342,11 @@ export function initQuiz1Game(root: HTMLElement): () => void {
       type: "correct",
       badge: "✅",
       title: "정답입니다!",
-      text: "1905년 1월 27일, 일본 내각은 독도를 '타케시마'로 명명하고\n주인이 없는 땅(무주지)이라 주장하며\n일본 영토로 편입하기로 결정했습니다.",
+      text: "1905년 1월 27일, 일본 내각은 독도를\n'타케시마'로 명명하고 주인이 없는 땅\n(무주지)이라 주장하며 일본 영토로\n편입하기로 결정했습니다.",
       move: null,
     },
     /* 9p - 전화 2단계 */
-    { bg: "ocean", type: "phone", caller: "과거에서 온 전화", callerName: "어부 (전라도)" },
+    { bg: "ocean", type: "phone", caller: "휴대전화", callerName: "어부 (전라도)" },
     /* 10p */
     {
       bg: "ocean",
@@ -317,7 +365,7 @@ export function initQuiz1Game(root: HTMLElement): () => void {
       type: "memo",
       title: "개척령 시기 전라도 출신 어부의 위치 힌트 (2/2)",
       hints: [
-        { num: "1", text: '<span class="hint-key">0127</span>' },
+        { num: "1", text: '<span class="hint-key">0127</span> <span class="hint-key hint-key-flip">DCBA</span>' },
         {
           num: "2",
           text: '울릉군 울릉읍 도동<span class="hint-key">B</span>길 <span class="hint-key">CD</span>',
@@ -345,7 +393,7 @@ export function initQuiz1Game(root: HTMLElement): () => void {
       badge: "📍",
       title: "정답입니다!",
       text: null,
-      move: "📌 울릉역사문화체험센터 앞으로 이동하세요.\n단, 건물 안으로 들어가지 않습니다.",
+      move: "📌 울릉역사문화체험센터 앞으로 이동하세요.",
     },
     /* ── 추가: 현판 힌트 메모 ── */
     {
@@ -353,9 +401,9 @@ export function initQuiz1Game(root: HTMLElement): () => void {
       type: "memo",
       title: "울릉역사문화체험센터 건물 현판 힌트",
       hints: [
-        { num: "1", text: '등록문화재 제<span class="hint-key">___</span>호  → 정답 <span class="hint-key">235</span>호' },
-        { num: "2", text: '<span class="hint-key">___</span>층 목재주택  → <span class="hint-key">2</span>층' },
-        { num: "3", text: '2008년까지 <span class="hint-key">____</span>년간 개인주택으로 사용됐다  → <span class="hint-key">56</span>' },
+        { num: "1", text: '등록문화재 제<span class="hint-key">___</span>호' },
+        { num: "2", text: '<span class="hint-key">___</span>층 목재주택' },
+        { num: "3", text: '2008년까지 <span class="hint-key">____</span>년간 개인주택으로 사용됐다' },
         { num: "4", text: '수식 : (힌트1) − (힌트2) − (힌트3) = <span class="hint-key">?</span>' },
       ],
       footer: "· BONUS HINT · 현판을 잘 살펴보세요 ·",
@@ -381,7 +429,7 @@ export function initQuiz1Game(root: HTMLElement): () => void {
       move: null,
     },
     /* 전화 3단계 */
-    { bg: "ocean", type: "phone", caller: "과거에서 온 전화", callerName: "어부 (전라도)" },
+    { bg: "ocean", type: "phone", caller: "휴대전화", callerName: "어부 (전라도)" },
     /* 어부 대화 */
     {
       bg: "ocean",
@@ -430,8 +478,11 @@ export function initQuiz1Game(root: HTMLElement): () => void {
       hint:
         "1. 조개껍데기가 삿갓 모양을 닮아 삿갓조개라고도 불린다.\n2. 전복과 비슷한 풍미를 지녀 작은 전복이라고 불린다.\n3. 거센 파도가 치는 해안가 절벽이나 바위에 서식한다.\n4. 식당 이름은 ㄷㅂㅅㄷ\n\n📍 식당의 위치는 황금 동상의 2시 방향이다.",
       placeholder: "식당명 입력 (예: ○○식당)",
+      placeholder2: "메뉴명 입력",
       answer: "대박식당",
-      answerAlt: ["따개비칼국수", "대박", "대박 식당"],
+      answerAlt: ["대박", "대박 식당"],
+      answer2: "따개비칼국수",
+      answerAlt2: [],
     },
     /* 정답 (식당) */
     {
@@ -443,7 +494,7 @@ export function initQuiz1Game(root: HTMLElement): () => void {
       move: null,
     },
     /* 전화 + 클리어 */
-    { bg: "ocean", type: "phone", caller: "미션 완료 신호", callerName: "이대환 박사" },
+    { bg: "ocean", type: "phone", caller: "휴대전화", callerName: "이대환 박사", enableCrack: false },
     /* 21p - 박사 에필로그 (일반 대사 UI) */
     {
       bg: "lab",
@@ -462,7 +513,7 @@ export function initQuiz1Game(root: HTMLElement): () => void {
     {
       bg: "ocean",
       type: "success",
-      charLabel: "검찰일기 이대환 박사",
+      charLabel: "개척령 어느 어부와의 시그널",
     },
   ];
 
@@ -478,6 +529,7 @@ export function initQuiz1Game(root: HTMLElement): () => void {
   let sceneApplyTimer: ReturnType<typeof setTimeout> | null = null;
   let deferTimer: ReturnType<typeof setTimeout> | null = null;
   let quizFocusTimer: ReturnType<typeof setTimeout> | null = null;
+  let isSceneTransitioning = false;
 
   function clearSceneApplyTimer() {
     if (sceneApplyTimer !== null) {
@@ -535,8 +587,10 @@ export function initQuiz1Game(root: HTMLElement): () => void {
     instant = false,
     opts?: { dialogueLine?: number; dialogueInstant?: boolean },
   ) {
+    if (!instant && isSceneTransitioning) return;
     clearPendingSceneTimers();
     clearSuccessParticleInterval();
+    isSceneTransitioning = !instant;
     currentScene = idx;
     if (opts && typeof opts.dialogueLine === "number") {
       dialogueLine = opts.dialogueLine;
@@ -550,6 +604,7 @@ export function initQuiz1Game(root: HTMLElement): () => void {
       renderScene(SCENES[idx]);
       dom.stage.classList.remove("fade-out");
       dom.stage.classList.add("fade-in");
+      isSceneTransitioning = false;
     };
     if (instant) {
       dom.stage.classList.remove("fade-out");
@@ -563,7 +618,11 @@ export function initQuiz1Game(root: HTMLElement): () => void {
     }, 500);
   }
 
-  function nextScene() {
+  function nextScene(force = false) {
+    if (isSceneTransitioning) return;
+    const cur = SCENES[currentScene] as any;
+    // 퀴즈는 제출 버튼을 통해서만 다음 씬으로 진행 가능
+    if (cur?.type === "quiz" && !force) return;
     if (currentScene < SCENES.length - 1) gotoScene(currentScene + 1);
   }
 
@@ -573,6 +632,7 @@ export function initQuiz1Game(root: HTMLElement): () => void {
     completedLineIndex: number,
   ) {
     typing = false;
+    dom.next.classList.add("q1g-next-ready");
     dom.next.style.display = "block";
     if (completedLineIndex >= lines.length - 1) {
       dom.next.onclick = () => nextScene();
@@ -644,6 +704,176 @@ export function initQuiz1Game(root: HTMLElement): () => void {
     }
   }
 
+  function drawMemoPaperBackground(canvas: HTMLCanvasElement) {
+    const ctx = canvas.getContext("2d");
+    if (!ctx) return;
+    const Wm = canvas.width;
+    const Hm = canvas.height;
+    if (Wm <= 0 || Hm <= 0) return;
+
+    ctx.clearRect(0, 0, Wm, Hm);
+
+    const PW = Wm;
+    const PH = Hm;
+    const PX = 0;
+    const PY = 0;
+    const FOLD = Math.max(30, Math.min(58, Math.floor(Math.min(Wm, Hm) * 0.14)));
+    const ROT = -2 * Math.PI / 180;
+
+    let seed = 7531;
+    const sr = () => {
+      seed = (seed * 9301 + 49297) % 233280;
+      return seed / 233280;
+    };
+    const srr = (a: number, b: number) => a + sr() * (b - a);
+
+    const tornEdge2 = (
+      x1: number, y1: number, x2: number, y2: number, segs: number, v: number,
+    ) => {
+      const dx = x2 - x1;
+      const dy = y2 - y1;
+      const len = Math.hypot(dx, dy) || 1;
+      const nx = -dy / len;
+      const ny = dx / len;
+      const pts: Array<[number, number]> = [];
+      for (let i = 0; i <= segs; i++) {
+        const t = i / segs;
+        const j = (i === 0 || i === segs) ? 0 : srr(-1, 1) * v;
+        pts.push([x1 + dx * t + nx * j, y1 + dy * t + ny * j]);
+      }
+      return pts;
+    };
+
+    const buildPath = () => {
+      seed = 7531;
+      const T = tornEdge2(PX + FOLD, PY, PX + PW, PY, 10, 5);
+      const R = tornEdge2(PX + PW, PY, PX + PW, PY + PH, 8, 3.5);
+      const B = tornEdge2(PX + PW, PY + PH, PX, PY + PH, 11, 6);
+      const L = tornEdge2(PX, PY + PH, PX, PY + FOLD, 7, 3.5);
+      ctx.beginPath();
+      T.forEach((p, i) => (i === 0 ? ctx.moveTo(p[0], p[1]) : ctx.lineTo(p[0], p[1])));
+      R.forEach((p, i) => { if (i > 0) ctx.lineTo(p[0], p[1]); });
+      B.forEach((p, i) => { if (i > 0) ctx.lineTo(p[0], p[1]); });
+      L.forEach((p, i) => { if (i > 0) ctx.lineTo(p[0], p[1]); });
+      ctx.lineTo(PX, PY + FOLD);
+      ctx.closePath();
+    };
+
+    ctx.save();
+    ctx.translate(Wm / 2, Hm / 2);
+    ctx.rotate(ROT);
+    ctx.translate(-Wm / 2, -Hm / 2);
+
+    ctx.save();
+    ctx.shadowColor = "rgba(0,0,0,0.55)";
+    ctx.shadowBlur = 10;
+    ctx.shadowOffsetX = 4;
+    ctx.shadowOffsetY = 5;
+    ctx.beginPath();
+    ctx.moveTo(PX, PY);
+    ctx.lineTo(PX + FOLD, PY);
+    ctx.lineTo(PX, PY + FOLD);
+    ctx.closePath();
+    ctx.fillStyle = "#a07830";
+    ctx.fill();
+    ctx.restore();
+
+    const fg = ctx.createLinearGradient(PX + FOLD, PY, PX, PY + FOLD);
+    fg.addColorStop(0, "rgba(0,0,0,0)");
+    fg.addColorStop(1, "rgba(0,0,0,0.42)");
+    ctx.fillStyle = fg;
+    ctx.beginPath();
+    ctx.moveTo(PX, PY);
+    ctx.lineTo(PX + FOLD, PY);
+    ctx.lineTo(PX, PY + FOLD);
+    ctx.closePath();
+    ctx.fill();
+
+    buildPath();
+    ctx.save();
+    ctx.shadowColor = "rgba(0,0,0,0.75)";
+    ctx.shadowBlur = 26;
+    ctx.shadowOffsetX = 6;
+    ctx.shadowOffsetY = 9;
+    ctx.fillStyle = "#ede6ce";
+    ctx.fill();
+    ctx.restore();
+
+    buildPath();
+    ctx.fillStyle = "#ede6ce";
+    ctx.fill();
+
+    ctx.save();
+    buildPath();
+    ctx.clip();
+
+    [
+      [PX + PW * 0.08, PY + PH * 0.12, 85, 0.13],
+      [PX + PW * 0.88, PY + PH * 0.75, 70, 0.14],
+      [PX + PW * 0.5, PY + PH * 0.92, 65, 0.11],
+      [PX + PW * 0.78, PY + PH * 0.10, 60, 0.12],
+      [PX + PW * 0.25, PY + PH * 0.60, 55, 0.08],
+    ].forEach(([cx, cy, r, a]) => {
+      const g = ctx.createRadialGradient(cx as number, cy as number, 0, cx as number, cy as number, r as number);
+      g.addColorStop(0, `rgba(85,55,14,${a})`);
+      g.addColorStop(1, "rgba(0,0,0,0)");
+      ctx.fillStyle = g;
+      ctx.fillRect(PX, PY, PW, PH);
+    });
+
+    [[0.26, 0.18], [0.60, 0.66], [0.78, 0.72]].forEach(([r1, r2]) => {
+      const x1 = PX + PW * r1;
+      const x2 = PX + PW * r2;
+      ctx.beginPath();
+      ctx.moveTo(x1 - 1.2, PY);
+      ctx.lineTo(x2 - 1.2, PY + PH);
+      ctx.strokeStyle = "rgba(255,252,230,0.22)";
+      ctx.lineWidth = 2.8;
+      ctx.stroke();
+      ctx.beginPath();
+      ctx.moveTo(x1 + 1.2, PY);
+      ctx.lineTo(x2 + 1.2, PY + PH);
+      ctx.strokeStyle = "rgba(50,26,4,0.10)";
+      ctx.lineWidth = 1.5;
+      ctx.stroke();
+    });
+
+    const imgData = ctx.getImageData(PX, PY, PW, PH);
+    const d = imgData.data;
+    for (let i = 0; i < d.length; i += 4) {
+      if (d[i + 3] < 10) continue;
+      const n = (Math.random() - 0.5) * 22;
+      d[i] = Math.min(255, Math.max(0, d[i] + n));
+      d[i + 1] = Math.min(255, Math.max(0, d[i + 1] + n * 0.9));
+      d[i + 2] = Math.min(255, Math.max(0, d[i + 2] + n * 0.7));
+    }
+    ctx.putImageData(imgData, PX, PY);
+
+    const fsh = ctx.createLinearGradient(PX, PY, PX + 95, PY + 95);
+    fsh.addColorStop(0, "rgba(0,0,0,0)");
+    fsh.addColorStop(0.32, "rgba(0,0,0,0.20)");
+    fsh.addColorStop(0.68, "rgba(0,0,0,0.06)");
+    fsh.addColorStop(1, "rgba(0,0,0,0)");
+    ctx.fillStyle = fsh;
+    ctx.fillRect(PX, PY, 100, 100);
+
+    const ev = ctx.createRadialGradient(PX + PW / 2, PY + PH / 2, PH * 0.25, PX + PW / 2, PY + PH / 2, PW * 0.72);
+    ev.addColorStop(0, "rgba(0,0,0,0)");
+    ev.addColorStop(1, "rgba(35,16,2,0.20)");
+    ctx.fillStyle = ev;
+    ctx.fillRect(PX, PY, PW, PH);
+    ctx.restore();
+
+    ctx.beginPath();
+    ctx.moveTo(PX + FOLD, PY + 1);
+    ctx.lineTo(PX + 1, PY + FOLD);
+    ctx.strokeStyle = "rgba(255,245,200,0.55)";
+    ctx.lineWidth = 1.4;
+    ctx.stroke();
+
+    ctx.restore();
+  }
+
   function attachFilmOverlay(container: HTMLElement) {
     const charArea = container.querySelector<HTMLElement>(".char-area");
     if (!charArea || charArea.querySelector(".film-grain-overlay")) return;
@@ -670,6 +900,7 @@ export function initQuiz1Game(root: HTMLElement): () => void {
   function startTypewriter(lines: string[], el: HTMLElement) {
     clearDialogueTyping();
     typing = true;
+    dom.next.classList.remove("q1g-next-ready");
     dom.next.style.display = "none";
     syncPrevVisibility();
     const line = lines[dialogueLine] || "";
@@ -720,6 +951,7 @@ export function initQuiz1Game(root: HTMLElement): () => void {
     dialogueLine = lineIndex;
     const raw = lines[lineIndex] ?? "";
     el.innerHTML = raw.replace(/\n/g, "<br>");
+    dom.next.classList.add("q1g-next-ready");
     dom.next.style.display = "block";
     if (lineIndex >= lines.length - 1) {
       dom.next.onclick = () => nextScene();
@@ -733,6 +965,7 @@ export function initQuiz1Game(root: HTMLElement): () => void {
   }
 
   function prevScene() {
+    if (isSceneTransitioning) return;
     const cur = SCENES[currentScene] as any;
     if (cur?.type === "dialogue" && Array.isArray(cur.lines) && dialogueLine > 0) {
       clearDialogueTyping();
@@ -765,9 +998,17 @@ export function initQuiz1Game(root: HTMLElement): () => void {
   function renderScene(s: Scene) {
     clearDeferTimer();
     clearQuizFocusTimer();
+    if (detachPhoneCrackClick) {
+      detachPhoneCrackClick();
+      detachPhoneCrackClick = null;
+    }
+    clearFxCanvas();
+    clearCrackStamps();
     setBg((s as any).bg || "ocean");
     dom.next.style.display = "none";
+    dom.next.classList.remove("q1g-next-ready");
     dom.next.onclick = () => nextScene();
+    dom.home?.style.removeProperty("display");
     syncPrevVisibility();
     dom.stage.innerHTML = "";
 
@@ -801,10 +1042,24 @@ export function initQuiz1Game(root: HTMLElement): () => void {
     showStageBadge(null);
     const d = document.createElement("div");
     d.className = "narration-scene";
+    const textLines = String(s.text || "")
+      .split("\n")
+      .map((line: string, idx: number) => `<div class="narration-text-line narration-text-line-${idx + 1}">${line}</div>`)
+      .join("");
+    const subChars = s.sub
+      ? String(s.sub)
+        .split("")
+        .map(
+          (ch: string, idx: number) =>
+            `<span style="animation-delay:${(2.55 + idx * 0.06).toFixed(2)}s">${ch === " " ? "&nbsp;" : ch}</span>`,
+        )
+        .join("")
+      : "";
     d.innerHTML = `
     <div class="narration-icon">${s.icon || "📖"}</div>
-    <div class="narration-text">${s.text.replace(/\n/g, "<br>")}</div>
-    ${s.sub ? `<div class="narration-sub">${s.sub}</div>` : ""}
+    <div class="narration-text">${textLines}</div>
+    ${s.sub ? `<div class="narration-sub">${subChars}</div>` : ""}
+    <div class="narration-red-line" aria-hidden="true"></div>
   `;
     dom.stage.appendChild(d);
     deferTimer = window.setTimeout(() => {
@@ -854,15 +1109,15 @@ export function initQuiz1Game(root: HTMLElement): () => void {
 
   /* ── 전화 ── */
   function renderPhone(s: any) {
-    showStageBadge("INCOMING CALL");
+    showStageBadge(null);
+    dom.prev.style.display = "none";
+    dom.home?.style.setProperty("display", "none");
     const d = document.createElement("div");
     d.className = "phone-scene";
     const caller = String(s.caller ?? "수신 전화").replace(/</g, "&lt;").replace(/>/g, "&gt;");
-    const callerName = String(s.callerName ?? "???").replace(/</g, "&lt;").replace(/>/g, "&gt;");
     d.innerHTML = `
     <div class="phone-top">
       <p class="phone-caller-type">${caller}</p>
-      <p class="phone-caller-name">${callerName}</p>
     </div>
     <div class="phone-bottom">
       <div class="phone-btn-wrap">
@@ -880,6 +1135,18 @@ export function initQuiz1Game(root: HTMLElement): () => void {
     </div>
   `;
     dom.stage.appendChild(d);
+
+    if (s.enableCrack !== false) {
+      const handleStageClick = (e: MouseEvent) => {
+        const target = e.target as HTMLElement | null;
+        if (target?.closest(".phone-btn-wrap")) return;
+        spawnCrackStamp(e.clientX, e.clientY);
+      };
+      dom.stage.addEventListener("click", handleStageClick);
+      detachPhoneCrackClick = () => {
+        dom.stage.removeEventListener("click", handleStageClick);
+      };
+    }
 
     let settled = false;
     function settle(fn: () => void) {
@@ -910,13 +1177,21 @@ export function initQuiz1Game(root: HTMLElement): () => void {
       .join("");
     d.innerHTML = `
     <div class="memo-paper">
-      <div class="memo-torn"></div>
-      <div class="memo-title">${s.title || "힌트 메모"}</div>
-      <div class="memo-content">${hintsHtml}</div>
-      ${s.footer ? `<div class="memo-footer">${s.footer}</div>` : ""}
+      <canvas class="memo-paper-bg" aria-hidden="true"></canvas>
+      <div class="memo-content-wrap">
+        <div class="memo-title">${s.title || "힌트 메모"}</div>
+        <div class="memo-content">${hintsHtml}</div>
+        ${s.footer ? `<div class="memo-footer">${s.footer}</div>` : ""}
+      </div>
     </div>
   `;
     dom.stage.appendChild(d);
+    const memoBg = d.querySelector<HTMLCanvasElement>(".memo-paper-bg");
+    if (memoBg) {
+      memoBg.width = Math.max(1, Math.floor(memoBg.clientWidth));
+      memoBg.height = Math.max(1, Math.floor(memoBg.clientHeight));
+      drawMemoPaperBackground(memoBg);
+    }
     deferTimer = window.setTimeout(() => {
       deferTimer = null;
       if (disposed) return;
@@ -932,17 +1207,27 @@ export function initQuiz1Game(root: HTMLElement): () => void {
     d.className = "quiz-scene";
     d.innerHTML = `
     <div class="quiz-box">
-      <div class="quiz-stage">${s.stage || "QUIZ"}</div>
+      <div class="quiz-stage"><span>${s.stage || "QUIZ"}</span></div>
       <div class="quiz-q">${s.question.replace(/\n/g, "<br>")}</div>
       ${s.hint ? `<div class="quiz-hint">${s.hint.replace(/\n/g, "<br>")}</div>` : ""}
       <input class="quiz-input" placeholder="${s.placeholder || "정답 입력"}" autocomplete="off"/>
-      <button type="button" class="quiz-submit">확인 →</button>
+      ${s.placeholder2 ? `<input class="quiz-input quiz-input-sub" placeholder="${s.placeholder2}" autocomplete="off"/>` : ""}
+      <button type="button" class="quiz-submit">
+        <span>확인</span>
+        <img
+          src="https://api.iconify.design/ph/arrow-right-bold.svg?color=%23d8c39f"
+          alt=""
+          width="22"
+          height="22"
+        />
+      </button>
       <div class="quiz-wrong">❌ 다시 확인해보세요.</div>
     </div>
   `;
     dom.stage.appendChild(d);
 
     const inp = d.querySelector(".quiz-input") as HTMLInputElement | null;
+    const inp2 = d.querySelector(".quiz-input-sub") as HTMLInputElement | null;
     const sub = d.querySelector(".quiz-submit") as HTMLButtonElement | null;
     const wrn = d.querySelector(".quiz-wrong") as HTMLElement | null;
 
@@ -951,10 +1236,26 @@ export function initQuiz1Game(root: HTMLElement): () => void {
     inp.addEventListener("keydown", (e) => {
       if (e.key === "Enter") sub.click();
     });
+    inp2?.addEventListener("keydown", (e) => {
+      if (e.key === "Enter") sub.click();
+    });
 
     sub.onclick = () => {
+      const rect = sub.getBoundingClientRect();
+      const size = Math.max(rect.width, rect.height);
+      const ripple = document.createElement("span");
+      ripple.className = "q1g-ripple";
+      ripple.style.width = `${size}px`;
+      ripple.style.height = `${size}px`;
+      ripple.style.left = `${rect.width / 2 - size / 2}px`;
+      ripple.style.top = `${rect.height / 2 - size / 2}px`;
+      sub.appendChild(ripple);
+      setTimeout(() => ripple.remove(), 600);
+
       const val = inp.value.trim();
       if (!val) return;
+      const val2 = inp2?.value.trim() ?? "";
+      if (inp2 && !val2) return;
       if (s.freeform) {
         // 자유 입력 — 비어있지 않으면 통과
         spawnParticles();
@@ -966,12 +1267,22 @@ export function initQuiz1Game(root: HTMLElement): () => void {
       const normMatch =
         typeof s.answer === "string" &&
         val.replace(/\s/g, "").toLowerCase() === s.answer.replace(/\s/g, "").toLowerCase();
-      const correct = exactMatch || altMatch || normMatch;
+      const correct1 = exactMatch || altMatch || normMatch;
+
+      const altMatch2 = inp2 ? (s.answerAlt2?.includes(val2) ?? false) : true;
+      const exactMatch2 = inp2 ? (typeof s.answer2 === "string" && val2 === s.answer2) : true;
+      const normMatch2 =
+        inp2 && typeof s.answer2 === "string"
+          ? val2.replace(/\s/g, "").toLowerCase() === s.answer2.replace(/\s/g, "").toLowerCase()
+          : true;
+      const correct2 = inp2 ? (exactMatch2 || altMatch2 || normMatch2) : true;
+
+      const correct = correct1 && correct2;
       if (correct) {
         spawnParticles();
         deferTimer = window.setTimeout(() => {
           deferTimer = null;
-          if (!disposed) nextScene();
+          if (!disposed) nextScene(true);
         }, 600);
       } else {
         wrn.style.display = "block";
@@ -980,8 +1291,10 @@ export function initQuiz1Game(root: HTMLElement): () => void {
           wrn.style.animation = "shake 0.3s ease";
         });
         inp.style.borderColor = "rgba(255,80,60,0.6)";
+        if (inp2) inp2.style.borderColor = "rgba(255,80,60,0.6)";
         setTimeout(() => {
           inp.style.borderColor = "";
+          if (inp2) inp2.style.borderColor = "";
         }, 1000);
       }
     };
@@ -1004,7 +1317,15 @@ export function initQuiz1Game(root: HTMLElement): () => void {
       ${s.text ? `<div class="correct-text">${s.text.replace(/\n/g, "<br>")}</div>` : ""}
       ${s.move ? `<div class="correct-move">${s.move.replace(/\n/g, "<br>")}</div>` : ""}
       <div class="correct-btns">
-        <button type="button" class="correct-yes">다음 문제 →</button>
+        <button type="button" class="correct-yes">
+          <span>다음 문제</span>
+          <img
+            src="https://api.iconify.design/ph/arrow-right-bold.svg?color=%23d8c39f"
+            alt=""
+            width="20"
+            height="20"
+          />
+        </button>
       </div>
     </div>
   `;
@@ -1030,9 +1351,9 @@ export function initQuiz1Game(root: HTMLElement): () => void {
     <div class="success-glow">MISSION SUCCESS</div>
     <div class="success-trophy" role="img" aria-label="미션 완료 트로피, 숫자 6">
       <span class="success-trophy-emoji" aria-hidden="true">🏆</span>
-      <span class="success-trophy-six" aria-hidden="true">6</span>
     </div>
     <div style="margin-top:12px;font-family:'Cinzel',serif;font-size:10px;letter-spacing:3px;color:rgba(100,150,200,0.4);">QUIZ 1 · COMPLETE</div>
+    <div class="success-complete-six">"6"</div>
   `;
     dom.stage.appendChild(d);
 
@@ -1075,6 +1396,13 @@ export function initQuiz1Game(root: HTMLElement): () => void {
     if (typeTimer) clearTimeout(typeTimer);
     clearPendingSceneTimers();
     clearSuccessParticleInterval();
+    isSceneTransitioning = false;
+    if (detachPhoneCrackClick) {
+      detachPhoneCrackClick();
+      detachPhoneCrackClick = null;
+    }
+    clearCrackStamps();
+    clearFxCanvas();
     dom.next.onclick = null;
     dom.prev.onclick = null;
   };
