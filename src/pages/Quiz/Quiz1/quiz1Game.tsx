@@ -27,6 +27,17 @@ export default function Quiz1Game() {
         xmlns="http://www.w3.org/2000/svg"
       >
         <defs>
+          <filter id="film-grain">
+            <feTurbulence type="fractalNoise" baseFrequency="0.95" numOctaves="2" seed="19" result="noise" />
+            <feColorMatrix
+              in="noise"
+              type="matrix"
+              values="1 0 0 0 0
+                      0 1 0 0 0
+                      0 0 1 0 0
+                      0 0 0 18 -8"
+            />
+          </filter>
           <filter id="q1g-stamp-rough">
             <feTurbulence type="fractalNoise" baseFrequency="0.065" numOctaves="4" seed="8" result="noise" />
             <feDisplacementMap

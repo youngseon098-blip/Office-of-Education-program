@@ -605,6 +605,68 @@ export function initQuiz1Game(root: HTMLElement): () => void {
     return segments;
   }
 
+  function drawFilmDamage(canvas: HTMLCanvasElement) {
+    const ctx = canvas.getContext("2d");
+    if (!ctx) return;
+    const w = canvas.width;
+    const h = canvas.height;
+    if (w <= 0 || h <= 0) return;
+
+    ctx.clearRect(0, 0, w, h);
+
+    const scratchCount = Math.max(16, Math.floor(w / 70));
+    for (let i = 0; i < scratchCount; i++) {
+      const x = Math.random() * w;
+      const y = Math.random() * h;
+      const len = h * (0.18 + Math.random() * 0.5);
+      const angle = (Math.random() - 0.5) * 0.14;
+      ctx.save();
+      ctx.translate(x, y);
+      ctx.rotate(angle);
+      ctx.beginPath();
+      ctx.moveTo(0, 0);
+      ctx.lineTo((Math.random() - 0.5) * 16, len);
+      ctx.strokeStyle = `rgba(255,255,255,${0.08 + Math.random() * 0.18})`;
+      ctx.lineWidth = 0.5 + Math.random() * 1.2;
+      ctx.stroke();
+      ctx.restore();
+    }
+
+    const dustCount = Math.max(70, Math.floor((w * h) / 9000));
+    for (let i = 0; i < dustCount; i++) {
+      const x = Math.random() * w;
+      const y = Math.random() * h;
+      const r = 0.3 + Math.random() * 1.6;
+      ctx.beginPath();
+      ctx.arc(x, y, r, 0, Math.PI * 2);
+      ctx.fillStyle = `rgba(240,235,220,${0.05 + Math.random() * 0.2})`;
+      ctx.fill();
+    }
+  }
+
+  function attachFilmOverlay(container: HTMLElement) {
+    const charArea = container.querySelector<HTMLElement>(".char-area");
+    if (!charArea || charArea.querySelector(".film-grain-overlay")) return;
+
+    const filmOverlay = document.createElement("div");
+    filmOverlay.innerHTML = `
+      <div class="film-grain-overlay"></div>
+      <div class="film-light-leak"></div>
+      <canvas class="film-scratch-canvas" id="q1g-scratch"></canvas>
+    `;
+    charArea.appendChild(filmOverlay);
+
+    const scratch = charArea.querySelector<HTMLCanvasElement>("#q1g-scratch");
+    if (!scratch) return;
+
+    const redraw = () => {
+      scratch.width = charArea.offsetWidth;
+      scratch.height = charArea.offsetHeight;
+      drawFilmDamage(scratch);
+    };
+    requestAnimationFrame(redraw);
+  }
+
   function startTypewriter(lines: string[], el: HTMLElement) {
     clearDialogueTyping();
     typing = true;
@@ -776,6 +838,7 @@ export function initQuiz1Game(root: HTMLElement): () => void {
     </div>
   `;
     dom.stage.appendChild(d);
+    attachFilmOverlay(d);
     const lines = s.lines as string[];
     const el = d.querySelector(".q1g-dtext") as HTMLElement | null;
     if (!el) return;
