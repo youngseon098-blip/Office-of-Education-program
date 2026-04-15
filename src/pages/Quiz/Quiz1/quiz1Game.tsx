@@ -112,7 +112,7 @@ export default function Quiz1Game() {
           width={18}
           height={18}
         />
-        <span>PREVIOUS</span>
+        <span>PREV</span>
       </button>
       <button type="button" id="q1g-next-btn">
         <span>NEXT</span>

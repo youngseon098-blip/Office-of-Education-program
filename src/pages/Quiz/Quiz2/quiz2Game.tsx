@@ -4,7 +4,13 @@ import "./quiz2Game.css";
 
 type Mood = "n" | "u" | "l";
 
-type StageScene = { t: "stage"; num: number; title: string; sub?: string };
+type StageScene = {
+  t: "stage";
+  num: number;
+  title: string;
+  sub?: string;
+  icon?: string;
+};
 type DialogueScene = {
   t: "dlg";
   ch: "director" | "agentA" | "laptop";
@@ -44,15 +50,22 @@ type Scene =
 
 const ICONS = { director: "👩‍💼", agentA: "🕵️", laptop: "💻" } as const;
 const QUIZ_CHECKPOINTS = [7, 12, 17, 22, 26];
+const INTRO_FULL_TEXT =
+  "울릉도에 이상 징후가 포착되고\n당신은 지금 잠입 요원으로\n현장에 투입된다.";
 
 const SCENES: Scene[] = [
-  { t: "stage", num: 0, title: "MISSION 02", sub: "새벽을 여는 독도" },
+  {
+    t: "stage",
+    num: 0,
+    title: "울릉도에 이상 징후가 포착되고\n당신은 잠입 요원으로 현장에 투입된다.",
+    sub: "MISSION · START",
+  },
   {
     t: "dlg",
     ch: "director",
     lbl: "국정원 최지수 국장",
     mood: "n",
-    lines: ["어머, 오셨네요? 방가원요", "저는 국정원 최지수 국장이예요~", "이번에 새로 합류하게 된 신입 요원들이시죠"],
+    lines: ["오셨군요. 반가워요.", "저는 국정원 최지수 국장이예요~", "이번에 새로 합류하게 된 신입 요원들이시죠"],
   },
   {
     t: "dlg",
@@ -258,14 +271,21 @@ export default function Quiz2Game() {
   const [singleError, setSingleError] = useState(false);
   const [multiErrors, setMultiErrors] = useState<boolean[]>([]);
   const [hintShown, setHintShown] = useState(false);
+  const [introIconVisible, setIntroIconVisible] = useState(false);
+  const [introTypedText, setIntroTypedText] = useState("");
+  const [introTypingDone, setIntroTypingDone] = useState(false);
+  const [introMetaVisible, setIntroMetaVisible] = useState(false);
 
   const rainRef = useRef<HTMLCanvasElement>(null);
   const boltRef = useRef<HTMLCanvasElement>(null);
   const flashRef = useRef<HTMLDivElement>(null);
+  const signalNoiseRef = useRef<HTMLCanvasElement>(null);
   const typeTimerRef = useRef<number | null>(null);
   const fadeTimerRef = useRef<number | null>(null);
+  const introTimersRef = useRef<number[]>([]);
 
   const scene = SCENES[cur];
+  const isIntroStage = scene.t === "stage" && scene.num === 0;
 
   useEffect(() => {
     document.title = "미션 2: 새벽을 여는 독도";
@@ -456,6 +476,118 @@ export default function Quiz2Game() {
     };
   }, [scene, lineIdx]);
 
+  useEffect(() => {
+    if (scene.t !== "dlg") return;
+    const canvas = signalNoiseRef.current;
+    if (!canvas) return;
+    const ctx = canvas.getContext("2d");
+    if (!ctx) return;
+
+    let rafId = 0;
+    let phase = 0;
+    const dpr = Math.max(1, window.devicePixelRatio || 1);
+
+    const resize = () => {
+      const w = canvas.clientWidth || 320;
+      const h = canvas.clientHeight || 56;
+      canvas.width = Math.floor(w * dpr);
+      canvas.height = Math.floor(h * dpr);
+      ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+    };
+
+    const drawNoise = () => {
+      const w = canvas.clientWidth || 320;
+      const h = canvas.clientHeight || 56;
+      ctx.clearRect(0, 0, w, h);
+
+      phase += 1;
+      const doGlitch = phase % 82 < 7;
+      if (doGlitch) {
+        const slices = Math.floor(Math.random() * 7) + 4;
+        for (let s = 0; s < slices; s += 1) {
+          const sy = Math.floor(Math.random() * h);
+          const sh = Math.floor(Math.random() * 4) + 1;
+          const shift = Math.floor(Math.random() * 26) - 13;
+          const alpha = 0.1 + Math.random() * 0.22;
+
+          ctx.save();
+          ctx.globalCompositeOperation = "screen";
+          ctx.translate(shift, 0);
+          ctx.fillStyle = `rgba(90, 200, 180, ${alpha})`;
+          ctx.fillRect(0, sy, w, sh);
+          if (Math.random() > 0.55) {
+            ctx.fillStyle = `rgba(224, 85, 85, ${alpha * 0.9})`;
+            ctx.fillRect(0, sy, w, 1);
+          }
+          ctx.restore();
+        }
+      }
+      rafId = requestAnimationFrame(drawNoise);
+    };
+
+    resize();
+    window.addEventListener("resize", resize);
+    rafId = requestAnimationFrame(drawNoise);
+
+    return () => {
+      cancelAnimationFrame(rafId);
+      window.removeEventListener("resize", resize);
+    };
+  }, [scene.t, cur]);
+
+  useEffect(() => {
+    introTimersRef.current.forEach((timerId) => window.clearTimeout(timerId));
+    introTimersRef.current = [];
+    setIntroIconVisible(false);
+    setIntroTypedText("");
+    setIntroTypingDone(false);
+    setIntroMetaVisible(false);
+
+    if (!isIntroStage) return;
+
+    const addIntroTimer = (timerId: number) => {
+      introTimersRef.current.push(timerId);
+      return timerId;
+    };
+
+    addIntroTimer(
+      window.setTimeout(() => {
+        setIntroIconVisible(true);
+      }, 400),
+    );
+
+    const typeChar = (idx: number) => {
+      if (idx >= INTRO_FULL_TEXT.length) {
+        setIntroTypingDone(true);
+        addIntroTimer(
+          window.setTimeout(() => {
+            setIntroMetaVisible(true);
+          }, 500),
+        );
+        return;
+      }
+      const ch = INTRO_FULL_TEXT[idx];
+      setIntroTypedText((prev) => prev + ch);
+      const delay = ch === "\n" ? 300 : Math.random() * 60 + 40;
+      addIntroTimer(
+        window.setTimeout(() => {
+          typeChar(idx + 1);
+        }, delay),
+      );
+    };
+
+    addIntroTimer(
+      window.setTimeout(() => {
+        typeChar(0);
+      }, 1200),
+    );
+
+    return () => {
+      introTimersRef.current.forEach((timerId) => window.clearTimeout(timerId));
+      introTimersRef.current = [];
+    };
+  }, [isIntroStage]);
+
   const progressDots = useMemo(() => {
     return QUIZ_CHECKPOINTS.map((si) => (cur > si ? "done" : cur >= si ? "now" : ""));
   }, [cur]);
@@ -516,7 +648,7 @@ export default function Quiz2Game() {
   const moodClass = (mood?: Mood) => (mood === "u" ? "urgent" : mood === "l" ? "laptop" : "");
 
   return (
-    <main className="quiz2game-page">
+    <main className={`quiz2game-page ${scene.t === "dlg" ? "q2-dialogue-jisoo" : ""}`}>
       <div id="bg-sky" />
       <div className="dcloud dc1" />
       <div className="dcloud dc2" />
@@ -550,16 +682,18 @@ export default function Quiz2Game() {
       </div>
       <div id={`trans ${isTransitioning ? "in" : ""}`} />
 
-      <div id="scene-wrap">
+      <div id="scene-wrap" className={isIntroStage ? "intro-layout" : ""}>
         <div id="char-area">
           {scene.t === "dlg" && (
-            <div className="ci-wrap">
-              <div className={`ci ${moodClass(scene.mood)}`}>
-                <span>{ICONS[scene.ch]}</span>
-                <div className="scan" />
+            scene.ch === "director" ? null : (
+              <div className="ci-wrap">
+                <div className={`ci ${moodClass(scene.mood)}`}>
+                  <span>{ICONS[scene.ch]}</span>
+                  <div className="scan" />
+                </div>
+                <div className={`ci-label ${moodClass(scene.mood)}`}>{scene.lbl}</div>
               </div>
-              <div className={`ci-label ${moodClass(scene.mood)}`}>{scene.lbl}</div>
-            </div>
+            )
           )}
           {scene.t === "success" && (
             <div className="ci-wrap">
@@ -574,12 +708,70 @@ export default function Quiz2Game() {
 
         <div id="scene-content">
           {scene.t === "stage" && (
-            <div className="sg-wrap">
-              <div className="sg-num">--- {scene.num === 0 ? "INTRO" : `STAGE ${scene.num}`} ---</div>
-              <div className="sg-title">{scene.title}</div>
-              <div className="sg-sub">{scene.sub ?? ""}</div>
-              <button className="sg-btn" onClick={adv}>
-                NEXT →
+            <div className={`sg-wrap ${scene.num === 0 ? "intro" : ""}`}>
+              {scene.num !== 0 && <div className="sg-num">--- STAGE {scene.num} ---</div>}
+              {scene.num === 0 && (
+                <div
+                  className={`sg-intro-icon ${introIconVisible ? "intro-visible" : ""}`}
+                  aria-hidden
+                >
+                  <svg
+                    width="56"
+                    height="56"
+                    viewBox="0 0 56 56"
+                    fill="none"
+                    xmlns="http://www.w3.org/2000/svg"
+                  >
+                    <defs>
+                      <filter id="q2-intro-glow">
+                        <feGaussianBlur stdDeviation="2.5" result="blur" />
+                        <feMerge>
+                          <feMergeNode in="blur" />
+                          <feMergeNode in="SourceGraphic" />
+                        </feMerge>
+                      </filter>
+                    </defs>
+                    <ellipse cx="24" cy="22" rx="14" ry="9" fill="rgba(90,120,165,.38)" />
+                    <ellipse cx="34" cy="20" rx="11" ry="8" fill="rgba(90,120,165,.35)" />
+                    <ellipse cx="28" cy="25" rx="16" ry="9" fill="rgba(80,110,155,.40)" />
+                    <path
+                      d="M30 24 L23 36 L28 36 L22 50 L36 32 L30 32 Z"
+                      fill="rgba(48,210,215,.85)"
+                      filter="url(#q2-intro-glow)"
+                    />
+                  </svg>
+                </div>
+              )}
+              {scene.num === 0 ? (
+                <div className="main-text">
+                  {introTypedText.split("\n").map((line, idx, arr) => (
+                    <span key={`intro-line-${idx}`}>
+                      {line}
+                      {idx < arr.length - 1 && <br />}
+                    </span>
+                  ))}
+                  {!introTypingDone && <span className="main-text-cursor" />}
+                </div>
+              ) : (
+                <div className="sg-title">{scene.title}</div>
+              )}
+              <div
+                className={`sg-sub ${isIntroStage ? (introMetaVisible ? "intro-visible" : "intro-hidden") : ""}`}
+              >
+                {scene.sub ?? ""}
+              </div>
+              {scene.num === 0 && <div className="sg-line" aria-hidden />}
+              <button
+                className={`sg-btn ${isIntroStage ? (introMetaVisible ? "intro-visible" : "intro-hidden") : ""}`}
+                onClick={adv}
+              >
+                <span>NEXT</span>
+                <img
+                  src="https://api.iconify.design/ph/arrow-right-bold.svg?color=%233ee8cc"
+                  alt=""
+                  width={18}
+                  height={18}
+                />
               </button>
             </div>
           )}
@@ -591,10 +783,22 @@ export default function Quiz2Game() {
               <div className="atmo-desc">{scene.desc}</div>
               <div className="atmo-nav">
                 <button className="nbtn" onClick={goBack}>
-                  ← PREV
+                  <img
+                    src="https://api.iconify.design/ph/arrow-left-bold.svg?color=%234de8ea"
+                    alt=""
+                    width={18}
+                    height={18}
+                  />
+                  <span>PREV</span>
                 </button>
                 <button className="nbtn p" onClick={adv}>
-                  NEXT →
+                  <span>NEXT</span>
+                  <img
+                    src="https://api.iconify.design/ph/arrow-right-bold.svg?color=%234de8ea"
+                    alt=""
+                    width={18}
+                    height={18}
+                  />
                 </button>
               </div>
             </div>
@@ -603,6 +807,10 @@ export default function Quiz2Game() {
           {scene.t === "dlg" && (
             <>
               <div className={`dlg-box ${moodClass(scene.mood)}`}>
+                <canvas ref={signalNoiseRef} className="q2-signal-noise" aria-hidden />
+                {scene.ch === "director" && (
+                  <div className="q2-dialogue-name">{scene.lbl}</div>
+                )}
                 <div className="dlg-txt">
                   {typedText}
                   <span className={`dlg-cur ${moodClass(scene.mood)}`} />
@@ -610,13 +818,31 @@ export default function Quiz2Game() {
               </div>
               <div className="dlg-nav">
                 <button className="nbtn" onClick={goBack}>
-                  ← PREV
+                  <img
+                    src="https://api.iconify.design/ph/arrow-left-bold.svg?color=%234de8ea"
+                    alt=""
+                    width={18}
+                    height={18}
+                  />
+                  <span>PREV</span>
                 </button>
                 <span className="pg-lbl">
                   {lineIdx + 1} / {scene.lines.length}
                 </span>
                 <button className={`nbtn ${!isTyping ? "p" : ""}`} onClick={nextLine}>
-                  {isTyping ? "..." : "NEXT →"}
+                  {isTyping ? (
+                    "..."
+                  ) : (
+                    <>
+                      <span>NEXT</span>
+                      <img
+                        src="https://api.iconify.design/ph/arrow-right-bold.svg?color=%234de8ea"
+                        alt=""
+                        width={18}
+                        height={18}
+                      />
+                    </>
+                  )}
                 </button>
               </div>
             </>
@@ -648,7 +874,13 @@ export default function Quiz2Game() {
               </div>
               <div className="bot-nav">
                 <button className="nbtn" onClick={goBack}>
-                  ← PREV
+                  <img
+                    src="https://api.iconify.design/ph/arrow-left-bold.svg?color=%234de8ea"
+                    alt=""
+                    width={18}
+                    height={18}
+                  />
+                  <span>PREV</span>
                 </button>
               </div>
             </>
@@ -681,7 +913,13 @@ export default function Quiz2Game() {
               </div>
               <div className="bot-nav">
                 <button className="nbtn" onClick={goBack}>
-                  ← PREV
+                  <img
+                    src="https://api.iconify.design/ph/arrow-left-bold.svg?color=%234de8ea"
+                    alt=""
+                    width={18}
+                    height={18}
+                  />
+                  <span>PREV</span>
                 </button>
               </div>
             </>
@@ -694,7 +932,13 @@ export default function Quiz2Game() {
               <div className="rs-desc">{scene.desc}</div>
               <div style={{ marginTop: 14, textAlign: "center" }}>
                 <button className="nbtn p" onClick={adv}>
-                  다음으로 →
+                  <span>NEXT</span>
+                  <img
+                    src="https://api.iconify.design/ph/arrow-right-bold.svg?color=%234de8ea"
+                    alt=""
+                    width={18}
+                    height={18}
+                  />
                 </button>
               </div>
             </div>

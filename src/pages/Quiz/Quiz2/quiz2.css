@@ -2,6 +2,22 @@
   background: #06080e;
 }
 
+/* quiz2 페이지의 전체 카드 시작 높이를 quiz1과 동일하게 고정 */
+.quiz2-page .quiz1-dossier {
+  width: min(400px, 94vw);
+  margin-top: clamp(16px, 4vh, 36px);
+  transform: scale(var(--quiz1-scale));
+  transform-origin: top center;
+  margin-bottom: 34px;
+}
+
+.quiz2-page .quiz1-cta-area {
+  width: min(400px, 94vw);
+  margin-top: 32px;
+  transform: scale(var(--quiz1-scale));
+  transform-origin: top center;
+}
+
 .quiz2-page .q2-storm-bg {
   position: fixed;
   inset: 0;
@@ -14,16 +30,12 @@
   position: absolute;
   inset: 0;
   background:
-    radial-gradient(
-      ellipse at 30% 20%,
+    radial-gradient(ellipse at 30% 20%,
       rgba(18, 28, 55, 0.95) 0%,
-      transparent 60%
-    ),
-    radial-gradient(
-      ellipse at 70% 10%,
+      transparent 60%),
+    radial-gradient(ellipse at 70% 10%,
       rgba(12, 20, 42, 0.9) 0%,
-      transparent 55%
-    ),
+      transparent 55%),
     linear-gradient(180deg, #050810 0%, #0a1220 35%, #111828 60%, #0a0e16 100%);
 }
 
@@ -45,11 +57,9 @@
   height: 180px;
   top: -40px;
   left: -60px;
-  background: radial-gradient(
-    ellipse,
-    rgba(42, 50, 72, 0.7) 0%,
-    transparent 70%
-  );
+  background: radial-gradient(ellipse,
+      rgba(42, 50, 72, 0.7) 0%,
+      transparent 70%);
   animation: q2-cloud-drift1 28s ease-in-out infinite alternate;
 }
 
@@ -58,11 +68,9 @@
   height: 160px;
   top: -20px;
   right: -40px;
-  background: radial-gradient(
-    ellipse,
-    rgba(35, 42, 65, 0.65) 0%,
-    transparent 70%
-  );
+  background: radial-gradient(ellipse,
+      rgba(35, 42, 65, 0.65) 0%,
+      transparent 70%);
   animation: q2-cloud-drift2 22s ease-in-out infinite alternate;
 }
 
@@ -71,11 +79,9 @@
   height: 200px;
   top: 20px;
   left: 20%;
-  background: radial-gradient(
-    ellipse,
-    rgba(28, 36, 58, 0.6) 0%,
-    transparent 70%
-  );
+  background: radial-gradient(ellipse,
+      rgba(28, 36, 58, 0.6) 0%,
+      transparent 70%);
   animation: q2-cloud-drift3 32s ease-in-out infinite alternate;
 }
 
@@ -84,11 +90,9 @@
   height: 130px;
   top: 60px;
   left: -30px;
-  background: radial-gradient(
-    ellipse,
-    rgba(55, 65, 90, 0.45) 0%,
-    transparent 68%
-  );
+  background: radial-gradient(ellipse,
+      rgba(55, 65, 90, 0.45) 0%,
+      transparent 68%);
   animation: q2-cloud-drift1 18s ease-in-out 4s infinite alternate;
 }
 
@@ -97,11 +101,9 @@
   height: 110px;
   top: 40px;
   right: 10%;
-  background: radial-gradient(
-    ellipse,
-    rgba(50, 60, 85, 0.4) 0%,
-    transparent 68%
-  );
+  background: radial-gradient(ellipse,
+      rgba(50, 60, 85, 0.4) 0%,
+      transparent 68%);
   animation: q2-cloud-drift2 24s ease-in-out 8s infinite alternate;
 }
 
@@ -136,21 +138,15 @@
   width: 120%;
   height: 100%;
   background:
-    radial-gradient(
-      ellipse at 20% 100%,
+    radial-gradient(ellipse at 20% 100%,
       rgba(140, 155, 185, 0.18) 0%,
-      transparent 55%
-    ),
-    radial-gradient(
-      ellipse at 50% 100%,
+      transparent 55%),
+    radial-gradient(ellipse at 50% 100%,
       rgba(120, 140, 175, 0.22) 0%,
-      transparent 60%
-    ),
-    radial-gradient(
-      ellipse at 80% 100%,
+      transparent 60%),
+    radial-gradient(ellipse at 80% 100%,
       rgba(130, 148, 180, 0.16) 0%,
-      transparent 52%
-    );
+      transparent 52%);
   filter: blur(18px);
   animation: q2-fog-drift1 20s ease-in-out infinite alternate;
 }
@@ -162,16 +158,12 @@
   width: 110%;
   height: 75%;
   background:
-    radial-gradient(
-      ellipse at 30% 100%,
+    radial-gradient(ellipse at 30% 100%,
       rgba(100, 120, 160, 0.14) 0%,
-      transparent 50%
-    ),
-    radial-gradient(
-      ellipse at 65% 100%,
+      transparent 50%),
+    radial-gradient(ellipse at 65% 100%,
       rgba(110, 130, 168, 0.18) 0%,
-      transparent 55%
-    );
+      transparent 55%);
   filter: blur(24px);
   animation: q2-fog-drift2 26s ease-in-out 3s infinite alternate;
 }
@@ -182,11 +174,9 @@
   left: 0;
   right: 0;
   height: 45%;
-  background: linear-gradient(
-    to top,
-    rgba(85, 105, 145, 0.22) 0%,
-    transparent 100%
-  );
+  background: linear-gradient(to top,
+      rgba(85, 105, 145, 0.22) 0%,
+      transparent 100%);
   filter: blur(12px);
   animation: q2-fog-drift3 14s ease-in-out infinite alternate;
 }
@@ -206,17 +196,16 @@
   position: absolute;
   inset: 0;
   z-index: 6;
-  background: radial-gradient(
-    ellipse at 50% 45%,
-    rgba(0, 0, 0, 0) 28%,
-    rgba(0, 0, 0, 0.72) 100%
-  );
+  background: radial-gradient(ellipse at 50% 45%,
+      rgba(0, 0, 0, 0) 28%,
+      rgba(0, 0, 0, 0.72) 100%);
 }
 
 @keyframes q2-cloud-drift1 {
   0% {
     transform: translateX(0) scaleX(1);
   }
+
   100% {
     transform: translateX(28px) scaleX(1.05);
   }
@@ -226,6 +215,7 @@
   0% {
     transform: translateX(0) scaleX(1);
   }
+
   100% {
     transform: translateX(-22px) scaleX(1.04);
   }
@@ -235,6 +225,7 @@
   0% {
     transform: translateX(0);
   }
+
   100% {
     transform: translateX(18px);
   }
@@ -244,6 +235,7 @@
   0% {
     transform: translateX(0) scaleY(1);
   }
+
   100% {
     transform: translateX(30px) scaleY(1.08);
   }
@@ -253,6 +245,7 @@
   0% {
     transform: translateX(0);
   }
+
   100% {
     transform: translateX(-24px);
   }
@@ -262,6 +255,7 @@
   0% {
     opacity: 0.7;
   }
+
   100% {
     opacity: 1;
   }
@@ -301,7 +295,30 @@
   -webkit-text-stroke: 0;
 }
 
+/* quiz1 기준으로 노트(스탬프) 위치 고정 */
+.quiz2-page .quiz1-stamp-row {
+  top: 138px;
+  right: 28px;
+  align-items: flex-end;
+  transform: scale(1.3);
+  transform-origin: top right;
+}
+
+/* quiz1 기준으로 타이틀/텍스트 블록 위치 고정 */
+.quiz2-page .quiz1-mission-title {
+  padding: 10px 18px 18px;
+}
+
+.quiz2-page .quiz1-mt-kr {
+  margin-top: 28px;
+  transform: translateX(-4px);
+  align-items: flex-start;
+  gap: 8px;
+}
+
 .quiz2-page .quiz1-mt-sub {
+  margin-top: 11px;
+  transform: translateX(-4px);
   color: #1a3a5c;
 }
 
@@ -335,13 +352,11 @@
 }
 
 .quiz2-page .quiz1-caution {
-  background: repeating-linear-gradient(
-    -45deg,
-    #1a2e48 0,
-    #1a2e48 5px,
-    #b8960a 5px,
-    #b8960a 10px
-  );
+  background: repeating-linear-gradient(-45deg,
+      #1a2e48 0,
+      #1a2e48 5px,
+      #b8960a 5px,
+      #b8960a 10px);
 }
 
 .quiz2-page .quiz1-cta-btn,

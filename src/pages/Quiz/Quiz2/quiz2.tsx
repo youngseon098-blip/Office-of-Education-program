@@ -277,11 +277,11 @@ export default function Quiz2() {
           <div className="quiz1-info-grid">
             <div className="quiz1-info-cell">
               <div className="quiz1-ic-label">Date</div>
-              <div className="quiz1-ic-val">1696 · 안용복 2차 도해</div>
+              <div className="quiz1-ic-val">현재 · 울릉도 긴급 잠입 임무</div>
             </div>
             <div className="quiz1-info-cell">
               <div className="quiz1-ic-label">Classification</div>
-              <div className="quiz1-ic-val red">Active · 암호 해독 필요</div>
+              <div className="quiz1-ic-val red">Active · 안개 원인 파악 필요</div>
             </div>
           </div>
 
@@ -298,11 +298,12 @@ export default function Quiz2() {
               STEP <span>1</span>
             </div>
             <div className="quiz1-step-title">
-              <em>암호 전보 수신!</em> 도해 좌표를 해독하라!
+              <em>박사의 메시지!</em> 기밀 파일을 해독하라!
             </div>
             <div className="quiz1-step-desc quiz1-step-desc-strong">
-              1696년 안용복의 2차 도해 기록에 숨겨진 암호 전보를 수신하라. 힌트
-              속에 담긴 숫자와 기호를 조합해 정확한 좌표를 찾아내야 한다.
+              요원 A가 보안관리 AI를 통해 기밀 문서를 전달한다.
+              두 개의 보기에서 공통으로 가장 많이 등장하는
+              단어를 찾아 목적지를 파악하라.
             </div>
           </div>
 
@@ -311,11 +312,12 @@ export default function Quiz2() {
               STEP <span>2</span>
             </div>
             <div className="quiz1-step-title">
-              <em>좌표 확인!</em> 최종 위치를 특정하라!
+              <em>암호 해독!</em> 요원 A의 위치를 찾아라!
             </div>
             <div className="quiz1-step-desc quiz1-step-desc-strong">
-              해독된 좌표와 역사적 기록을 대조하여 안용복이 주장한 섬의 정확한
-              위치를 확인하라. 주어진 시간은 단 60분이다.
+              도동에서 요원 A를 접선하라. 요원 A가 메일로
+              보낸 기밀 파일의 광고판 암호를 해독하여
+              단서를 확보하라. 주어진 시간은 단 60분이다.
             </div>
           </div>
 
