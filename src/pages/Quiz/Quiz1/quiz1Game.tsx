@@ -28,7 +28,13 @@ export default function Quiz1Game() {
       >
         <defs>
           <filter id="film-grain">
-            <feTurbulence type="fractalNoise" baseFrequency="0.95" numOctaves="2" seed="19" result="noise" />
+            <feTurbulence
+              type="fractalNoise"
+              baseFrequency="0.95"
+              numOctaves="2"
+              seed="19"
+              result="noise"
+            />
             <feColorMatrix
               in="noise"
               type="matrix"
@@ -39,7 +45,13 @@ export default function Quiz1Game() {
             />
           </filter>
           <filter id="q1g-stamp-rough">
-            <feTurbulence type="fractalNoise" baseFrequency="0.065" numOctaves="4" seed="8" result="noise" />
+            <feTurbulence
+              type="fractalNoise"
+              baseFrequency="0.065"
+              numOctaves="4"
+              seed="8"
+              result="noise"
+            />
             <feDisplacementMap
               in="SourceGraphic"
               in2="noise"
@@ -50,7 +62,13 @@ export default function Quiz1Game() {
             <feGaussianBlur stdDeviation="0.3" />
           </filter>
           <filter id="stamp-rough">
-            <feTurbulence type="fractalNoise" baseFrequency="0.04" numOctaves="4" seed="5" result="noise" />
+            <feTurbulence
+              type="fractalNoise"
+              baseFrequency="0.04"
+              numOctaves="4"
+              seed="5"
+              result="noise"
+            />
             <feDisplacementMap
               in="SourceGraphic"
               in2="noise"
@@ -78,6 +96,10 @@ export default function Quiz1Game() {
           height={28}
         />
       </Link>
+
+      <div className="q1g-topbar">
+        <div className="q1g-tp-pill">MISSION 01 · 개척령 어느 어부와의 시그널</div>
+      </div>
 
       <div id="q1g-stage-badge" />
 

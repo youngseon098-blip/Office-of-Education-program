@@ -17,9 +17,7 @@ interface SceneQuiz {
   freeform?: boolean;
 }
 
-type Scene =
-  | Record<string, any>
-  | SceneQuiz;
+type Scene = Record<string, any> | SceneQuiz;
 
 export function initQuiz1Game(root: HTMLElement): () => void {
   const c = root.querySelector<HTMLCanvasElement>("#q1g-c-bg");
@@ -32,13 +30,13 @@ export function initQuiz1Game(root: HTMLElement): () => void {
   const hm = root.querySelector<HTMLElement>(".app-home-link--fixed");
 
   if (!c || !fx || !st || !nx || !pv || !bd || !ov) {
-    return () => { };
+    return () => {};
   }
 
   const x = c.getContext("2d");
   const fxCtx = fx.getContext("2d");
   if (!x || !fxCtx) {
-    return () => { };
+    return () => {};
   }
 
   const dom = {
@@ -161,47 +159,110 @@ export function initQuiz1Game(root: HTMLElement): () => void {
 
   function buildBloodCanvas() {
     const bc = document.createElement("canvas");
-    bc.width = W; bc.height = H;
+    bc.width = W;
+    bc.height = H;
     const ctxRaw = bc.getContext("2d");
     if (!ctxRaw) return bc;
     const bctx: CanvasRenderingContext2D = ctxRaw;
-    const R = "#c00808", RD = "#880404", RL = "#e00a0a";
-    function blob(cx: number, cy: number, rx: number, ry: number, rot: number, al: number, col: string) {
-      bctx.save(); bctx.translate(cx, cy); bctx.rotate(rot);
-      bctx.globalAlpha = al; bctx.fillStyle = col;
-      bctx.beginPath(); bctx.ellipse(0, 0, rx, ry, 0, 0, Math.PI * 2); bctx.fill(); bctx.restore();
+    const R = "#c00808",
+      RD = "#880404",
+      RL = "#e00a0a";
+    function blob(
+      cx: number,
+      cy: number,
+      rx: number,
+      ry: number,
+      rot: number,
+      al: number,
+      col: string,
+    ) {
+      bctx.save();
+      bctx.translate(cx, cy);
+      bctx.rotate(rot);
+      bctx.globalAlpha = al;
+      bctx.fillStyle = col;
+      bctx.beginPath();
+      bctx.ellipse(0, 0, rx, ry, 0, 0, Math.PI * 2);
+      bctx.fill();
+      bctx.restore();
     }
     function splat(sx: number, sy: number, maxR: number, al: number) {
       blob(sx, sy, maxR * 0.9, maxR * 0.44, -0.28, al * 0.95, R);
-      blob(sx - maxR * 0.04, sy - maxR * 0.01, maxR * 0.62, maxR * 0.33, 0.12, al * 0.86, RD);
-      blob(sx + maxR * 0.05, sy + maxR * 0.01, maxR * 0.45, maxR * 0.25, -0.08, al * 0.80, RL);
+      blob(
+        sx - maxR * 0.04,
+        sy - maxR * 0.01,
+        maxR * 0.62,
+        maxR * 0.33,
+        0.12,
+        al * 0.86,
+        RD,
+      );
+      blob(
+        sx + maxR * 0.05,
+        sy + maxR * 0.01,
+        maxR * 0.45,
+        maxR * 0.25,
+        -0.08,
+        al * 0.8,
+        RL,
+      );
       for (let i = 0; i < 10; i++) {
         const a = (i / 10) * Math.PI * 2 + sx * 0.01;
         const d = maxR * (0.42 + Math.sin(i * 2.2) * 0.28);
-        const r = maxR * (0.04 + Math.abs(Math.sin(i * 1.9)) * 0.10);
-        blob(sx + Math.cos(a) * d, sy + Math.sin(a) * d, r, r * 0.62, a, al * 0.45, R);
+        const r = maxR * (0.04 + Math.abs(Math.sin(i * 1.9)) * 0.1);
+        blob(
+          sx + Math.cos(a) * d,
+          sy + Math.sin(a) * d,
+          r,
+          r * 0.62,
+          a,
+          al * 0.45,
+          R,
+        );
       }
       for (let i = 0; i < 3; i++) {
         const dx = sx + Math.sin(i * 2 + sx) * maxR * 0.32;
         const dlen = maxR * (0.38 + Math.sin(i * 1.8) * 0.18);
         const w = maxR * 0.08;
-        bctx.save(); bctx.globalAlpha = al * 0.72; bctx.fillStyle = RD;
+        bctx.save();
+        bctx.globalAlpha = al * 0.72;
+        bctx.fillStyle = RD;
         bctx.beginPath();
         bctx.moveTo(dx - w / 2, sy + maxR * 0.26);
-        bctx.quadraticCurveTo(dx + w * 0.3, sy + maxR * 0.26 + dlen * 0.5, dx - w * 0.2, sy + maxR * 0.26 + dlen);
-        bctx.quadraticCurveTo(dx - w, sy + maxR * 0.26 + dlen * 0.8, dx - w / 2, sy + maxR * 0.26);
+        bctx.quadraticCurveTo(
+          dx + w * 0.3,
+          sy + maxR * 0.26 + dlen * 0.5,
+          dx - w * 0.2,
+          sy + maxR * 0.26 + dlen,
+        );
+        bctx.quadraticCurveTo(
+          dx - w,
+          sy + maxR * 0.26 + dlen * 0.8,
+          dx - w / 2,
+          sy + maxR * 0.26,
+        );
         bctx.fill();
-        bctx.beginPath(); bctx.ellipse(dx - w * 0.1, sy + maxR * 0.26 + dlen + w * 1.1, w * 0.78, w * 1.15, 0, 0, Math.PI * 2); bctx.fill();
+        bctx.beginPath();
+        bctx.ellipse(
+          dx - w * 0.1,
+          sy + maxR * 0.26 + dlen + w * 1.1,
+          w * 0.78,
+          w * 1.15,
+          0,
+          0,
+          Math.PI * 2,
+        );
+        bctx.fill();
         bctx.restore();
       }
     }
     splat(W * 0.14, H * 0.07, Math.min(W, H) * 0.072, 0.82);
     splat(W * 0.06, H * 0.12, Math.min(W, H) * 0.042, 0.68);
-    splat(W * 0.86, H * 0.08, Math.min(W, H) * 0.034, 0.60);
+    splat(W * 0.86, H * 0.08, Math.min(W, H) * 0.034, 0.6);
     splat(W * 0.92, H * 0.22, Math.min(W, H) * 0.024, 0.48);
     splat(W * 0.04, H * 0.48, Math.min(W, H) * 0.022, 0.35);
-    splat(W * 0.95, H * 0.62, Math.min(W, H) * 0.018, 0.30);
-    splat(W * 0.08, H * 0.82, Math.min(W, H) * 0.020, 0.32);
+    splat(W * 0.95, H * 0.62, Math.min(W, H) * 0.018, 0.3);
+    splat(W * 0.08, H * 0.82, Math.min(W, H) * 0.02, 0.32);
     splat(W * 0.88, H * 0.88, Math.min(W, H) * 0.018, 0.28);
     return bc;
   }
@@ -216,20 +277,32 @@ export function initQuiz1Game(root: HTMLElement): () => void {
     /* ── 나무 바닥 베이스 ── */
     const bg = ctx2.createLinearGradient(0, 0, 0, H);
     if (bgMode === "lab") {
-      bg.addColorStop(0, "#201508"); bg.addColorStop(0.5, "#281a0a"); bg.addColorStop(1, "#1a1006");
+      bg.addColorStop(0, "#201508");
+      bg.addColorStop(0.5, "#281a0a");
+      bg.addColorStop(1, "#1a1006");
     } else if (bgMode === "museum") {
-      bg.addColorStop(0, "#1c1208"); bg.addColorStop(0.5, "#221608"); bg.addColorStop(1, "#181006");
+      bg.addColorStop(0, "#1c1208");
+      bg.addColorStop(0.5, "#221608");
+      bg.addColorStop(1, "#181006");
     } else {
-      bg.addColorStop(0, "#1e1510"); bg.addColorStop(0.4, "#241a0e"); bg.addColorStop(0.8, "#1c1208"); bg.addColorStop(1, "#140e06");
+      bg.addColorStop(0, "#1e1510");
+      bg.addColorStop(0.4, "#241a0e");
+      bg.addColorStop(0.8, "#1c1208");
+      bg.addColorStop(1, "#140e06");
     }
-    ctx2.fillStyle = bg; ctx2.fillRect(0, 0, W, H);
+    ctx2.fillStyle = bg;
+    ctx2.fillRect(0, 0, W, H);
 
     /* 나무 결 */
     for (let i = 0; i < 22; i++) {
       const yBase = (H / 22) * i + Math.sin(i * 1.3) * 10;
-      ctx2.beginPath(); ctx2.moveTo(0, yBase);
+      ctx2.beginPath();
+      ctx2.moveTo(0, yBase);
       for (let px = 0; px <= W; px += 28)
-        ctx2.lineTo(px, yBase + Math.sin(px * 0.007 + i * 0.9 + bgT * 0.04) * 5);
+        ctx2.lineTo(
+          px,
+          yBase + Math.sin(px * 0.007 + i * 0.9 + bgT * 0.04) * 5,
+        );
       ctx2.strokeStyle = `rgba(${i % 2 ? 200 : 160},${i % 2 ? 140 : 110},${i % 2 ? 50 : 40},0.032)`;
       ctx2.lineWidth = 1.2 + Math.sin(i * 0.6) * 0.8;
       ctx2.stroke();
@@ -237,15 +310,33 @@ export function initQuiz1Game(root: HTMLElement): () => void {
 
     /* lab 조명 글로우 */
     if (bgMode === "lab") {
-      const lg = ctx2.createRadialGradient(W * 0.5, H * 0.3, 0, W * 0.5, H * 0.3, H * 0.5);
-      lg.addColorStop(0, "rgba(220,160,60,0.07)"); lg.addColorStop(1, "rgba(0,0,0,0)");
-      ctx2.fillStyle = lg; ctx2.fillRect(0, 0, W, H);
+      const lg = ctx2.createRadialGradient(
+        W * 0.5,
+        H * 0.3,
+        0,
+        W * 0.5,
+        H * 0.3,
+        H * 0.5,
+      );
+      lg.addColorStop(0, "rgba(220,160,60,0.07)");
+      lg.addColorStop(1, "rgba(0,0,0,0)");
+      ctx2.fillStyle = lg;
+      ctx2.fillRect(0, 0, W, H);
     }
 
     /* 주변부 비네팅 */
-    const vig = ctx2.createRadialGradient(W / 2, H / 2, H * 0.12, W / 2, H / 2, H * 0.82);
-    vig.addColorStop(0, "rgba(0,0,0,0)"); vig.addColorStop(1, "rgba(0,0,0,0.68)");
-    ctx2.fillStyle = vig; ctx2.fillRect(0, 0, W, H);
+    const vig = ctx2.createRadialGradient(
+      W / 2,
+      H / 2,
+      H * 0.12,
+      W / 2,
+      H / 2,
+      H * 0.82,
+    );
+    vig.addColorStop(0, "rgba(0,0,0,0)");
+    vig.addColorStop(1, "rgba(0,0,0,0.68)");
+    ctx2.fillStyle = vig;
+    ctx2.fillRect(0, 0, W, H);
 
     /* 혈흔 오버레이 */
     if (!bloodCanvas || bloodCanvas.width !== W || bloodCanvas.height !== H) {
@@ -317,10 +408,22 @@ export function initQuiz1Game(root: HTMLElement): () => void {
       type: "memo",
       title: "개척령 시기 전라도 출신 어부의 위치 힌트 (1/2)",
       hints: [
-        { num: "1", text: '대복상회 울릉군 울릉읍 도동 <span class="hint-key">A</span>길 6' },
-        { num: "2", text: '연합국 최고사령관 각서 (SCAPIN 제67<span class="hint-key">B</span>호)' },
-        { num: "3", text: '안용복의 2차 도해는 16<span class="hint-key">C</span>6년' },
-        { num: "4", text: '울진죽변~독도의 거리 <span class="hint-key">D</span>16.8km' },
+        {
+          num: "1",
+          text: '대복상회 울릉군 울릉읍 도동 <span class="hint-key">A</span>길 6',
+        },
+        {
+          num: "2",
+          text: '연합국 최고사령관 각서 (SCAPIN 제67<span class="hint-key">B</span>호)',
+        },
+        {
+          num: "3",
+          text: '안용복의 2차 도해는 16<span class="hint-key">C</span>6년',
+        },
+        {
+          num: "4",
+          text: '울진죽변~독도의 거리 <span class="hint-key">D</span>16.8km',
+        },
       ],
       footer: "· HINT 1 OF 2 ·",
     },
@@ -346,7 +449,12 @@ export function initQuiz1Game(root: HTMLElement): () => void {
       move: null,
     },
     /* 9p - 전화 2단계 */
-    { bg: "ocean", type: "phone", caller: "휴대전화", callerName: "어부 (전라도)" },
+    {
+      bg: "ocean",
+      type: "phone",
+      caller: "휴대전화",
+      callerName: "어부 (전라도)",
+    },
     /* 10p */
     {
       bg: "ocean",
@@ -365,7 +473,10 @@ export function initQuiz1Game(root: HTMLElement): () => void {
       type: "memo",
       title: "개척령 시기 전라도 출신 어부의 위치 힌트 (2/2)",
       hints: [
-        { num: "1", text: '<span class="hint-key">0127</span> <span class="hint-key hint-key-flip">DCBA</span>' },
+        {
+          num: "1",
+          text: '<span class="hint-key">0127</span> <span class="hint-key hint-key-flip">DCBA</span>',
+        },
         {
           num: "2",
           text: '울릉군 울릉읍 도동<span class="hint-key">B</span>길 <span class="hint-key">CD</span>',
@@ -379,8 +490,7 @@ export function initQuiz1Game(root: HTMLElement): () => void {
       bg: "ocean",
       type: "quiz",
       stage: "2단계 퀴즈",
-      question:
-        "앞선 힌트를 활용하여,\n장소(건물명)를 입력하세요.",
+      question: "앞선 힌트를 활용하여,\n장소(건물명)를 입력하세요.",
       hint: "📍 메모에 적힌 내용을 조합해 장소명을 입력하세요.",
       placeholder: "장소명 입력",
       answer: "울릉역사문화체험센터",
@@ -403,8 +513,14 @@ export function initQuiz1Game(root: HTMLElement): () => void {
       hints: [
         { num: "1", text: '등록문화재 제<span class="hint-key">___</span>호' },
         { num: "2", text: '<span class="hint-key">___</span>층 목재주택' },
-        { num: "3", text: '2008년까지 <span class="hint-key">____</span>년간 개인주택으로 사용됐다' },
-        { num: "4", text: '수식 : (힌트1) − (힌트2) − (힌트3) = <span class="hint-key">?</span>' },
+        {
+          num: "3",
+          text: '2008년까지 <span class="hint-key">____</span>년간 개인주택으로 사용됐다',
+        },
+        {
+          num: "4",
+          text: '수식 : (힌트1) − (힌트2) − (힌트3) = <span class="hint-key">?</span>',
+        },
       ],
       footer: "· BONUS HINT · 현판을 잘 살펴보세요 ·",
     },
@@ -429,7 +545,12 @@ export function initQuiz1Game(root: HTMLElement): () => void {
       move: null,
     },
     /* 전화 3단계 */
-    { bg: "ocean", type: "phone", caller: "휴대전화", callerName: "어부 (전라도)" },
+    {
+      bg: "ocean",
+      type: "phone",
+      caller: "휴대전화",
+      callerName: "어부 (전라도)",
+    },
     /* 어부 대화 */
     {
       bg: "ocean",
@@ -475,8 +596,7 @@ export function initQuiz1Game(root: HTMLElement): () => void {
       type: "quiz",
       stage: "4단계 퀴즈",
       question: "아래 설명에 해당하는 식당과 메뉴를 찾아\n정답을 입력하세요.",
-      hint:
-        "1. 조개껍데기가 삿갓 모양을 닮아 삿갓조개라고도 불린다.\n2. 전복과 비슷한 풍미를 지녀 작은 전복이라고 불린다.\n3. 거센 파도가 치는 해안가 절벽이나 바위에 서식한다.\n4. 식당 이름은 ㄷㅂㅅㄷ\n\n📍 식당의 위치는 황금 동상의 2시 방향이다.",
+      hint: "1. 조개껍데기가 삿갓 모양을 닮아 삿갓조개라고도 불린다.\n2. 전복과 비슷한 풍미를 지녀 작은 전복이라고 불린다.\n3. 거센 파도가 치는 해안가 절벽이나 바위에 서식한다.\n4. 식당 이름은 ㄷㅂㅅㄷ\n\n📍 식당의 위치는 황금 동상의 2시 방향이다.",
       placeholder: "식당명 입력 (예: ○○식당)",
       placeholder2: "메뉴명 입력",
       answer: "대박식당",
@@ -494,7 +614,13 @@ export function initQuiz1Game(root: HTMLElement): () => void {
       move: null,
     },
     /* 전화 + 클리어 */
-    { bg: "ocean", type: "phone", caller: "휴대전화", callerName: "이대환 박사", enableCrack: false },
+    {
+      bg: "ocean",
+      type: "phone",
+      caller: "휴대전화",
+      callerName: "이대환 박사",
+      enableCrack: false,
+    },
     /* 21p - 박사 에필로그 (일반 대사 UI) */
     {
       bg: "lab",
@@ -601,6 +727,7 @@ export function initQuiz1Game(root: HTMLElement): () => void {
     clearDialogueTyping();
     const apply = () => {
       if (disposed) return;
+      root.classList.toggle("q1g-show-intro-pill", idx === 0);
       renderScene(SCENES[idx]);
       dom.stage.classList.remove("fade-out");
       dom.stage.classList.add("fade-in");
@@ -646,9 +773,9 @@ export function initQuiz1Game(root: HTMLElement): () => void {
   }
 
   /** 대사 줄에 <strong>...</strong>이 있으면 타이핑 시 본문만 글자 단위, 태그 블록은 통째로 삽입 */
-  function lineTypingSegments(line: string): Array<
-    { kind: "text"; text: string } | { kind: "html"; html: string }
-  > {
+  function lineTypingSegments(
+    line: string,
+  ): Array<{ kind: "text"; text: string } | { kind: "html"; html: string }> {
     const segments: Array<
       { kind: "text"; text: string } | { kind: "html"; html: string }
     > = [];
@@ -656,11 +783,13 @@ export function initQuiz1Game(root: HTMLElement): () => void {
     let last = 0;
     let m: RegExpExecArray | null;
     while ((m = re.exec(line)) !== null) {
-      if (m.index > last) segments.push({ kind: "text", text: line.slice(last, m.index) });
+      if (m.index > last)
+        segments.push({ kind: "text", text: line.slice(last, m.index) });
       segments.push({ kind: "html", html: m[0] });
       last = m.index + m[0].length;
     }
-    if (last < line.length) segments.push({ kind: "text", text: line.slice(last) });
+    if (last < line.length)
+      segments.push({ kind: "text", text: line.slice(last) });
     if (segments.length === 0) segments.push({ kind: "text", text: line });
     return segments;
   }
@@ -717,8 +846,11 @@ export function initQuiz1Game(root: HTMLElement): () => void {
     const PH = Hm;
     const PX = 0;
     const PY = 0;
-    const FOLD = Math.max(30, Math.min(58, Math.floor(Math.min(Wm, Hm) * 0.14)));
-    const ROT = -2 * Math.PI / 180;
+    const FOLD = Math.max(
+      30,
+      Math.min(58, Math.floor(Math.min(Wm, Hm) * 0.14)),
+    );
+    const ROT = (-2 * Math.PI) / 180;
 
     let seed = 7531;
     const sr = () => {
@@ -728,7 +860,12 @@ export function initQuiz1Game(root: HTMLElement): () => void {
     const srr = (a: number, b: number) => a + sr() * (b - a);
 
     const tornEdge2 = (
-      x1: number, y1: number, x2: number, y2: number, segs: number, v: number,
+      x1: number,
+      y1: number,
+      x2: number,
+      y2: number,
+      segs: number,
+      v: number,
     ) => {
       const dx = x2 - x1;
       const dy = y2 - y1;
@@ -738,7 +875,7 @@ export function initQuiz1Game(root: HTMLElement): () => void {
       const pts: Array<[number, number]> = [];
       for (let i = 0; i <= segs; i++) {
         const t = i / segs;
-        const j = (i === 0 || i === segs) ? 0 : srr(-1, 1) * v;
+        const j = i === 0 || i === segs ? 0 : srr(-1, 1) * v;
         pts.push([x1 + dx * t + nx * j, y1 + dy * t + ny * j]);
       }
       return pts;
@@ -751,10 +888,18 @@ export function initQuiz1Game(root: HTMLElement): () => void {
       const B = tornEdge2(PX + PW, PY + PH, PX, PY + PH, 11, 6);
       const L = tornEdge2(PX, PY + PH, PX, PY + FOLD, 7, 3.5);
       ctx.beginPath();
-      T.forEach((p, i) => (i === 0 ? ctx.moveTo(p[0], p[1]) : ctx.lineTo(p[0], p[1])));
-      R.forEach((p, i) => { if (i > 0) ctx.lineTo(p[0], p[1]); });
-      B.forEach((p, i) => { if (i > 0) ctx.lineTo(p[0], p[1]); });
-      L.forEach((p, i) => { if (i > 0) ctx.lineTo(p[0], p[1]); });
+      T.forEach((p, i) =>
+        i === 0 ? ctx.moveTo(p[0], p[1]) : ctx.lineTo(p[0], p[1]),
+      );
+      R.forEach((p, i) => {
+        if (i > 0) ctx.lineTo(p[0], p[1]);
+      });
+      B.forEach((p, i) => {
+        if (i > 0) ctx.lineTo(p[0], p[1]);
+      });
+      L.forEach((p, i) => {
+        if (i > 0) ctx.lineTo(p[0], p[1]);
+      });
       ctx.lineTo(PX, PY + FOLD);
       ctx.closePath();
     };
@@ -811,17 +956,28 @@ export function initQuiz1Game(root: HTMLElement): () => void {
       [PX + PW * 0.08, PY + PH * 0.12, 85, 0.13],
       [PX + PW * 0.88, PY + PH * 0.75, 70, 0.14],
       [PX + PW * 0.5, PY + PH * 0.92, 65, 0.11],
-      [PX + PW * 0.78, PY + PH * 0.10, 60, 0.12],
-      [PX + PW * 0.25, PY + PH * 0.60, 55, 0.08],
+      [PX + PW * 0.78, PY + PH * 0.1, 60, 0.12],
+      [PX + PW * 0.25, PY + PH * 0.6, 55, 0.08],
     ].forEach(([cx, cy, r, a]) => {
-      const g = ctx.createRadialGradient(cx as number, cy as number, 0, cx as number, cy as number, r as number);
+      const g = ctx.createRadialGradient(
+        cx as number,
+        cy as number,
+        0,
+        cx as number,
+        cy as number,
+        r as number,
+      );
       g.addColorStop(0, `rgba(85,55,14,${a})`);
       g.addColorStop(1, "rgba(0,0,0,0)");
       ctx.fillStyle = g;
       ctx.fillRect(PX, PY, PW, PH);
     });
 
-    [[0.26, 0.18], [0.60, 0.66], [0.78, 0.72]].forEach(([r1, r2]) => {
+    [
+      [0.26, 0.18],
+      [0.6, 0.66],
+      [0.78, 0.72],
+    ].forEach(([r1, r2]) => {
       const x1 = PX + PW * r1;
       const x2 = PX + PW * r2;
       ctx.beginPath();
@@ -857,7 +1013,14 @@ export function initQuiz1Game(root: HTMLElement): () => void {
     ctx.fillStyle = fsh;
     ctx.fillRect(PX, PY, 100, 100);
 
-    const ev = ctx.createRadialGradient(PX + PW / 2, PY + PH / 2, PH * 0.25, PX + PW / 2, PY + PH / 2, PW * 0.72);
+    const ev = ctx.createRadialGradient(
+      PX + PW / 2,
+      PY + PH / 2,
+      PH * 0.25,
+      PX + PW / 2,
+      PY + PH / 2,
+      PW * 0.72,
+    );
     ev.addColorStop(0, "rgba(0,0,0,0)");
     ev.addColorStop(1, "rgba(35,16,2,0.20)");
     ctx.fillStyle = ev;
@@ -946,7 +1109,11 @@ export function initQuiz1Game(root: HTMLElement): () => void {
     typeStep();
   }
 
-  function showDialogueLineInstant(lines: string[], el: HTMLElement, lineIndex: number) {
+  function showDialogueLineInstant(
+    lines: string[],
+    el: HTMLElement,
+    lineIndex: number,
+  ) {
     clearDialogueTyping();
     dialogueLine = lineIndex;
     const raw = lines[lineIndex] ?? "";
@@ -967,7 +1134,11 @@ export function initQuiz1Game(root: HTMLElement): () => void {
   function prevScene() {
     if (isSceneTransitioning) return;
     const cur = SCENES[currentScene] as any;
-    if (cur?.type === "dialogue" && Array.isArray(cur.lines) && dialogueLine > 0) {
+    if (
+      cur?.type === "dialogue" &&
+      Array.isArray(cur.lines) &&
+      dialogueLine > 0
+    ) {
       clearDialogueTyping();
       dialogueLine -= 1;
       const el = dom.stage.querySelector(".q1g-dtext") as HTMLElement | null;
@@ -977,7 +1148,11 @@ export function initQuiz1Game(root: HTMLElement): () => void {
     if (currentScene <= 0) return;
     const prevIdx = currentScene - 1;
     const prevS = SCENES[prevIdx] as any;
-    if (prevS?.type === "dialogue" && Array.isArray(prevS.lines) && prevS.lines.length > 0) {
+    if (
+      prevS?.type === "dialogue" &&
+      Array.isArray(prevS.lines) &&
+      prevS.lines.length > 0
+    ) {
       gotoScene(prevIdx, true, {
         dialogueLine: prevS.lines.length - 1,
         dialogueInstant: true,
@@ -991,7 +1166,8 @@ export function initQuiz1Game(root: HTMLElement): () => void {
     const cur = SCENES[currentScene] as any;
     const inDialogueMid =
       cur?.type === "dialogue" && Array.isArray(cur.lines) && dialogueLine > 0;
-    dom.prev.style.display = currentScene > 0 || inDialogueMid ? "block" : "none";
+    dom.prev.style.display =
+      currentScene > 0 || inDialogueMid ? "block" : "none";
   }
 
   /* ── 씬 렌더 ── */
@@ -1044,16 +1220,19 @@ export function initQuiz1Game(root: HTMLElement): () => void {
     d.className = "narration-scene";
     const textLines = String(s.text || "")
       .split("\n")
-      .map((line: string, idx: number) => `<div class="narration-text-line narration-text-line-${idx + 1}">${line}</div>`)
+      .map(
+        (line: string, idx: number) =>
+          `<div class="narration-text-line narration-text-line-${idx + 1}">${line}</div>`,
+      )
       .join("");
     const subChars = s.sub
       ? String(s.sub)
-        .split("")
-        .map(
-          (ch: string, idx: number) =>
-            `<span style="animation-delay:${(2.55 + idx * 0.06).toFixed(2)}s">${ch === " " ? "&nbsp;" : ch}</span>`,
-        )
-        .join("")
+          .split("")
+          .map(
+            (ch: string, idx: number) =>
+              `<span style="animation-delay:${(2.55 + idx * 0.06).toFixed(2)}s">${ch === " " ? "&nbsp;" : ch}</span>`,
+          )
+          .join("")
       : "";
     d.innerHTML = `
     <div class="narration-icon">${s.icon || "📖"}</div>
@@ -1082,7 +1261,8 @@ export function initQuiz1Game(root: HTMLElement): () => void {
     );
     const d = document.createElement("div");
     d.className = "dialogue-scene";
-    const charVisual = s.char === "fisherman" ? FISHERMAN_CHAR_HTML : DOCTOR_CHAR_HTML;
+    const charVisual =
+      s.char === "fisherman" ? FISHERMAN_CHAR_HTML : DOCTOR_CHAR_HTML;
     d.innerHTML = `
     <div class="char-area">
       ${charVisual}
@@ -1114,7 +1294,9 @@ export function initQuiz1Game(root: HTMLElement): () => void {
     dom.home?.style.setProperty("display", "none");
     const d = document.createElement("div");
     d.className = "phone-scene";
-    const caller = String(s.caller ?? "수신 전화").replace(/</g, "&lt;").replace(/>/g, "&gt;");
+    const caller = String(s.caller ?? "수신 전화")
+      .replace(/</g, "&lt;")
+      .replace(/>/g, "&gt;");
     d.innerHTML = `
     <div class="phone-top">
       <p class="phone-caller-type">${caller}</p>
@@ -1155,8 +1337,12 @@ export function initQuiz1Game(root: HTMLElement): () => void {
       fn();
     }
 
-    const rejectBtn = d.querySelector(".q1g-reject-btn") as HTMLButtonElement | null;
-    const answerBtn = d.querySelector(".q1g-answer-btn") as HTMLButtonElement | null;
+    const rejectBtn = d.querySelector(
+      ".q1g-reject-btn",
+    ) as HTMLButtonElement | null;
+    const answerBtn = d.querySelector(
+      ".q1g-answer-btn",
+    ) as HTMLButtonElement | null;
     rejectBtn?.addEventListener("click", () => settle(() => prevScene()));
     answerBtn?.addEventListener("click", () => settle(() => nextScene()));
   }
@@ -1266,16 +1452,20 @@ export function initQuiz1Game(root: HTMLElement): () => void {
       const exactMatch = typeof s.answer === "string" && val === s.answer;
       const normMatch =
         typeof s.answer === "string" &&
-        val.replace(/\s/g, "").toLowerCase() === s.answer.replace(/\s/g, "").toLowerCase();
+        val.replace(/\s/g, "").toLowerCase() ===
+          s.answer.replace(/\s/g, "").toLowerCase();
       const correct1 = exactMatch || altMatch || normMatch;
 
       const altMatch2 = inp2 ? (s.answerAlt2?.includes(val2) ?? false) : true;
-      const exactMatch2 = inp2 ? (typeof s.answer2 === "string" && val2 === s.answer2) : true;
+      const exactMatch2 = inp2
+        ? typeof s.answer2 === "string" && val2 === s.answer2
+        : true;
       const normMatch2 =
         inp2 && typeof s.answer2 === "string"
-          ? val2.replace(/\s/g, "").toLowerCase() === s.answer2.replace(/\s/g, "").toLowerCase()
+          ? val2.replace(/\s/g, "").toLowerCase() ===
+            s.answer2.replace(/\s/g, "").toLowerCase()
           : true;
-      const correct2 = inp2 ? (exactMatch2 || altMatch2 || normMatch2) : true;
+      const correct2 = inp2 ? exactMatch2 || altMatch2 || normMatch2 : true;
 
       const correct = correct1 && correct2;
       if (correct) {

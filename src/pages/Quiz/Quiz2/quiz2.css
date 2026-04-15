@@ -1,0 +1,362 @@
+.quiz2-page.quiz1-page {
+  background: #06080e;
+}
+
+.quiz2-page .q2-storm-bg {
+  position: fixed;
+  inset: 0;
+  z-index: 0;
+  overflow: hidden;
+  pointer-events: none;
+}
+
+.quiz2-page .q2-sky {
+  position: absolute;
+  inset: 0;
+  background:
+    radial-gradient(
+      ellipse at 30% 20%,
+      rgba(18, 28, 55, 0.95) 0%,
+      transparent 60%
+    ),
+    radial-gradient(
+      ellipse at 70% 10%,
+      rgba(12, 20, 42, 0.9) 0%,
+      transparent 55%
+    ),
+    linear-gradient(180deg, #050810 0%, #0a1220 35%, #111828 60%, #0a0e16 100%);
+}
+
+.quiz2-page .q2-clouds {
+  position: absolute;
+  inset: 0;
+  overflow: hidden;
+}
+
+.quiz2-page .q2-cloud {
+  position: absolute;
+  border-radius: 50%;
+  filter: blur(28px);
+  mix-blend-mode: screen;
+}
+
+.quiz2-page .q2-cloud.c1 {
+  width: 380px;
+  height: 180px;
+  top: -40px;
+  left: -60px;
+  background: radial-gradient(
+    ellipse,
+    rgba(42, 50, 72, 0.7) 0%,
+    transparent 70%
+  );
+  animation: q2-cloud-drift1 28s ease-in-out infinite alternate;
+}
+
+.quiz2-page .q2-cloud.c2 {
+  width: 320px;
+  height: 160px;
+  top: -20px;
+  right: -40px;
+  background: radial-gradient(
+    ellipse,
+    rgba(35, 42, 65, 0.65) 0%,
+    transparent 70%
+  );
+  animation: q2-cloud-drift2 22s ease-in-out infinite alternate;
+}
+
+.quiz2-page .q2-cloud.c3 {
+  width: 420px;
+  height: 200px;
+  top: 20px;
+  left: 20%;
+  background: radial-gradient(
+    ellipse,
+    rgba(28, 36, 58, 0.6) 0%,
+    transparent 70%
+  );
+  animation: q2-cloud-drift3 32s ease-in-out infinite alternate;
+}
+
+.quiz2-page .q2-cloud.c4 {
+  width: 280px;
+  height: 130px;
+  top: 60px;
+  left: -30px;
+  background: radial-gradient(
+    ellipse,
+    rgba(55, 65, 90, 0.45) 0%,
+    transparent 68%
+  );
+  animation: q2-cloud-drift1 18s ease-in-out 4s infinite alternate;
+}
+
+.quiz2-page .q2-cloud.c5 {
+  width: 240px;
+  height: 110px;
+  top: 40px;
+  right: 10%;
+  background: radial-gradient(
+    ellipse,
+    rgba(50, 60, 85, 0.4) 0%,
+    transparent 68%
+  );
+  animation: q2-cloud-drift2 24s ease-in-out 8s infinite alternate;
+}
+
+#rain-canvas {
+  position: absolute;
+  inset: 0;
+  z-index: 3;
+  opacity: 1;
+  pointer-events: none;
+}
+
+#lightning-canvas {
+  position: absolute;
+  inset: 0;
+  z-index: 4;
+  pointer-events: none;
+}
+
+.quiz2-page .q2-fog {
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  height: 55%;
+  z-index: 2;
+}
+
+.quiz2-page .q2-fog1 {
+  position: absolute;
+  bottom: 0;
+  left: -10%;
+  width: 120%;
+  height: 100%;
+  background:
+    radial-gradient(
+      ellipse at 20% 100%,
+      rgba(140, 155, 185, 0.18) 0%,
+      transparent 55%
+    ),
+    radial-gradient(
+      ellipse at 50% 100%,
+      rgba(120, 140, 175, 0.22) 0%,
+      transparent 60%
+    ),
+    radial-gradient(
+      ellipse at 80% 100%,
+      rgba(130, 148, 180, 0.16) 0%,
+      transparent 52%
+    );
+  filter: blur(18px);
+  animation: q2-fog-drift1 20s ease-in-out infinite alternate;
+}
+
+.quiz2-page .q2-fog2 {
+  position: absolute;
+  bottom: 0;
+  left: -5%;
+  width: 110%;
+  height: 75%;
+  background:
+    radial-gradient(
+      ellipse at 30% 100%,
+      rgba(100, 120, 160, 0.14) 0%,
+      transparent 50%
+    ),
+    radial-gradient(
+      ellipse at 65% 100%,
+      rgba(110, 130, 168, 0.18) 0%,
+      transparent 55%
+    );
+  filter: blur(24px);
+  animation: q2-fog-drift2 26s ease-in-out 3s infinite alternate;
+}
+
+.quiz2-page .q2-fog3 {
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  height: 45%;
+  background: linear-gradient(
+    to top,
+    rgba(85, 105, 145, 0.22) 0%,
+    transparent 100%
+  );
+  filter: blur(12px);
+  animation: q2-fog-drift3 14s ease-in-out infinite alternate;
+}
+
+.quiz2-page .q2-flash-overlay {
+  position: absolute;
+  inset: 0;
+  z-index: 5;
+  background: rgba(160, 180, 255, 0);
+}
+
+.quiz2-page .q2-flash-overlay.active {
+  background: rgba(160, 180, 255, 0.22);
+}
+
+.quiz2-page .q2-vignette {
+  position: absolute;
+  inset: 0;
+  z-index: 6;
+  background: radial-gradient(
+    ellipse at 50% 45%,
+    rgba(0, 0, 0, 0) 28%,
+    rgba(0, 0, 0, 0.72) 100%
+  );
+}
+
+@keyframes q2-cloud-drift1 {
+  0% {
+    transform: translateX(0) scaleX(1);
+  }
+  100% {
+    transform: translateX(28px) scaleX(1.05);
+  }
+}
+
+@keyframes q2-cloud-drift2 {
+  0% {
+    transform: translateX(0) scaleX(1);
+  }
+  100% {
+    transform: translateX(-22px) scaleX(1.04);
+  }
+}
+
+@keyframes q2-cloud-drift3 {
+  0% {
+    transform: translateX(0);
+  }
+  100% {
+    transform: translateX(18px);
+  }
+}
+
+@keyframes q2-fog-drift1 {
+  0% {
+    transform: translateX(0) scaleY(1);
+  }
+  100% {
+    transform: translateX(30px) scaleY(1.08);
+  }
+}
+
+@keyframes q2-fog-drift2 {
+  0% {
+    transform: translateX(0);
+  }
+  100% {
+    transform: translateX(-24px);
+  }
+}
+
+@keyframes q2-fog-drift3 {
+  0% {
+    opacity: 0.7;
+  }
+  100% {
+    opacity: 1;
+  }
+}
+
+/* quiz1과 동일 레이아웃 유지 + quiz2 파란 메인 포인트만 오버라이드 */
+.quiz2-page .quiz1-folder-tab {
+  background: #1a2e48;
+  color: #7ab0d8;
+}
+
+.quiz2-page .quiz1-hdr {
+  background: #1a2e48;
+}
+
+.quiz2-page .quiz1-hdr-title {
+  color: #c8d8e8;
+}
+
+.quiz2-page .quiz1-hdr-num {
+  color: rgba(140, 170, 200, 0.65);
+}
+
+.quiz2-page .quiz1-stamp-red {
+  color: rgba(26, 58, 92, 0.8);
+  border-color: rgba(26, 58, 92, 0.7);
+  background: rgba(26, 58, 92, 0.08);
+  text-shadow: none;
+  -webkit-text-stroke: 0;
+}
+
+.quiz2-page .quiz1-stamp-blk {
+  color: rgba(26, 58, 92, 0.65);
+  border-color: rgba(26, 58, 92, 0.6);
+  background: rgba(26, 58, 92, 0.05);
+  text-shadow: none;
+  -webkit-text-stroke: 0;
+}
+
+.quiz2-page .quiz1-mt-sub {
+  color: #1a3a5c;
+}
+
+.quiz2-page .quiz1-ic-val.red {
+  color: #1a4a7a;
+}
+
+.quiz2-page .quiz1-step-num span,
+.quiz2-page .quiz1-step-title em {
+  color: #1a3a5c;
+}
+
+.quiz2-page .quiz1-field-input {
+  border: 1.5px solid #2e3e54;
+  color: #a0c0d8;
+  background: #1c1408;
+}
+
+.quiz2-page .quiz1-field-input::placeholder {
+  color: #3a4a5a;
+}
+
+.quiz2-page .quiz1-field-input:focus {
+  box-shadow:
+    inset 0 2px 6px rgba(0, 0, 0, 0.5),
+    0 0 0 1px #2a6090;
+}
+
+.quiz2-page .quiz1-field-btn-red {
+  background: #1e3a5c;
+}
+
+.quiz2-page .quiz1-caution {
+  background: repeating-linear-gradient(
+    -45deg,
+    #1a2e48 0,
+    #1a2e48 5px,
+    #b8960a 5px,
+    #b8960a 10px
+  );
+}
+
+.quiz2-page .quiz1-cta-btn,
+.quiz2-page button.quiz1-cta-btn.quiz1-cta-btn-locked:disabled {
+  background: #1a2e48;
+  border-color: rgba(42, 96, 144, 0.5);
+  color: #4a96c8;
+  text-shadow: 0 0 22px rgba(42, 96, 144, 0.45);
+}
+
+.quiz2-page .quiz1-cta-btn:hover:not(:disabled) {
+  border-color: rgba(74, 150, 200, 0.7);
+  background: #203a5a;
+}
+
+.quiz2-page .quiz1-bottom-lbl {
+  color: rgba(140, 120, 60, 0.45);
+}

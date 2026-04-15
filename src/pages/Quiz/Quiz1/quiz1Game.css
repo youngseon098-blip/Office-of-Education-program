@@ -74,6 +74,36 @@
       rgba(3, 2, 0, 0.5) 100%);
 }
 
+.q1g-topbar {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  z-index: 95;
+  display: none;
+  justify-content: center;
+  padding: 12px 20px 0;
+  pointer-events: none;
+}
+
+.quiz1-game-root.q1g-show-intro-pill .q1g-topbar {
+  display: flex;
+}
+
+.q1g-tp-pill {
+  font-size: 12px;
+  letter-spacing: 0.22em;
+  color: rgba(220, 200, 170, 0.7);
+  background: rgba(30, 20, 12, 0.94);
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  border-radius: 999px;
+  padding: 9px 24px;
+  white-space: nowrap;
+  max-width: min(calc(100vw - 28px), 100%);
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
 /* ═══════════════════════════════
    SCENE
 ═══════════════════════════════ */

@@ -49,8 +49,24 @@ export default function Quiz1() {
         ctx.restore();
       }
       bl(sx, sy, maxR * 0.9, maxR * 0.45, -0.2, al * 0.9, cols[1]);
-      bl(sx - maxR * 0.12, sy - maxR * 0.06, maxR * 0.6, maxR * 0.32, 0.1, al * 0.8, cols[0]);
-      bl(sx + maxR * 0.15, sy + maxR * 0.05, maxR * 0.45, maxR * 0.24, -0.05, al * 0.75, cols[2]);
+      bl(
+        sx - maxR * 0.12,
+        sy - maxR * 0.06,
+        maxR * 0.6,
+        maxR * 0.32,
+        0.1,
+        al * 0.8,
+        cols[0],
+      );
+      bl(
+        sx + maxR * 0.15,
+        sy + maxR * 0.05,
+        maxR * 0.45,
+        maxR * 0.24,
+        -0.05,
+        al * 0.75,
+        cols[2],
+      );
     }
 
     function drawBg() {
@@ -85,7 +101,14 @@ export default function Quiz1() {
       splat(w * 0.04, h * 0.55, 16, 0.3);
       splat(w * 0.96, h * 0.7, 12, 0.3);
 
-      const vig = ctx.createRadialGradient(w / 2, h / 2, h * 0.15, w / 2, h / 2, h * 0.8);
+      const vig = ctx.createRadialGradient(
+        w / 2,
+        h / 2,
+        h * 0.15,
+        w / 2,
+        h / 2,
+        h * 0.8,
+      );
       vig.addColorStop(0, "rgba(0,0,0,0)");
       vig.addColorStop(1, "rgba(0,0,0,0.65)");
       ctx.fillStyle = vig;
@@ -107,7 +130,13 @@ export default function Quiz1() {
       >
         <defs>
           <filter id="stamp-rough">
-            <feTurbulence type="fractalNoise" baseFrequency="0.065" numOctaves="4" seed="8" result="noise" />
+            <feTurbulence
+              type="fractalNoise"
+              baseFrequency="0.065"
+              numOctaves="4"
+              seed="8"
+              result="noise"
+            />
             <feDisplacementMap
               in="SourceGraphic"
               in2="noise"
@@ -155,10 +184,14 @@ export default function Quiz1() {
           </div>
 
           <div className="quiz1-mission-title">
-            <div className="quiz1-mt-code">Mission 01 · The Fisherman's Signal</div>
+            <div className="quiz1-mt-code">
+              Mission 01 · The Fisherman's Signal
+            </div>
             <div className="quiz1-mt-kr">
               <span className="quiz1-mt-line quiz1-mt-line-1">개척령</span>
-              <span className="quiz1-mt-line quiz1-mt-line-2">어느 어부와의</span>
+              <span className="quiz1-mt-line quiz1-mt-line-2">
+                어느 어부와의
+              </span>
               <span className="quiz1-mt-line quiz1-mt-line-3">시그널</span>
             </div>
             <div className="quiz1-mt-sub">당신의 한계를 시험하라!</div>
@@ -191,7 +224,8 @@ export default function Quiz1() {
               <em>박사의 브리핑!</em> 시그널의 정체를 파악하라!
             </div>
             <div className="quiz1-step-desc quiz1-step-desc-strong">
-              이규원검찰일기 연구소에 도착한 당신, 이대환 박사의 브리핑을 듣고 과거에서 온 시그널의 의미를 이해하라.
+              이규원검찰일기 연구소에 도착한 당신, 이대환 박사의 브리핑을 듣고
+              과거에서 온 시그널의 의미를 이해하라.
             </div>
           </div>
 
@@ -203,7 +237,8 @@ export default function Quiz1() {
               <em>시그널 수신!</em> 어부의 위치를 해독하라!
             </div>
             <div className="quiz1-step-desc quiz1-step-desc-strong">
-              과거에서 온 어부의 암호 전화를 수신하고, 힌트를 조합해 그의 위치를 파악하라. 주어진 시간은 단 60분이다.
+              과거에서 온 어부의 암호 전화를 수신하고, 힌트를 조합해 그의 위치를
+              파악하라. 주어진 시간은 단 60분이다.
             </div>
           </div>
 
@@ -218,7 +253,11 @@ export default function Quiz1() {
                 inputMode="numeric"
                 maxLength={8}
               />
-              <button className="quiz1-field-btn quiz1-field-btn-red" type="button" aria-label="코드 확인">
+              <button
+                className="quiz1-field-btn quiz1-field-btn-red"
+                type="button"
+                aria-label="코드 확인"
+              >
                 <svg width="18" height="18" viewBox="0 0 24 24" fill="none">
                   <path
                     d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"
@@ -242,7 +281,11 @@ export default function Quiz1() {
             지금, 입장하시겠습니까?
           </Link>
         ) : (
-          <button type="button" className="quiz1-cta-btn quiz1-cta-btn-locked" disabled>
+          <button
+            type="button"
+            className="quiz1-cta-btn quiz1-cta-btn-locked"
+            disabled
+          >
             지금, 입장하시겠습니까?
           </button>
         )}
