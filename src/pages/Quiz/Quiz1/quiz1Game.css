@@ -91,6 +91,7 @@
 }
 
 .q1g-tp-pill {
+  font-family: "Special Elite", serif;
   font-size: 12px;
   letter-spacing: 0.22em;
   color: rgba(220, 200, 170, 0.7);
@@ -233,6 +234,21 @@
   right: max(14px, env(safe-area-inset-right, 0px));
 }
 
+/* 첫 페이지(narration)에서만 NEXT 버튼을 빨간 선 아래로 배치 */
+.quiz1-game-root.q1g-show-intro-pill #q1g-next-btn {
+  left: 50%;
+  right: auto;
+  bottom: auto;
+  top: calc(50% + 169px);
+  transform: translateX(-50%);
+  border-color: rgba(180, 145, 70, 0.55);
+  color: rgba(210, 175, 85, 0.95);
+  opacity: 0;
+  animation:
+    q1g-intro-next-reveal 0.9s cubic-bezier(0.4, 0, 0.2, 1) both,
+    q1g-next-ready-pulse 2.2s ease-in-out 0.9s infinite;
+}
+
 #q1g-prev-btn {
   left: max(14px, env(safe-area-inset-left, 0px));
 }
@@ -284,6 +300,19 @@
   }
 }
 
+@keyframes q1g-intro-next-reveal {
+  0% {
+    opacity: 0;
+    clip-path: inset(0 0 0 100%);
+    transform: translateX(-50%) translateY(8px);
+  }
+  100% {
+    opacity: 1;
+    clip-path: inset(0 0 0 0);
+    transform: translateX(-50%) translateY(0);
+  }
+}
+
 /* ═══════════════════════════════
    NARRATION
 ═══════════════════════════════ */
@@ -297,6 +326,7 @@
   text-align: center;
   position: relative;
   overflow: hidden;
+  transform: translateY(-26px);
   animation: q1g-intro-bg-reveal 1.2s ease both;
 }
 .narration-scene::before {

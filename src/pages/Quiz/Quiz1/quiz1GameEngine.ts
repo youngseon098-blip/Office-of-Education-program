@@ -1245,7 +1245,7 @@ export function initQuiz1Game(root: HTMLElement): () => void {
       deferTimer = null;
       if (disposed) return;
       dom.next.style.display = "block";
-    }, 800);
+    }, 3200);
   }
 
   /* ── 대화 ── */
