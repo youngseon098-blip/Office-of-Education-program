@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useRef, useState } from "react";
+import { Fragment, useEffect, useMemo, useRef, useState } from "react";
 import { Link } from "react-router-dom";
 import "./quiz2Game.css";
 
@@ -48,16 +48,26 @@ type Scene =
   | ResultScene
   | SuccessScene;
 
-const ICONS = { director: "👩‍💼", agentA: "🕵️", laptop: "💻" } as const;
+const ICONS = { director: "🧑🏻‍🦳", agentA: "🕵🏻‍♂️", laptop: "💻" } as const;
 const QUIZ_CHECKPOINTS = [7, 12, 17, 22, 26];
 const INTRO_FULL_TEXT =
   "울릉도에 이상 징후가 포착되고\n당신은 지금 잠입 요원으로\n현장에 투입된다.";
+const DIALOGUE_EMPHASIS_TEXTS = ["안개의 진짜 원인", "요원 A가"] as const;
+const DIALOGUE_EMPHASIS_REGEX = new RegExp(
+  `(${DIALOGUE_EMPHASIS_TEXTS.map((text) =>
+    text.replace(/[.*+?^${}()|[\]\\]/g, "\\$&"),
+  ).join("|")})`,
+  "g",
+);
+const LAPTOP_GLITCH_CHARS = "!@#$%^&*░▒▓█■□▪";
+const LAPTOP_GLITCH_TOTAL_FRAMES = 36;
 
 const SCENES: Scene[] = [
   {
     t: "stage",
     num: 0,
-    title: "울릉도에 이상 징후가 포착되고\n당신은 잠입 요원으로 현장에 투입된다.",
+    title:
+      "울릉도에 이상 징후가 포착되고\n당신은 잠입 요원으로 현장에 투입된다.",
     sub: "MISSION · START",
   },
   {
@@ -65,7 +75,11 @@ const SCENES: Scene[] = [
     ch: "director",
     lbl: "국정원 최지수 국장",
     mood: "n",
-    lines: ["오셨군요. 반가워요.", "저는 국정원 최지수 국장이예요~", "이번에 새로 합류하게 된 신입 요원들이시죠"],
+    lines: [
+      "오셨군요. 반가워요.",
+      "저는 국정원 최지수 국장이예요.",
+      "이번에 새로 합류하게 된 신입 요원들이시죠?",
+    ],
   },
   {
     t: "dlg",
@@ -73,7 +87,7 @@ const SCENES: Scene[] = [
     lbl: "국정원 최지수 국장",
     mood: "n",
     lines: [
-      "자, 다들 앉으세요. 상황이 급해서 바로 본론부터 들어갈게요.",
+      "자, 다들 앉으세요. 상황이 급해서 바로 본론으로 들어갈게요.",
       "아시다시피 울릉도는 연평균 기온 12.3도로 꽤 온화한 해양성 기후를 띠는 곳이에요.",
       "그런데 최근 들어 울릉도 일대에 안개가 너무 자주 발생한다는 주민들 신고가 빗발치고 있어요.",
     ],
@@ -103,7 +117,7 @@ const SCENES: Scene[] = [
     lines: [
       "아.아. 요원 A입니다.",
       "아직 당신의 신원이 확인되지 않아 무전으로 먼저 인사 드리는 점 미리 사과 드리겠습니다.",
-      "당신들의 신원을 확인하는 점 양해부탁드립니다.",
+      "절차가 절차인만큼 당신들의 신원을 확인하는 점 양해부탁드립니다.",
     ],
   },
   {
@@ -111,25 +125,36 @@ const SCENES: Scene[] = [
     ch: "agentA",
     lbl: "[ 요원 A · 무전 수신 ]",
     mood: "n",
-    lines: ["너무 겁먹지는 마십시요. 울릉도로 온다면 통상적으로 하는 관례라고 생각하시면 됩니다.", "그럼 우리 신입 요원님들 실력 좀 보도록 하겠습니다."],
+    lines: [
+      "너무 겁먹지는 마십시요. 울릉도로 온다면 통상적으로 하는 관례라고 생각하시면 됩니다.",
+      "그럼 우리 신입 요원님들 실력 좀 보도록 하겠습니다.",
+    ],
   },
   {
     t: "quiz",
     mood: "n",
     badge: "3급 기밀 절차 · 항구 거리 계산",
-    title: "각 알파벳의 숫자를 기입한 후 연산을 계산하시오",
+    title: "각 알파벳의 숫자를 기입한 후 연산을 계산하시오.",
     body: "1. 죽변항 : AB0.3 km  (A=1, B=3)\n2. 묵호항 : CDE.0 km  (C=1, D=6, E=1)\n3. 포항항 : 21F.0 km  (F=7)\n\nSCAPIN 제GHI호  (G=6, H=7, I=7)\n\nX = (G*F) + (D*H) + B\nY = (A+C+E) / I\n\nX + Y = ?",
     ph: "정답 입력 (소수점 포함)",
     ans: "87.4",
-    hint: "X=87, Y=0.4",
+    hint: "힝 속았지?",
   },
-  { t: "result", lbl: "SIGNAL CONFIRMED", ans: "87.4 km", desc: "울릉도와 독도의 거리는 87.4km입니다.\n신원이 확인되었습니다." },
+  {
+    t: "result",
+    lbl: "SIGNAL CONFIRMED",
+    ans: "87.4 km",
+    desc: "울릉도와 독도의 거리는 87.4km입니다.\n신원이 확인되었습니다.",
+  },
   {
     t: "dlg",
     ch: "agentA",
     lbl: "[ 요원 A · 무전 수신 ]",
     mood: "n",
-    lines: ["신원도 확인 되었으니 제가 있는 곳을 알려 드리겠습니다.", "보는 눈이 많아 구체적인 위치는 암호로 전송하겠습니다."],
+    lines: [
+      "신원도 확인 되었으니 제가 있는 곳을 알려 드리겠습니다.",
+      "보는 눈이 많아 구체적인 위치는 암호로 전송하겠습니다.",
+    ],
   },
   { t: "stage", num: 1, title: "STAGE 1", sub: "암호 해독" },
   {
@@ -138,9 +163,9 @@ const SCENES: Scene[] = [
     lbl: "[ 보안관리 AI 프로세서 ]",
     mood: "l",
     lines: [
-      "(기계음) 안녕하세요 보안관리 AI 프로세서입니다.",
-      "(기계음) 요원 A가 당신에게 전달한 기밀 문서입니다.",
-      "(기계음) 열람을 원하시면 버튼을 눌러주십시요.",
+      "안녕하세요 보안관리 AI 프로세서입니다.",
+      "요원 A가 당신에게 전달한 기밀 문서입니다.",
+      "열람을 원하시면 버튼을 눌러주십시요.",
     ],
   },
   {
@@ -148,12 +173,17 @@ const SCENES: Scene[] = [
     mood: "n",
     badge: "STAGE 1 · 단어 해독",
     title: "다음 문장에서 공통으로 가장 많이 표현된 단어를 해독하세요",
-    body: "[보기 1]\n독도 등대(항로표지관리소)는 대한민국 영토 최동단에서 밤바다를 밝히며, 우리 영토의 실효적 지배를 상징하는 핵심 시설. 이 등대의 높이는 15M이다.\n\n[보기 2]\n울릉도 최초의 등대이며 1958년 4월에 첫 불을 밝혔다. 통칭 태하등대라고 하며 높이는 7.6M의 백색 원형 구조물로 약 50km 불빛을 전달한다.",
+    body: "[보기 1]\n독도 등대(항로표지관리소)는 대한민국 영토 최동단에서 밤바다를 밝히며, 우리 영토의 실효적 지배를 상징하는 핵심 시설. 이 등대의 높이는 15M이다.\n\n[보기 2]\n울릉도 최초의 등대이며 1958년 4월에 첫 불을 밝혔다. 통칭 태하등대라고 하며 높이는 7.6M의 백색 원형 콘크리트 구조물로 약 50km 거리까지 불빛을 전달한다.",
     ph: "공통 단어 입력",
     ans: "등대",
     hint: "두 지문 모두에서 반복되는 단어",
   },
-  { t: "result", lbl: "STAGE 1 CLEAR", ans: "등대식당", desc: "등대식당으로 이동하세요.\n단, 식당 안으로 들어가지 않습니다." },
+  {
+    t: "result",
+    lbl: "STAGE 1 CLEAR",
+    ans: "등대식당",
+    desc: "등대식당으로 이동하세요.\n단, 식당 안으로 들어가지 않습니다.",
+  },
   { t: "stage", num: 2, title: "STAGE 2", sub: "광고판 해독" },
   {
     t: "dlg",
@@ -164,6 +194,8 @@ const SCENES: Scene[] = [
       "반갑습니다. 정식으로 인사드리죠. 요원 A입니다.",
       "여기가 그 유명한 울릉도 도동입니다. 이미 적들의 정보망이 이 골목 구석구석까지 뻗어있을 가능성이 높습니다.",
       "저는 지금부터 울릉군청 조사관을 접선해 내부 단서를 확보하겠습니다.",
+      "그사이 요원님들께 제가 사전 조사한 기밀 파일을 보냈습니다.",
+      "그 파일을 해독한다면 단서를 조금이라도 찾을 수 있을것 같습니다.",
     ],
   },
   {
@@ -172,16 +204,16 @@ const SCENES: Scene[] = [
     lbl: "[ 보안관리 AI 프로세서 ]",
     mood: "l",
     lines: [
-      "(기계음) 요원 A가 당신에게 전달한 기밀 파일입니다.",
-      "(기계음) 해당 파일은 암호로 잠금이 걸려 있습니다.",
-      "(기계음) 비밀번호를 풀어 단서를 찾길 바랍니다.",
+      "요원 A가 당신에게 전달한 기밀 파일입니다.",
+      "해당 파일은 암호로 잠금이 걸려 있습니다.",
+      "비밀번호를 풀어 단서를 찾길 바랍니다.",
     ],
   },
   {
     t: "quiz-m",
     mood: "n",
     badge: "STAGE 2 · 광고판 위치 해독",
-    title: "해당 장소에는 아래의 숫자가 의미하는 단어가 있다",
+    title: "해당 장소에는 아래의 숫자가 의미하는 단어가 있다.",
     body: "A. 정면   B. 노란색   C. 다리   D. 하트\n\n4 // 3 // 8\n\n→ 4번째 ( ) · 3번째 ( ) · 8번째 ( )",
     inputs: [
       { lbl: "4번째", ph: "4번째 단어", ans: "경상북도" },
@@ -189,7 +221,12 @@ const SCENES: Scene[] = [
       { lbl: "8번째", ph: "8번째 단어", ans: "한국옥외광고협회" },
     ],
   },
-  { t: "result", lbl: "STAGE 2 CLEAR", ans: "경상북도 · 울릉군", desc: "한국옥외광고협회\n해당 그림을 보고 장소로 이동합니다." },
+  {
+    t: "result",
+    lbl: "STAGE 2 CLEAR",
+    ans: "경상북도 · 울릉군",
+    desc: "한국옥외광고협회\n해당 그림을 보고 장소로 이동합니다.",
+  },
   { t: "stage", num: 3, title: "STAGE 3", sub: "긴급 해독" },
   {
     t: "dlg",
@@ -208,8 +245,8 @@ const SCENES: Scene[] = [
     lbl: "[ 요원 A · 긴급 무전 ]",
     mood: "u",
     lines: [
-      "시간이 없습니다! 제어 시스템에 복잡한 암호가 걸려 있습니다.",
-      "지금 기계에 표시된 문제를 불러드릴 테니, 즉시 해독 코드 보내주십시요!",
+      "시간이 없습니다! 지금 제 앞에 있는 제어 시스템에 복잡한 암호가 걸려 있습니다!",
+      "지금 기계에 표시된 문제를 불러드릴 테니, 즉시 분석해서 해독 코드를 보내주십시요!",
       "독도가 완전히 사라지기 전에 서둘러야 합니다!",
     ],
   },
@@ -217,11 +254,11 @@ const SCENES: Scene[] = [
     t: "quiz",
     mood: "u",
     badge: "⚠ STAGE 3 · 긴급 연산",
-    title: "각 나라까지의 거리를 계산하여 최종 암호값을 구하시오",
+    title: "각 나라까지의 거리를 계산하여 최종 암호값을 구하시오.",
     body: "U = 울릉도  →    87.4 km\nR = 러시아  →  6,000 km\nM = 미국    → 10,500 km\nO = 오키섬  →   157.5 km\n\n( M - R ) - U - O = ?",
     ph: "정답 입력 (소수점 1자리)",
     ans: "4255.1",
-    hint: "10500 - 6000 - 87.4 - 157.5",
+    hint: "또 속았죠?",
   },
   { t: "stage", num: 4, title: "STAGE 4", sub: "최종 해독" },
   {
@@ -232,7 +269,7 @@ const SCENES: Scene[] = [
     lines: [
       "요원! 내 말 들려요? 최지수 국장이예요. 상황이 완전히 뒤집혔어요!",
       "요원 A... 그 자식, 일본의 첩자였어요. 다행히 요원 B에게 제거되었어요.",
-      "기계는 이미 과부하 상태고, 안개가 독도 전체를 집어삼키기 일보 직전이예요!",
+      "하지만 기계는 이미 과부하 상태고, 안개가 독도 전체를 집어삼키기 일보 직전이예요!",
     ],
   },
   {
@@ -240,7 +277,10 @@ const SCENES: Scene[] = [
     ch: "director",
     lbl: "[ 최지수 국장 · 긴급 ]",
     mood: "u",
-    lines: ["이제 믿을 건 당신밖에 없어요!", "얼릉 새로운 암호 해독 코드를 분석해주세요!"],
+    lines: [
+      "이제 믿을 건 당신밖에 없어요!",
+      "얼른 새로운 암호 해독 코드를 분석해주세요!",
+    ],
   },
   {
     t: "quiz",
@@ -249,7 +289,7 @@ const SCENES: Scene[] = [
     title: "새로운 공식으로 최종 암호를 계산하시오 — 시간이 없습니다!",
     body: "U = 울릉도  →    87.4 km\nR = 러시아  →  6,000 km\nM = 미국    → 10,500 km\nO = 오키섬  →   157.5 km\n\n( M + R ) + U - O = ?",
     ph: "최종 암호 입력",
-    ans: "16429.9",
+    ans: "16,429.9",
     hint: "10500 + 6000 + 87.4 - 157.5",
   },
   { t: "success" },
@@ -265,6 +305,12 @@ export default function Quiz2Game() {
   const [lineIdx, setLineIdx] = useState(0);
   const [typedText, setTypedText] = useState("");
   const [isTyping, setIsTyping] = useState(false);
+  const [atmoTypedText, setAtmoTypedText] = useState("");
+  const [isAtmoTyping, setIsAtmoTyping] = useState(false);
+  const [harborAnimOn, setHarborAnimOn] = useState(false);
+  const [urgentCalcAnimOn, setUrgentCalcAnimOn] = useState(false);
+  const [stage4RemainingSec, setStage4RemainingSec] = useState<number>(300);
+  const [rippleRings, setRippleRings] = useState<number[]>([]);
   const [singleInput, setSingleInput] = useState("");
   const [singlePlaceholder, setSinglePlaceholder] = useState("");
   const [multiInputs, setMultiInputs] = useState<string[]>([]);
@@ -281,11 +327,34 @@ export default function Quiz2Game() {
   const flashRef = useRef<HTMLDivElement>(null);
   const signalNoiseRef = useRef<HTMLCanvasElement>(null);
   const typeTimerRef = useRef<number | null>(null);
+  const atmoTypeTimerRef = useRef<number | null>(null);
+  const dialogueRafRef = useRef<number | null>(null);
   const fadeTimerRef = useRef<number | null>(null);
   const introTimersRef = useRef<number[]>([]);
 
+  const signalRainCanvasRef = useRef<HTMLCanvasElement | null>(null);
+  const signalCountRafRef = useRef<number | null>(null);
+  const signalTimersRef = useRef<number[]>([]);
+  const harborWrapRef = useRef<HTMLDivElement | null>(null);
+  const harborFlashIntervalRef = useRef<number | null>(null);
+  const stageRainCanvasRef = useRef<HTMLCanvasElement | null>(null);
+  const stageTimersRef = useRef<number[]>([]);
+  const stage4TimerRef = useRef<number | null>(null);
+
   const scene = SCENES[cur];
   const isIntroStage = scene.t === "stage" && scene.num === 0;
+
+  const [signalResultOn, setSignalResultOn] = useState(false);
+  const [signalDistanceDisplay, setSignalDistanceDisplay] = useState("0.0");
+  const [signalLightningOpacity, setSignalLightningOpacity] = useState(0);
+  const [stageFxOn, setStageFxOn] = useState(false);
+  const [stageLightningOpacity, setStageLightningOpacity] = useState(0);
+
+  const signalDistanceTarget = useMemo(() => {
+    if (scene.t !== "result" || scene.lbl !== "SIGNAL CONFIRMED") return null;
+    const m = scene.ans.match(/(\d+(?:\.\d+)?)/);
+    return m ? Number(m[1]) : null;
+  }, [scene]);
 
   useEffect(() => {
     document.title = "미션 2: 새벽을 여는 독도";
@@ -293,6 +362,259 @@ export default function Quiz2Game() {
       document.title = "Office of Education Program";
     };
   }, []);
+
+  useEffect(() => {
+    // SIGNAL CONFIRMED result-specific animations (count up + staged reveal + lightning flash)
+    signalTimersRef.current.forEach((t) => window.clearTimeout(t));
+    signalTimersRef.current = [];
+    if (signalCountRafRef.current != null) {
+      cancelAnimationFrame(signalCountRafRef.current);
+      signalCountRafRef.current = null;
+    }
+
+    if (scene.t !== "result" || scene.lbl !== "SIGNAL CONFIRMED") {
+      setSignalResultOn(false);
+      setSignalDistanceDisplay("0.0");
+      setSignalLightningOpacity(0);
+      return;
+    }
+
+    setSignalResultOn(false);
+    setSignalDistanceDisplay("0.0");
+    setSignalLightningOpacity(0);
+
+    const tShow = window.setTimeout(() => setSignalResultOn(true), 80);
+    signalTimersRef.current.push(tShow);
+
+    const tCount = window.setTimeout(() => {
+      const target = signalDistanceTarget ?? 0;
+      const durationMs = 1200;
+      const start = performance.now();
+      const step = (now: number) => {
+        const p = Math.min((now - start) / durationMs, 1);
+        const ease = 1 - Math.pow(1 - p, 4);
+        const v = target * ease;
+        setSignalDistanceDisplay(v.toFixed(1));
+        if (p < 1) signalCountRafRef.current = requestAnimationFrame(step);
+      };
+      signalCountRafRef.current = requestAnimationFrame(step);
+    }, 600);
+    signalTimersRef.current.push(tCount);
+
+    let cancelled = false;
+    const scheduleLightning = () => {
+      if (cancelled) return;
+      const nextDelay = Math.random() * 7000 + 4000;
+      const tNext = window.setTimeout(() => {
+        if (cancelled) return;
+        const base = Math.random() * 0.04 + 0.01;
+        setSignalLightningOpacity(base);
+        const tOff = window.setTimeout(() => {
+          setSignalLightningOpacity(0);
+          if (Math.random() > 0.5) {
+            const tDouble = window.setTimeout(() => {
+              setSignalLightningOpacity(Math.random() * 0.03);
+              const tDoubleOff = window.setTimeout(
+                () => setSignalLightningOpacity(0),
+                50,
+              );
+              signalTimersRef.current.push(tDoubleOff);
+            }, 100);
+            signalTimersRef.current.push(tDouble);
+          }
+        }, 60);
+        signalTimersRef.current.push(tOff);
+        scheduleLightning();
+      }, nextDelay);
+      signalTimersRef.current.push(tNext);
+    };
+    scheduleLightning();
+
+    return () => {
+      cancelled = true;
+      signalTimersRef.current.forEach((t) => window.clearTimeout(t));
+      signalTimersRef.current = [];
+      if (signalCountRafRef.current != null) {
+        cancelAnimationFrame(signalCountRafRef.current);
+        signalCountRafRef.current = null;
+      }
+    };
+  }, [scene, signalDistanceTarget]);
+
+  useEffect(() => {
+    stageTimersRef.current.forEach((t) => window.clearTimeout(t));
+    stageTimersRef.current = [];
+    setStageFxOn(false);
+    setStageLightningOpacity(0);
+
+    if (scene.t !== "stage" || scene.num === 0) return;
+
+    const tOn = window.setTimeout(() => setStageFxOn(true), 150);
+    stageTimersRef.current.push(tOn);
+
+    let cancelled = false;
+    const scheduleLightning = () => {
+      if (cancelled) return;
+      const nextDelay = Math.random() * 8000 + 5000;
+      const tNext = window.setTimeout(() => {
+        if (cancelled) return;
+        const base = Math.random() * 0.035 + 0.008;
+        setStageLightningOpacity(base);
+        const tOff = window.setTimeout(() => {
+          setStageLightningOpacity(0);
+          if (Math.random() > 0.5) {
+            const tDouble = window.setTimeout(() => {
+              setStageLightningOpacity(Math.random() * 0.025);
+              const tDoubleOff = window.setTimeout(
+                () => setStageLightningOpacity(0),
+                45,
+              );
+              stageTimersRef.current.push(tDoubleOff);
+            }, 90);
+            stageTimersRef.current.push(tDouble);
+          }
+        }, 55);
+        stageTimersRef.current.push(tOff);
+        scheduleLightning();
+      }, nextDelay);
+      stageTimersRef.current.push(tNext);
+    };
+    scheduleLightning();
+
+    return () => {
+      cancelled = true;
+      stageTimersRef.current.forEach((t) => window.clearTimeout(t));
+      stageTimersRef.current = [];
+    };
+  }, [scene]);
+
+  useEffect(() => {
+    if (scene.t !== "stage" || scene.num === 0) return;
+    const canvas = stageRainCanvasRef.current;
+    if (!canvas) return;
+    const ctx = canvas.getContext("2d");
+    if (!ctx) return;
+
+    let drops: {
+      x: number;
+      y: number;
+      len: number;
+      speed: number;
+      alpha: number;
+    }[] = [];
+
+    const resize = () => {
+      const parent = canvas.parentElement;
+      if (!parent) return;
+      canvas.width = parent.clientWidth;
+      canvas.height = parent.clientHeight;
+      drops = Array.from({ length: 120 }, () => ({
+        x: Math.random() * canvas.width,
+        y: Math.random() * canvas.height,
+        len: Math.random() * 16 + 7,
+        speed: Math.random() * 4 + 3,
+        alpha: Math.random() * 0.18 + 0.04,
+      }));
+    };
+    resize();
+    window.addEventListener("resize", resize);
+
+    let raf = 0;
+    const draw = () => {
+      ctx.clearRect(0, 0, canvas.width, canvas.height);
+      for (const d of drops) {
+        ctx.save();
+        ctx.strokeStyle = `rgba(140,210,255,${d.alpha})`;
+        ctx.lineWidth = 0.65;
+        ctx.translate(d.x, d.y);
+        ctx.rotate(0.17);
+        ctx.beginPath();
+        ctx.moveTo(0, 0);
+        ctx.lineTo(0, d.len);
+        ctx.stroke();
+        ctx.restore();
+
+        d.y += d.speed;
+        d.x -= d.speed * 0.17;
+        if (d.y > canvas.height) {
+          d.y = -d.len;
+          d.x = Math.random() * canvas.width;
+        }
+        if (d.x < 0) d.x = canvas.width;
+      }
+      raf = requestAnimationFrame(draw);
+    };
+    raf = requestAnimationFrame(draw);
+
+    return () => {
+      window.removeEventListener("resize", resize);
+      cancelAnimationFrame(raf);
+    };
+  }, [scene]);
+
+  useEffect(() => {
+    if (scene.t !== "result" || scene.lbl !== "SIGNAL CONFIRMED") return;
+    const canvas = signalRainCanvasRef.current;
+    if (!canvas) return;
+    const ctx = canvas.getContext("2d");
+    if (!ctx) return;
+
+    let drops: {
+      x: number;
+      y: number;
+      len: number;
+      speed: number;
+      alpha: number;
+    }[] = [];
+
+    const resize = () => {
+      const parent = canvas.parentElement;
+      if (!parent) return;
+      canvas.width = parent.clientWidth;
+      canvas.height = parent.clientHeight;
+      drops = Array.from({ length: 110 }, () => ({
+        x: Math.random() * canvas.width,
+        y: Math.random() * canvas.height,
+        len: Math.random() * 16 + 7,
+        speed: Math.random() * 4 + 3,
+        alpha: Math.random() * 0.2 + 0.05,
+      }));
+    };
+    resize();
+    window.addEventListener("resize", resize);
+
+    let raf = 0;
+    const draw = () => {
+      ctx.clearRect(0, 0, canvas.width, canvas.height);
+      for (const d of drops) {
+        ctx.save();
+        ctx.strokeStyle = `rgba(140,210,255,${d.alpha})`;
+        ctx.lineWidth = 0.7;
+        ctx.translate(d.x, d.y);
+        ctx.rotate(0.18);
+        ctx.beginPath();
+        ctx.moveTo(0, 0);
+        ctx.lineTo(0, d.len);
+        ctx.stroke();
+        ctx.restore();
+
+        d.y += d.speed;
+        d.x -= d.speed * 0.18;
+        if (d.y > canvas.height) {
+          d.y = -d.len;
+          d.x = Math.random() * canvas.width;
+        }
+        if (d.x < 0) d.x = canvas.width;
+      }
+      raf = requestAnimationFrame(draw);
+    };
+    raf = requestAnimationFrame(draw);
+
+    return () => {
+      window.removeEventListener("resize", resize);
+      cancelAnimationFrame(raf);
+    };
+  }, [scene]);
 
   useEffect(() => {
     const rCanvas = rainRef.current;
@@ -356,7 +678,13 @@ export default function Quiz2Game() {
       rainRaf = requestAnimationFrame(rain);
     };
 
-    const bolt = (x: number, y: number, a: number, len: number, dep: number) => {
+    const bolt = (
+      x: number,
+      y: number,
+      a: number,
+      len: number,
+      dep: number,
+    ) => {
       if (len < 12) return;
       const ex = x + Math.cos(a) * len + (Math.random() - 0.5) * 28;
       const ey = y + Math.sin(a) * len + (Math.random() - 0.5) * 16;
@@ -377,7 +705,13 @@ export default function Quiz2Game() {
       const branch = dep < 3 ? Math.floor(Math.random() * 3) + 1 : 0;
       for (let i = 0; i < branch; i += 1) {
         const tt = Math.random() * 0.7 + 0.15;
-        bolt(x + (ex - x) * tt, y + (ey - y) * tt, a + (Math.random() - 0.5) * 1.1, len * (Math.random() * 0.35 + 0.28), dep + 1);
+        bolt(
+          x + (ex - x) * tt,
+          y + (ey - y) * tt,
+          a + (Math.random() - 0.5) * 1.1,
+          len * (Math.random() * 0.35 + 0.28),
+          dep + 1,
+        );
       }
       bolt(ex, ey, a + (Math.random() - 0.5) * 0.35, len * 0.62, dep + 1);
     };
@@ -412,17 +746,26 @@ export default function Quiz2Game() {
           bx.clearRect(0, 0, w, h);
           flash.classList.add("on");
           setTimeout(() => flash.classList.remove("on"), 42);
-          bolt(sx + (Math.random() - 0.5) * 85, 0, ang + (Math.random() - 0.5) * 0.3, h * 0.44, 0);
+          bolt(
+            sx + (Math.random() - 0.5) * 85,
+            0,
+            ang + (Math.random() - 0.5) * 0.3,
+            h * 0.44,
+            0,
+          );
           setTimeout(() => bx.clearRect(0, 0, w, h), 200);
         }, 125);
       }
     };
 
     const schedule = () => {
-      lightningTimer = setTimeout(() => {
-        strike();
-        schedule();
-      }, Math.random() * 2200 + 900);
+      lightningTimer = setTimeout(
+        () => {
+          strike();
+          schedule();
+        },
+        Math.random() * 2200 + 900,
+      );
     };
 
     rain();
@@ -454,17 +797,83 @@ export default function Quiz2Game() {
   }, [cur, scene]);
 
   useEffect(() => {
+    const isAgentA = scene.t === "dlg" && scene.ch === "agentA";
+    if (!isAgentA) {
+      setRippleRings([]);
+      return;
+    }
+
+    const addRipple = () => {
+      const id = Date.now() + Math.random();
+      setRippleRings((prev) => [...prev, id]);
+      window.setTimeout(() => {
+        setRippleRings((prev) => prev.filter((v) => v !== id));
+      }, 2200);
+    };
+
+    addRipple();
+    const intervalId = window.setInterval(addRipple, 380);
+    return () => window.clearInterval(intervalId);
+  }, [scene.t, scene.t === "dlg" ? scene.ch : "", cur]);
+
+  useEffect(() => {
     if (scene.t !== "dlg") return;
+    if (dialogueRafRef.current != null) {
+      cancelAnimationFrame(dialogueRafRef.current);
+      dialogueRafRef.current = null;
+    }
     const line = scene.lines[lineIdx] ?? "";
     setTypedText("");
     setIsTyping(true);
+
+    if (scene.ch === "laptop") {
+      let frame = 0;
+      const step = () => {
+        const progress = frame / LAPTOP_GLITCH_TOTAL_FRAMES;
+        const out = line
+          .split("")
+          .map((ch, i) => {
+            if (ch === " ") return " ";
+            if (progress > i / Math.max(1, line.length)) return ch;
+            return LAPTOP_GLITCH_CHARS[
+              Math.floor(Math.random() * LAPTOP_GLITCH_CHARS.length)
+            ];
+          })
+          .join("");
+        setTypedText(out);
+
+        if (frame < LAPTOP_GLITCH_TOTAL_FRAMES) {
+          frame += 1;
+          dialogueRafRef.current = requestAnimationFrame(step);
+        } else {
+          setTypedText(line);
+          setIsTyping(false);
+          dialogueRafRef.current = null;
+        }
+      };
+      dialogueRafRef.current = requestAnimationFrame(step);
+      return () => {
+        if (dialogueRafRef.current != null) {
+          cancelAnimationFrame(dialogueRafRef.current);
+          dialogueRafRef.current = null;
+        }
+      };
+    }
+
     let i = 0;
     const type = () => {
       if (i < line.length) {
         const ch = line[i];
         i += 1;
         setTypedText((prev) => prev + ch);
-        const d = ch === "." || ch === "!" || ch === "?" ? 68 : ch === "," ? 42 : ch === " " ? 30 : 48 + (Math.random() - 0.5) * 16;
+        const d =
+          ch === "." || ch === "!" || ch === "?"
+            ? 68
+            : ch === ","
+              ? 42
+              : ch === " "
+                ? 30
+                : 48 + (Math.random() - 0.5) * 16;
         typeTimerRef.current = window.setTimeout(type, d);
       } else {
         setIsTyping(false);
@@ -475,6 +884,100 @@ export default function Quiz2Game() {
       if (typeTimerRef.current) window.clearTimeout(typeTimerRef.current);
     };
   }, [scene, lineIdx]);
+
+  useEffect(() => {
+    if (atmoTypeTimerRef.current) window.clearTimeout(atmoTypeTimerRef.current);
+    setAtmoTypedText("");
+    setIsAtmoTyping(false);
+
+    if (scene.t !== "atmo") return;
+    const text = scene.desc ?? "";
+    setIsAtmoTyping(true);
+    let i = 0;
+    const typeWriter = () => {
+      if (i < text.length) {
+        const ch = text[i];
+        i += 1;
+        setAtmoTypedText((prev) => prev + ch);
+        atmoTypeTimerRef.current = window.setTimeout(typeWriter, 75);
+      } else {
+        setIsAtmoTyping(false);
+      }
+    };
+    typeWriter();
+    return () => {
+      if (atmoTypeTimerRef.current)
+        window.clearTimeout(atmoTypeTimerRef.current);
+    };
+  }, [scene]);
+
+  useEffect(() => {
+    setUrgentCalcAnimOn(false);
+    if (scene.t !== "quiz" || scene.badge !== "⚠ STAGE 3 · 긴급 연산") return;
+    const t = window.setTimeout(() => setUrgentCalcAnimOn(true), 120);
+    return () => window.clearTimeout(t);
+  }, [scene]);
+
+  useEffect(() => {
+    if (stage4TimerRef.current) {
+      window.clearInterval(stage4TimerRef.current);
+      stage4TimerRef.current = null;
+    }
+    if (scene.t !== "quiz" || scene.badge !== "⚠ STAGE 4 · 최종 암호") return;
+
+    setStage4RemainingSec(300);
+    stage4TimerRef.current = window.setInterval(() => {
+      setStage4RemainingSec((prev) => Math.max(0, prev - 1));
+    }, 1000);
+
+    return () => {
+      if (stage4TimerRef.current) {
+        window.clearInterval(stage4TimerRef.current);
+        stage4TimerRef.current = null;
+      }
+    };
+  }, [scene]);
+
+  useEffect(() => {
+    if (harborFlashIntervalRef.current) {
+      window.clearInterval(harborFlashIntervalRef.current);
+      harborFlashIntervalRef.current = null;
+    }
+    setHarborAnimOn(false);
+
+    const isHarborQuiz =
+      scene.t === "quiz" &&
+      (scene.badge === "3급 기밀 절차 · 항구 거리 계산" ||
+        scene.badge === "STAGE 1 · 단어 해독");
+    if (!isHarborQuiz) return;
+
+    // Stagger entrance trigger (purely via CSS transitions)
+    const t = window.setTimeout(() => setHarborAnimOn(true), 80);
+
+    // Variable glitch flash (random highlight letters)
+    harborFlashIntervalRef.current = window.setInterval(() => {
+      const root = harborWrapRef.current;
+      if (!root) return;
+      const vars = Array.from(root.querySelectorAll(".q2-harbor-hl"));
+      if (vars.length === 0) return;
+      const target = vars[
+        Math.floor(Math.random() * vars.length)
+      ] as HTMLElement;
+      target.classList.add("q2-harbor-hl-flash");
+      window.setTimeout(
+        () => target.classList.remove("q2-harbor-hl-flash"),
+        90,
+      );
+    }, 1800);
+
+    return () => {
+      window.clearTimeout(t);
+      if (harborFlashIntervalRef.current) {
+        window.clearInterval(harborFlashIntervalRef.current);
+        harborFlashIntervalRef.current = null;
+      }
+    };
+  }, [scene]);
 
   useEffect(() => {
     if (scene.t !== "dlg") return;
@@ -589,7 +1092,9 @@ export default function Quiz2Game() {
   }, [isIntroStage]);
 
   const progressDots = useMemo(() => {
-    return QUIZ_CHECKPOINTS.map((si) => (cur > si ? "done" : cur >= si ? "now" : ""));
+    return QUIZ_CHECKPOINTS.map((si) =>
+      cur > si ? "done" : cur >= si ? "now" : "",
+    );
   }, [cur]);
 
   const changeScene = (updater: (prev: number) => number) => {
@@ -621,6 +1126,10 @@ export default function Quiz2Game() {
   const submitSingle = () => {
     if (scene.t !== "quiz") return;
     if (norm(singleInput) === norm(scene.ans)) {
+      if (scene.badge === "⚠ STAGE 4 · 최종 암호" && stage4TimerRef.current) {
+        window.clearInterval(stage4TimerRef.current);
+        stage4TimerRef.current = null;
+      }
       adv();
       return;
     }
@@ -635,7 +1144,9 @@ export default function Quiz2Game() {
 
   const submitMulti = () => {
     if (scene.t !== "quiz-m") return;
-    const errors = scene.inputs.map((item, idx) => norm(multiInputs[idx] ?? "") !== norm(item.ans));
+    const errors = scene.inputs.map(
+      (item, idx) => norm(multiInputs[idx] ?? "") !== norm(item.ans),
+    );
     setMultiErrors(errors);
     if (errors.every((v) => !v)) {
       adv();
@@ -645,11 +1156,60 @@ export default function Quiz2Game() {
     setMultiInputs((prev) => prev.map((v, idx) => (errors[idx] ? "" : v)));
   };
 
-  const moodClass = (mood?: Mood) => (mood === "u" ? "urgent" : mood === "l" ? "laptop" : "");
+  const moodClass = (mood?: Mood) =>
+    mood === "u" ? "urgent" : mood === "l" ? "laptop" : "";
+  const dialogueBgClass =
+    scene.t === "dlg" && scene.ch === "agentA"
+      ? "q2-dialogue-agent"
+      : scene.t === "dlg" && scene.ch === "laptop"
+        ? "q2-dialogue-laptop"
+        : "";
+  const renderHarborValue = (text: string) => {
+    const parts = text.split(/([A-I])/g);
+    return parts.map((part, idx) =>
+      /^[A-I]$/.test(part) ? (
+        <span className="q2-harbor-hl" key={`${part}-${idx}`}>
+          {part}
+        </span>
+      ) : (
+        <Fragment key={`${part}-${idx}`}>{part}</Fragment>
+      ),
+    );
+  };
+  const renderDialogueText = (text: string) => {
+    if (!DIALOGUE_EMPHASIS_TEXTS.some((target) => text.includes(target))) {
+      return text;
+    }
+    const parts = text.split(DIALOGUE_EMPHASIS_REGEX);
+    return parts.map((part, idx) =>
+      DIALOGUE_EMPHASIS_TEXTS.includes(
+        part as (typeof DIALOGUE_EMPHASIS_TEXTS)[number],
+      ) ? (
+        <span className="dlg-emphasis" key={`${part}-${idx}`}>
+          {part}
+        </span>
+      ) : (
+        <Fragment key={`${part}-${idx}`}>{part}</Fragment>
+      ),
+    );
+  };
 
   return (
-    <main className={`quiz2game-page ${scene.t === "dlg" ? "q2-dialogue-jisoo" : ""}`}>
+    <main
+      className={`quiz2game-page ${scene.t === "dlg" ? "q2-dialogue-jisoo" : ""} ${dialogueBgClass} ${scene.t === "atmo" ? "q2-atmo-page" : ""} ${scene.t === "result" ? "q2-result-page" : ""} ${scene.t === "stage" && scene.num !== 0 ? "q2-stage-page" : ""} ${scene.t === "quiz" && (scene.badge === "3급 기밀 절차 · 항구 거리 계산" || scene.badge === "STAGE 1 · 단어 해독") ? "q2-harbor-page" : ""} ${scene.t === "quiz" && scene.badge === "⚠ STAGE 3 · 긴급 연산" ? "q2-s3-page" : ""} ${scene.t === "quiz" && scene.badge === "⚠ STAGE 4 · 최종 암호" ? "q2-s4-page" : ""}`}
+    >
       <div id="bg-sky" />
+      {scene.t === "atmo" && (
+        <video
+          className="q2-atmo-video"
+          src="/img/Quiz/Quiz2/yacht.mp4"
+          autoPlay
+          muted
+          loop
+          playsInline
+          aria-hidden
+        />
+      )}
       <div className="dcloud dc1" />
       <div className="dcloud dc2" />
       <div className="dcloud dc3" />
@@ -685,15 +1245,15 @@ export default function Quiz2Game() {
       <div id="scene-wrap" className={isIntroStage ? "intro-layout" : ""}>
         <div id="char-area">
           {scene.t === "dlg" && (
-            scene.ch === "director" ? null : (
-              <div className="ci-wrap">
-                <div className={`ci ${moodClass(scene.mood)}`}>
-                  <span>{ICONS[scene.ch]}</span>
-                  <div className="scan" />
-                </div>
-                <div className={`ci-label ${moodClass(scene.mood)}`}>{scene.lbl}</div>
+            <div className="ci-wrap">
+              <div className={`ci ${moodClass(scene.mood)}`}>
+                <span>{ICONS[scene.ch]}</span>
+                <div className="scan" />
               </div>
-            )
+              <div className={`ci-label ${moodClass(scene.mood)}`}>
+                {scene.lbl}
+              </div>
+            </div>
           )}
           {scene.t === "success" && (
             <div className="ci-wrap">
@@ -708,79 +1268,233 @@ export default function Quiz2Game() {
 
         <div id="scene-content">
           {scene.t === "stage" && (
-            <div className={`sg-wrap ${scene.num === 0 ? "intro" : ""}`}>
-              {scene.num !== 0 && <div className="sg-num">--- STAGE {scene.num} ---</div>}
-              {scene.num === 0 && (
-                <div
-                  className={`sg-intro-icon ${introIconVisible ? "intro-visible" : ""}`}
-                  aria-hidden
-                >
-                  <svg
-                    width="56"
-                    height="56"
-                    viewBox="0 0 56 56"
-                    fill="none"
-                    xmlns="http://www.w3.org/2000/svg"
-                  >
-                    <defs>
-                      <filter id="q2-intro-glow">
-                        <feGaussianBlur stdDeviation="2.5" result="blur" />
-                        <feMerge>
-                          <feMergeNode in="blur" />
-                          <feMergeNode in="SourceGraphic" />
-                        </feMerge>
-                      </filter>
-                    </defs>
-                    <ellipse cx="24" cy="22" rx="14" ry="9" fill="rgba(90,120,165,.38)" />
-                    <ellipse cx="34" cy="20" rx="11" ry="8" fill="rgba(90,120,165,.35)" />
-                    <ellipse cx="28" cy="25" rx="16" ry="9" fill="rgba(80,110,155,.40)" />
-                    <path
-                      d="M30 24 L23 36 L28 36 L22 50 L36 32 L30 32 Z"
-                      fill="rgba(48,210,215,.85)"
-                      filter="url(#q2-intro-glow)"
-                    />
-                  </svg>
-                </div>
-              )}
-              {scene.num === 0 ? (
-                <div className="main-text">
-                  {introTypedText.split("\n").map((line, idx, arr) => (
-                    <span key={`intro-line-${idx}`}>
-                      {line}
-                      {idx < arr.length - 1 && <br />}
-                    </span>
-                  ))}
-                  {!introTypingDone && <span className="main-text-cursor" />}
+            <>
+              {scene.num !== 0 ? (
+                <div className={`q2-stage-scene ${stageFxOn ? "is-on" : ""}`}>
+                  <canvas ref={stageRainCanvasRef} className="q2-stage-rain" />
+                  <div
+                    className="q2-stage-lightning"
+                    style={{ opacity: stageLightningOpacity }}
+                  />
+                  <div className="q2-stage-glow" />
+                  <div className="q2-stage-scan" />
+
+                  <div className="q2-stage-hdr q2-stage-anim">
+                    <div className="q2-stage-hdr-pill">
+                      <span className="q2-stage-hdr-dot" aria-hidden />
+                      <span className="q2-stage-hdr-text">
+                        MISSION 02 · 새벽을 여는 독도
+                      </span>
+                    </div>
+                  </div>
+
+                  <div className="q2-stage-main">
+                    <div className="q2-stage-ring q2-stage-anim">
+                      <svg
+                        className="q2-stage-ring-svg"
+                        viewBox="0 0 130 130"
+                        aria-hidden
+                      >
+                        <circle
+                          cx="65"
+                          cy="65"
+                          r="60"
+                          fill="none"
+                          stroke="rgba(90,240,196,0.12)"
+                          strokeWidth="1"
+                        />
+                        <circle
+                          cx="65"
+                          cy="65"
+                          r="60"
+                          fill="none"
+                          stroke="#5af0c4"
+                          strokeWidth="1.5"
+                          strokeDasharray="50 327"
+                          strokeLinecap="round"
+                        />
+                        <circle
+                          cx="65"
+                          cy="65"
+                          r="48"
+                          fill="none"
+                          stroke="rgba(90,240,196,0.08)"
+                          strokeWidth="0.8"
+                        />
+                        <circle
+                          cx="65"
+                          cy="65"
+                          r="48"
+                          fill="none"
+                          stroke="rgba(90,240,196,0.3)"
+                          strokeWidth="0.8"
+                          strokeDasharray="20 282"
+                          strokeLinecap="round"
+                          className="q2-stage-ring-svg2"
+                        />
+                      </svg>
+                      <div className="q2-stage-ring-core">
+                        <span className="q2-stage-ring-kicker">STAGE</span>
+                        <span className="q2-stage-ring-num">{scene.num}</span>
+                      </div>
+                    </div>
+
+                    <div className="q2-stage-sep q2-stage-anim">
+                      <div className="q2-stage-sep-line left" />
+                      <span className="q2-stage-sep-text">
+                        --- STAGE {scene.num} ---
+                      </span>
+                      <div className="q2-stage-sep-line right" />
+                    </div>
+
+                    <div className="q2-stage-ttl q2-stage-anim">
+                      <h1 className="q2-stage-h1">STAGE {scene.num}</h1>
+                    </div>
+
+                    <div className="q2-stage-tag q2-stage-anim">
+                      <div className="q2-stage-tag-line" />
+                      <span className="q2-stage-tag-text">
+                        {scene.sub ?? ""}
+                      </span>
+                      <div className="q2-stage-tag-line" />
+                    </div>
+
+                    <div className="q2-stage-info q2-stage-anim">
+                      <div className="q2-stage-info-col">
+                        <div className="q2-stage-info-k">LEVEL</div>
+                        <div className="q2-stage-info-v">3급</div>
+                      </div>
+                      <div className="q2-stage-info-col">
+                        <div className="q2-stage-info-k">TYPE</div>
+                        <div className="q2-stage-info-v">해독</div>
+                      </div>
+                      <div className="q2-stage-info-col">
+                        <div className="q2-stage-info-k">STATUS</div>
+                        <div className="q2-stage-info-status">
+                          <span className="q2-stage-info-dot" aria-hidden />
+                          ACTIVE
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+
+                  <div className="q2-stage-btn q2-stage-anim">
+                    <button className="q2-stage-next" onClick={adv}>
+                      <span>NEXT</span>
+                      <img
+                        src="https://api.iconify.design/ph/arrow-right-bold.svg?color=%235af0c4"
+                        alt=""
+                        width={16}
+                        height={16}
+                      />
+                    </button>
+                  </div>
                 </div>
               ) : (
-                <div className="sg-title">{scene.title}</div>
+                <div
+                  className={`sg-wrap ${scene.num === 0 ? "intro" : "q2-stage-center"}`}
+                >
+                  {scene.num !== 0 && (
+                    <div className="sg-num">--- STAGE {scene.num} ---</div>
+                  )}
+                  {scene.num === 0 && (
+                    <div
+                      className={`sg-intro-icon ${introIconVisible ? "intro-visible" : ""}`}
+                      aria-hidden
+                    >
+                      <svg
+                        width="56"
+                        height="56"
+                        viewBox="0 0 56 56"
+                        fill="none"
+                        xmlns="http://www.w3.org/2000/svg"
+                      >
+                        <defs>
+                          <filter id="q2-intro-glow">
+                            <feGaussianBlur stdDeviation="2.5" result="blur" />
+                            <feMerge>
+                              <feMergeNode in="blur" />
+                              <feMergeNode in="SourceGraphic" />
+                            </feMerge>
+                          </filter>
+                        </defs>
+                        <ellipse
+                          cx="24"
+                          cy="22"
+                          rx="14"
+                          ry="9"
+                          fill="rgba(90,120,165,.38)"
+                        />
+                        <ellipse
+                          cx="34"
+                          cy="20"
+                          rx="11"
+                          ry="8"
+                          fill="rgba(90,120,165,.35)"
+                        />
+                        <ellipse
+                          cx="28"
+                          cy="25"
+                          rx="16"
+                          ry="9"
+                          fill="rgba(80,110,155,.40)"
+                        />
+                        <path
+                          d="M30 24 L23 36 L28 36 L22 50 L36 32 L30 32 Z"
+                          fill="rgba(48,210,215,.85)"
+                          filter="url(#q2-intro-glow)"
+                        />
+                      </svg>
+                    </div>
+                  )}
+                  {scene.num === 0 ? (
+                    <div className="main-text">
+                      {introTypedText.split("\n").map((line, idx, arr) => (
+                        <span key={`intro-line-${idx}`}>
+                          {line}
+                          {idx < arr.length - 1 && <br />}
+                        </span>
+                      ))}
+                      {!introTypingDone && (
+                        <span className="main-text-cursor" />
+                      )}
+                    </div>
+                  ) : (
+                    <div className="sg-title">{scene.title}</div>
+                  )}
+                  <div
+                    className={`sg-sub ${isIntroStage ? (introMetaVisible ? "intro-visible" : "intro-hidden") : ""}`}
+                  >
+                    {scene.sub ?? ""}
+                  </div>
+                  {scene.num === 0 && <div className="sg-line" aria-hidden />}
+                  {scene.num === 0 && (
+                    <button
+                      className={`sg-btn ${isIntroStage ? (introMetaVisible ? "intro-visible" : "intro-hidden") : ""}`}
+                      onClick={adv}
+                    >
+                      <span>NEXT</span>
+                      <img
+                        src="https://api.iconify.design/ph/arrow-right-bold.svg?color=%233ee8cc"
+                        alt=""
+                        width={18}
+                        height={18}
+                      />
+                    </button>
+                  )}
+                </div>
               )}
-              <div
-                className={`sg-sub ${isIntroStage ? (introMetaVisible ? "intro-visible" : "intro-hidden") : ""}`}
-              >
-                {scene.sub ?? ""}
-              </div>
-              {scene.num === 0 && <div className="sg-line" aria-hidden />}
-              <button
-                className={`sg-btn ${isIntroStage ? (introMetaVisible ? "intro-visible" : "intro-hidden") : ""}`}
-                onClick={adv}
-              >
-                <span>NEXT</span>
-                <img
-                  src="https://api.iconify.design/ph/arrow-right-bold.svg?color=%233ee8cc"
-                  alt=""
-                  width={18}
-                  height={18}
-                />
-              </button>
-            </div>
+            </>
           )}
 
           {scene.t === "atmo" && (
             <div className="atmo-wrap">
               <span className="atmo-ico">{scene.icon}</span>
               <div className="atmo-lbl">{scene.lbl}</div>
-              <div className="atmo-desc">{scene.desc}</div>
+              <div className="atmo-desc">
+                {atmoTypedText}
+                {isAtmoTyping && <span className="atmo-cursor" aria-hidden />}
+              </div>
               <div className="atmo-nav">
                 <button className="nbtn" onClick={goBack}>
                   <img
@@ -807,12 +1521,97 @@ export default function Quiz2Game() {
           {scene.t === "dlg" && (
             <>
               <div className={`dlg-box ${moodClass(scene.mood)}`}>
-                <canvas ref={signalNoiseRef} className="q2-signal-noise" aria-hidden />
-                {scene.ch === "director" && (
+                {scene.ch === "agentA" ? (
+                  <div className="q2-agent-glitch" aria-hidden>
+                    <div className="q2-agent-screenfx">
+                      <div className="q2-agent-scanlines" />
+                      <div className="q2-agent-scanbar" />
+                      <div className="q2-agent-pulse" />
+                      <div className="q2-agent-vignette" />
+                    </div>
+                    <div className="q2-agent-frame" />
+                    <div className="q2-agent-corner tl" />
+                    <div className="q2-agent-corner tr" />
+                    <div className="q2-agent-corner bl" />
+                    <div className="q2-agent-corner br" />
+                    <div className="q2-agent-ripple-wrap">
+                      {rippleRings.map((id) => (
+                        <div className="ripple-ring" key={id} />
+                      ))}
+                    </div>
+                    <div className={`tx-label ${isTyping ? "is-on" : ""}`}>
+                      ● TX
+                    </div>
+                  </div>
+                ) : scene.ch === "laptop" ? (
+                  <div className="q2-laptop-mock" aria-hidden>
+                    <div className="q2-laptop-screen">
+                      <div className="q2-laptop-screen-inner">
+                        <div className="q2-laptop-scanlines" />
+                        <div className="q2-laptop-sweep" />
+                        <div className="q2-laptop-term">
+                          <div className="q2-laptop-term-head">
+                            SECURITY AI v2.7.1 // BOOT SEQUENCE
+                          </div>
+                          <div className="q2-laptop-term-sep" />
+                          <div className="q2-laptop-term-line l1">
+                            &gt; 보안 시스템 초기화 중...
+                          </div>
+                          <div className="q2-laptop-term-line l2">
+                            &gt; 암호화 레이어 로드 완료
+                          </div>
+                          <div className="q2-laptop-term-line l3">
+                            &gt; 신원 인증 대기 중...
+                          </div>
+                          <div className="q2-laptop-term-line l4">
+                            &gt; [WARNING] 외부 접근 감지
+                          </div>
+                          <div className="q2-laptop-term-line l5">
+                            &gt; AI 프로세서 온라인
+                            <span className="q2-laptop-underscore">_</span>
+                          </div>
+                          <div className="q2-laptop-eq">
+                            <span className="b b1" />
+                            <span className="b b2" />
+                            <span className="b b3" />
+                            <span className="b b4" />
+                            <span className="b b5" />
+                            <span className="b b6" />
+                            <span className="b b7" />
+                            <span className="b b8" />
+                          </div>
+                        </div>
+                      </div>
+                      <div className="q2-laptop-cam" />
+                    </div>
+                    <div className="q2-laptop-hinge" />
+                    <div className="q2-laptop-base">
+                      <div className="q2-laptop-kb r1">
+                        <span className="k k1" />
+                        <span className="k k2" />
+                        <span className="k k3" />
+                        <span className="k k4 glow" />
+                      </div>
+                      <div className="q2-laptop-kb r2">
+                        <span className="k k5" />
+                        <span className="k k6" />
+                        <span className="k k7" />
+                      </div>
+                      <div className="q2-laptop-track" />
+                    </div>
+                  </div>
+                ) : (
+                  <canvas
+                    ref={signalNoiseRef}
+                    className="q2-signal-noise"
+                    aria-hidden
+                  />
+                )}
+                {scene.t === "dlg" && (
                   <div className="q2-dialogue-name">{scene.lbl}</div>
                 )}
                 <div className="dlg-txt">
-                  {typedText}
+                  {renderDialogueText(typedText)}
                   <span className={`dlg-cur ${moodClass(scene.mood)}`} />
                 </div>
               </div>
@@ -829,7 +1628,10 @@ export default function Quiz2Game() {
                 <span className="pg-lbl">
                   {lineIdx + 1} / {scene.lines.length}
                 </span>
-                <button className={`nbtn ${!isTyping ? "p" : ""}`} onClick={nextLine}>
+                <button
+                  className={`nbtn ${!isTyping ? "p" : ""}`}
+                  onClick={nextLine}
+                >
                   {isTyping ? (
                     "..."
                   ) : (
@@ -850,28 +1652,662 @@ export default function Quiz2Game() {
 
           {scene.t === "quiz" && (
             <>
-              <div className={`qz-card ${moodClass(scene.mood)}`}>
-                <div className={`qz-badge ${moodClass(scene.mood)}`}>{scene.badge}</div>
-                <div className="qz-title">{scene.title}</div>
-                <div className={`qz-body ${moodClass(scene.mood)}`}>{scene.body}</div>
-                <div className="qi-row">
-                  <input
-                    className={`qi ${singleError ? "err" : ""}`}
-                    value={singleInput}
-                    onChange={(e) => setSingleInput(e.target.value)}
-                    placeholder={singlePlaceholder}
-                    onKeyDown={(e) => {
-                      if (e.key === "Enter") submitSingle();
-                    }}
-                  />
-                  <button className={`qbtn ${moodClass(scene.mood)}`} onClick={submitSingle}>
-                    →
-                  </button>
+              {scene.badge === "3급 기밀 절차 · 항구 거리 계산" ? (
+                <div
+                  ref={harborWrapRef}
+                  className={`q2-harbor-wrap q2-harbor-anim ${harborAnimOn ? "is-on" : ""}`}
+                >
+                  <div className="q2-harbor-top">
+                    <div className="q2-harbor-pill">
+                      <span className="q2-harbor-dot" aria-hidden />
+                      <span className="q2-harbor-pill-txt">{scene.badge}</span>
+                    </div>
+                  </div>
+
+                  <h2 className="q2-harbor-title">{scene.title}</h2>
+
+                  <div className="q2-harbor-grid">
+                    <div className="q2-harbor-card q2-harbor-card--teal">
+                      <div className="q2-harbor-card-kicker">WAYPOINT DATA</div>
+
+                      <div className="q2-harbor-way">
+                        <div className="q2-harbor-way-row">
+                          <span className="q2-harbor-way-idx">1.</span>
+                          <div className="q2-harbor-way-body">
+                            <div className="q2-harbor-way-line">
+                              <span className="q2-harbor-way-name">죽변항</span>
+                              <span className="q2-harbor-way-val">
+                                {" "}
+                                : {renderHarborValue("AB0.3 km")}
+                              </span>
+                            </div>
+                          </div>
+                        </div>
+                        <div className="q2-harbor-sep" aria-hidden />
+
+                        <div className="q2-harbor-way-row">
+                          <span className="q2-harbor-way-idx">2.</span>
+                          <div className="q2-harbor-way-body">
+                            <div className="q2-harbor-way-line">
+                              <span className="q2-harbor-way-name">묵호항</span>
+                              <span className="q2-harbor-way-val">
+                                {" "}
+                                : {renderHarborValue("CDE.0 km")}
+                              </span>
+                            </div>
+                          </div>
+                        </div>
+                        <div className="q2-harbor-sep" aria-hidden />
+
+                        <div className="q2-harbor-way-row">
+                          <span className="q2-harbor-way-idx">3.</span>
+                          <div className="q2-harbor-way-body">
+                            <div className="q2-harbor-way-line">
+                              <span className="q2-harbor-way-name">포항항</span>
+                              <span className="q2-harbor-way-val">
+                                {" "}
+                                : {renderHarborValue("21F.0 km")}
+                              </span>
+                            </div>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+
+                    <div className="q2-harbor-card q2-harbor-card--violet">
+                      <div className="q2-harbor-card-kicker q2-harbor-card-kicker--violet">
+                        CLASSIFIED REF
+                      </div>
+
+                      <div className="q2-harbor-ref-title">
+                        SCAPIN 제{renderHarborValue("GHI")}호
+                      </div>
+
+                      <div
+                        className="q2-harbor-sep q2-harbor-sep--violet"
+                        aria-hidden
+                      />
+
+                      <div className="q2-harbor-card-kicker q2-harbor-card-kicker--violet">
+                        FORMULA
+                      </div>
+                      <div className="q2-harbor-formula">
+                        <div className="q2-harbor-formula-line">
+                          X = (G×F) + (D×H) + B
+                        </div>
+                        <div className="q2-harbor-formula-line">
+                          Y = (A+C+E) / I
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+
+                  <div className="q2-harbor-target">
+                    <div>
+                      <div className="q2-harbor-target-kicker">
+                        TARGET VALUE
+                      </div>
+                      <div className="q2-harbor-target-val">X + Y = ?</div>
+                    </div>
+                    <div className="q2-harbor-target-bar" aria-hidden />
+                    <div className="q2-harbor-target-note">
+                      소수점 포함
+                      <br />
+                      최종값 입력
+                    </div>
+                  </div>
+
+                  <div className="q2-harbor-inputrow">
+                    <div className="q2-harbor-inputwrap">
+                      <input
+                        className={`q2-harbor-input ${singleError ? "err" : ""}`}
+                        value={singleInput}
+                        onChange={(e) => setSingleInput(e.target.value)}
+                        placeholder={singlePlaceholder}
+                        onKeyDown={(e) => {
+                          if (e.key === "Enter") submitSingle();
+                        }}
+                      />
+                    </div>
+                    <button className="q2-harbor-submit" onClick={submitSingle}>
+                      <svg
+                        width="18"
+                        height="18"
+                        viewBox="0 0 24 24"
+                        fill="none"
+                        stroke="currentColor"
+                        strokeWidth="2.5"
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                        aria-hidden
+                      >
+                        <line x1="5" y1="12" x2="19" y2="12" />
+                        <polyline points="12 5 19 12 12 19" />
+                      </svg>
+                    </button>
+                  </div>
+
+                  <div className="q2-harbor-hint">
+                    <button
+                      className="q2-harbor-hintbtn"
+                      onClick={() => setHintShown((v) => !v)}
+                    >
+                      [ 힌트 보기 ]
+                    </button>
+                    {hintShown && scene.hint && (
+                      <div className="q2-harbor-hintbox">{scene.hint}</div>
+                    )}
+                  </div>
                 </div>
-                <button className="qhint" onClick={() => setHintShown(true)}>
-                  {hintShown ? `힌트: ${scene.hint ?? ""}` : "[힌트 보기]"}
-                </button>
-              </div>
+              ) : scene.badge === "STAGE 1 · 단어 해독" ? (
+                <div
+                  ref={harborWrapRef}
+                  className={`q2-harbor-wrap q2-harbor-anim ${harborAnimOn ? "is-on" : ""}`}
+                >
+                  <div className="q2-harbor-top">
+                    <div className="q2-harbor-pill">
+                      <span className="q2-harbor-dot" aria-hidden />
+                      <span className="q2-harbor-pill-txt">{scene.badge}</span>
+                    </div>
+                  </div>
+
+                  <h2 className="q2-harbor-title">{scene.title}</h2>
+
+                  {(() => {
+                    const raw = scene.body ?? "";
+                    const parts = raw.split(/\[보기 2\]/);
+                    const v1 = (parts[0] ?? "")
+                      .replace(/^\[보기 1\]\s*/m, "")
+                      .trim();
+                    const v2 = (parts[1] ?? "").trim();
+                    return (
+                      <div className="q2-harbor-grid">
+                        <div className="q2-harbor-card q2-harbor-card--teal">
+                          <div className="q2-harbor-card-kicker">[보기 1]</div>
+                          <div className="q2-harbor-bodytext">{v1}</div>
+                        </div>
+                        <div className="q2-harbor-card q2-harbor-card--violet">
+                          <div className="q2-harbor-card-kicker q2-harbor-card-kicker--violet">
+                            [보기 2]
+                          </div>
+                          <div className="q2-harbor-bodytext">{v2}</div>
+                        </div>
+                      </div>
+                    );
+                  })()}
+
+                  <div className="q2-harbor-target">
+                    <div>
+                      <div className="q2-harbor-target-kicker">
+                        TARGET VALUE
+                      </div>
+                      <div className="q2-harbor-target-val">공통 단어 = ?</div>
+                    </div>
+                    <div className="q2-harbor-target-bar" aria-hidden />
+                    <div className="q2-harbor-target-note">
+                      공통 단어
+                      <br />
+                      입력
+                    </div>
+                  </div>
+
+                  <div className="q2-harbor-inputrow">
+                    <div className="q2-harbor-inputwrap">
+                      <input
+                        className={`q2-harbor-input ${singleError ? "err" : ""}`}
+                        value={singleInput}
+                        onChange={(e) => setSingleInput(e.target.value)}
+                        placeholder={singlePlaceholder}
+                        onKeyDown={(e) => {
+                          if (e.key === "Enter") submitSingle();
+                        }}
+                      />
+                    </div>
+                    <button className="q2-harbor-submit" onClick={submitSingle}>
+                      <svg
+                        width="18"
+                        height="18"
+                        viewBox="0 0 24 24"
+                        fill="none"
+                        stroke="currentColor"
+                        strokeWidth="2.5"
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                        aria-hidden
+                      >
+                        <line x1="5" y1="12" x2="19" y2="12" />
+                        <polyline points="12 5 19 12 12 19" />
+                      </svg>
+                    </button>
+                  </div>
+
+                  <div className="q2-harbor-hint">
+                    <button
+                      className="q2-harbor-hintbtn"
+                      onClick={() => setHintShown((v) => !v)}
+                    >
+                      [ 힌트 보기 ]
+                    </button>
+                    {hintShown && scene.hint && (
+                      <div className="q2-harbor-hintbox">{scene.hint}</div>
+                    )}
+                  </div>
+                </div>
+              ) : scene.badge === "⚠ STAGE 3 · 긴급 연산" ? (
+                <div
+                  className={`q2-s3-wrap ${urgentCalcAnimOn ? "is-on" : ""} ${hintShown ? "hint-open" : ""}`}
+                >
+                  <div className="q2-s3-border" aria-hidden />
+                  <div className="q2-s3-top">
+                    <div className="q2-s3-pill">
+                      <svg
+                        className="q2-s3-ico"
+                        width="11"
+                        height="11"
+                        viewBox="0 0 24 24"
+                        fill="none"
+                      >
+                        <path
+                          d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"
+                          stroke="#e05030"
+                          strokeWidth="2.5"
+                        />
+                        <line
+                          x1="12"
+                          y1="9"
+                          x2="12"
+                          y2="13"
+                          stroke="#e05030"
+                          strokeWidth="2.5"
+                        />
+                        <line
+                          x1="12"
+                          y1="17"
+                          x2="12.01"
+                          y2="17"
+                          stroke="#e05030"
+                          strokeWidth="2.5"
+                        />
+                      </svg>
+                      <span className="q2-s3-pilltxt">
+                        {scene.badge.replace(/^⚠\s*/, "")}
+                      </span>
+                      <span className="q2-s3-alertdot" aria-hidden />
+                    </div>
+                  </div>
+
+                  <h2 className="q2-s3-title">{scene.title}</h2>
+
+                  {(() => {
+                    const raw = scene.body ?? "";
+                    const lines = raw
+                      .split("\n")
+                      .map((l) => l.trim())
+                      .filter(Boolean);
+                    const rowLines = lines.filter((l) => /^[URMO]\s*=/.test(l));
+                    const formulaLine =
+                      lines.find((l) => l.includes("=") && l.includes("?")) ??
+                      "";
+
+                    const parsed = rowLines.map((l) => {
+                      const m = l.match(
+                        /^([URMO])\s*=\s*([^→]+)→\s*([0-9,\.]+)\s*km/i,
+                      );
+                      return {
+                        k: m?.[1] ?? "",
+                        name: (m?.[2] ?? "").trim(),
+                        val: (m?.[3] ?? "").trim(),
+                      };
+                    });
+                    const byKey = Object.fromEntries(
+                      parsed.map((p) => [p.k, p]),
+                    ) as Record<
+                      string,
+                      { k: string; name: string; val: string }
+                    >;
+
+                    const mkCard = (
+                      k: "U" | "R" | "M" | "O",
+                      tone: "teal" | "red",
+                    ) => {
+                      const p = byKey[k] ?? { k, name: "", val: "" };
+                      return (
+                        <div
+                          className={`q2-s3-varcard tone-${tone} ${urgentCalcAnimOn ? "in" : ""}`}
+                          key={k}
+                        >
+                          <div className={`q2-s3-varbadge tone-${tone}`}>
+                            VAR
+                          </div>
+                          <div className="q2-s3-varrow">
+                            <span className={`q2-s3-vark tone-${tone}`}>
+                              {p.k}
+                            </span>
+                            <span className={`q2-s3-eq tone-${tone}`}>=</span>
+                            <span className={`q2-s3-varname tone-${tone}`}>
+                              {p.name}
+                            </span>
+                          </div>
+                          <div
+                            className={`q2-s3-varval tone-${tone} q2-s3-varq`}
+                          >
+                            {p.k}와의 거리는?
+                          </div>
+                        </div>
+                      );
+                    };
+
+                    return (
+                      <>
+                        <div className="q2-s3-grid">
+                          {mkCard("U", "teal")}
+                          {mkCard("R", "red")}
+                          {mkCard("M", "red")}
+                          {mkCard("O", "teal")}
+                        </div>
+
+                        <div
+                          className={`q2-s3-formula ${urgentCalcAnimOn ? "in" : ""}`}
+                        >
+                          <div>
+                            <div className="q2-s3-formula-k">
+                              TARGET FORMULA
+                            </div>
+                            <div className="q2-s3-formula-v">{formulaLine}</div>
+                          </div>
+                          <div className="q2-s3-formula-note">
+                            소수점
+                            <br />
+                            1자리
+                          </div>
+                        </div>
+                      </>
+                    );
+                  })()}
+
+                  <div
+                    className={`q2-s3-inputrow ${urgentCalcAnimOn ? "in" : ""}`}
+                  >
+                    <input
+                      className={`q2-s3-in ${singleError ? "err" : ""}`}
+                      value={singleInput}
+                      onChange={(e) => setSingleInput(e.target.value)}
+                      placeholder={singlePlaceholder}
+                      onKeyDown={(e) => {
+                        if (e.key === "Enter") submitSingle();
+                      }}
+                    />
+                    <button
+                      className="q2-s3-go"
+                      onClick={submitSingle}
+                      aria-label="제출"
+                    >
+                      <svg
+                        width="18"
+                        height="18"
+                        viewBox="0 0 24 24"
+                        fill="none"
+                        stroke="currentColor"
+                        strokeWidth="2.5"
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                        aria-hidden
+                      >
+                        <line x1="5" y1="12" x2="19" y2="12" />
+                        <polyline points="12 5 19 12 12 19" />
+                      </svg>
+                    </button>
+                  </div>
+
+                  <div className={`q2-s3-hint ${urgentCalcAnimOn ? "in" : ""}`}>
+                    <button
+                      className="q2-s3-hintbtn"
+                      onClick={() => setHintShown((v) => !v)}
+                    >
+                      [ 힌트 보기 ]
+                    </button>
+                    {hintShown && scene.hint && (
+                      <div className="q2-s3-hintbox">{scene.hint}</div>
+                    )}
+                  </div>
+                </div>
+              ) : scene.badge === "⚠ STAGE 4 · 최종 암호" ? (
+                <div className={`q2-s4-wrap ${hintShown ? "hint-open" : ""}`}>
+                  <div className="q2-s4-border" aria-hidden />
+
+                  {(() => {
+                    const pad = (n: number) => String(n).padStart(2, "0");
+                    const m = Math.floor(stage4RemainingSec / 60);
+                    const s = stage4RemainingSec % 60;
+                    const pct = Math.max(
+                      0,
+                      Math.min(100, (stage4RemainingSec / 300) * 100),
+                    );
+
+                    const raw = scene.body ?? "";
+                    const lines = raw
+                      .split("\n")
+                      .map((l) => l.trim())
+                      .filter(Boolean);
+                    const rowLines = lines.filter((l) => /^[URMO]\s*=/.test(l));
+                    const formulaLine =
+                      lines.find((l) => l.includes("=") && l.includes("?")) ??
+                      "";
+
+                    const parsed = rowLines.map((l) => {
+                      const mm = l.match(
+                        /^([URMO])\s*=\s*([^→]+)→\s*([0-9,\.]+)\s*km/i,
+                      );
+                      return {
+                        k: mm?.[1] ?? "",
+                        name: (mm?.[2] ?? "").trim(),
+                        val: (mm?.[3] ?? "").trim(),
+                      };
+                    });
+                    const byKey = Object.fromEntries(
+                      parsed.map((p) => [p.k, p]),
+                    ) as Record<
+                      string,
+                      { k: string; name: string; val: string }
+                    >;
+
+                    const row = (k: "U" | "R" | "M" | "O") => {
+                      const p = byKey[k] ?? { k, name: "", val: "" };
+                      const isTeal = k === "U" || k === "O";
+                      return (
+                        <div className={`q2-s4-row ${k}`} key={k}>
+                          <span
+                            className={`q2-s4-k ${isTeal ? "teal" : "red"}`}
+                          >
+                            {p.k}
+                          </span>
+                          <div className="q2-s4-meta">
+                            <div className="q2-s4-name">{p.name}</div>
+                            <div
+                              className={`q2-s4-val ${isTeal ? "teal" : "red"}`}
+                            >
+                              {p.val} <span className="q2-s4-unit">km</span>
+                            </div>
+                          </div>
+                        </div>
+                      );
+                    };
+
+                    return (
+                      <>
+                        <div className="q2-s4-hdr">
+                          <div className="q2-s4-pill">
+                            <svg
+                              width="11"
+                              height="11"
+                              viewBox="0 0 24 24"
+                              fill="none"
+                            >
+                              <path
+                                d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"
+                                stroke="#e05030"
+                                strokeWidth="2.5"
+                              />
+                              <line
+                                x1="12"
+                                y1="9"
+                                x2="12"
+                                y2="13"
+                                stroke="#e05030"
+                                strokeWidth="2.5"
+                              />
+                              <line
+                                x1="12"
+                                y1="17"
+                                x2="12.01"
+                                y2="17"
+                                stroke="#e05030"
+                                strokeWidth="2.5"
+                              />
+                            </svg>
+                            <span className="q2-s4-pilltxt">
+                              STAGE 4 · 최종 암호
+                            </span>
+                            <span className="q2-s4-dot" aria-hidden />
+                          </div>
+
+                          <div className="q2-s4-time">
+                            <svg
+                              width="12"
+                              height="12"
+                              viewBox="0 0 24 24"
+                              fill="none"
+                              stroke="#e05030"
+                              strokeWidth="2"
+                              strokeLinecap="round"
+                            >
+                              <circle cx="12" cy="12" r="10" />
+                              <polyline points="12 6 12 12 16 14" />
+                            </svg>
+                            <span className="q2-s4-timek">TIME</span>
+                            <span
+                              className={`q2-s4-timer ${stage4RemainingSec <= 30 ? "is-urgent" : ""}`}
+                            >
+                              {pad(m)}:{pad(s)}
+                            </span>
+                          </div>
+                        </div>
+
+                        <h2 className="q2-s4-title">
+                          새로운 공식으로 최종 암호를 계산하시오
+                          <br />
+                          <span className="q2-s4-title-sub">
+                            — 시간이 없습니다!
+                          </span>
+                        </h2>
+
+                        <div className="q2-s4-table">
+                          <div className="q2-s4-kicker">DISTANCE DATABASE</div>
+                          <div className="q2-s4-grid">
+                            {row("U")}
+                            {row("R")}
+                            {row("M")}
+                            {row("O")}
+                          </div>
+                        </div>
+
+                        <div className="q2-s4-formula">
+                          <div className="q2-s4-formula-top" aria-hidden />
+                          <div className="q2-s4-formula-k">FINAL FORMULA</div>
+                          <div className="q2-s4-formula-v">{formulaLine}</div>
+                          <div className="q2-s4-formula-scan" aria-hidden />
+                        </div>
+
+                        <div className="q2-s4-bar">
+                          <div
+                            className="q2-s4-bar-in"
+                            style={{ width: `${pct}%` }}
+                            aria-hidden
+                          />
+                        </div>
+
+                        <div className="q2-s4-inputrow">
+                          <input
+                            className={`q2-s4-in ${singleError ? "err" : ""}`}
+                            value={singleInput}
+                            onChange={(e) => setSingleInput(e.target.value)}
+                            placeholder={singlePlaceholder}
+                            onKeyDown={(e) => {
+                              if (e.key === "Enter") submitSingle();
+                            }}
+                          />
+                          <button
+                            className="q2-s4-go"
+                            onClick={submitSingle}
+                            aria-label="제출"
+                          >
+                            <svg
+                              width="18"
+                              height="18"
+                              viewBox="0 0 24 24"
+                              fill="none"
+                              stroke="currentColor"
+                              strokeWidth="2.5"
+                              strokeLinecap="round"
+                              strokeLinejoin="round"
+                              aria-hidden
+                            >
+                              <line x1="5" y1="12" x2="19" y2="12" />
+                              <polyline points="12 5 19 12 12 19" />
+                            </svg>
+                          </button>
+                        </div>
+
+                        <button
+                          className="q2-s4-hintbtn"
+                          onClick={() => setHintShown((v) => !v)}
+                        >
+                          [ 힌트 보기 ]
+                        </button>
+                        {hintShown && scene.hint && (
+                          <div className="q2-s4-hintbox">{scene.hint}</div>
+                        )}
+                      </>
+                    );
+                  })()}
+                </div>
+              ) : (
+                <div className={`qz-card ${moodClass(scene.mood)}`}>
+                  <div className={`qz-badge ${moodClass(scene.mood)}`}>
+                    {scene.badge}
+                  </div>
+                  <div className="qz-title">{scene.title}</div>
+                  <div className={`qz-body ${moodClass(scene.mood)}`}>
+                    {scene.body}
+                  </div>
+                  <div className="qi-row">
+                    <input
+                      className={`qi ${singleError ? "err" : ""}`}
+                      value={singleInput}
+                      onChange={(e) => setSingleInput(e.target.value)}
+                      placeholder={singlePlaceholder}
+                      onKeyDown={(e) => {
+                        if (e.key === "Enter") submitSingle();
+                      }}
+                    />
+                    <button
+                      className={`qbtn ${moodClass(scene.mood)}`}
+                      onClick={submitSingle}
+                    >
+                      →
+                    </button>
+                  </div>
+                  <button
+                    className="qhint"
+                    onClick={() => setHintShown((v) => !v)}
+                  >
+                    [ 힌트 보기 ]
+                  </button>
+                  {hintShown && scene.hint && (
+                    <div className="qhint-box">{scene.hint}</div>
+                  )}
+                </div>
+              )}
               <div className="bot-nav">
                 <button className="nbtn" onClick={goBack}>
                   <img
@@ -888,29 +2324,153 @@ export default function Quiz2Game() {
 
           {scene.t === "quiz-m" && (
             <>
-              <div className="qz-card">
-                <div className="qz-badge">{scene.badge}</div>
-                <div className="qz-title">{scene.title}</div>
-                <div className="qz-body">{scene.body}</div>
-                {scene.inputs.map((item, idx) => (
-                  <div key={item.lbl} className="mi-row">
-                    <span className="mi-lbl">{item.lbl}</span>
-                    <input
-                      className={`mi ${multiErrors[idx] ? "err" : ""}`}
-                      value={multiInputs[idx] ?? ""}
-                      onChange={(e) => {
-                        const next = [...multiInputs];
-                        next[idx] = e.target.value;
-                        setMultiInputs(next);
-                      }}
-                      placeholder={item.ph}
-                    />
+              {scene.badge === "STAGE 2 · 광고판 위치 해독" ? (
+                <div className="q2-s2-wrap">
+                  <div className="q2-s2-top">
+                    <div className="q2-s2-pill">
+                      <span className="q2-s2-dot" aria-hidden />
+                      <span className="q2-s2-pilltxt">{scene.badge}</span>
+                    </div>
                   </div>
-                ))}
-                <button className="msub" onClick={submitMulti}>
-                  확인 →
-                </button>
-              </div>
+
+                  <h2 className="q2-s2-title">{scene.title}</h2>
+
+                  {(() => {
+                    const lines = (scene.body ?? "")
+                      .split("\n")
+                      .map((l) => l.trim());
+                    const optionsLine =
+                      lines.find((l) => l.startsWith("A.")) ?? "";
+                    const numsLine =
+                      lines.find((l) => /^\d+\s*\/\//.test(l)) ?? "";
+                    const arrowLine =
+                      lines.find((l) => l.startsWith("→")) ?? "";
+
+                    const optMatches = Array.from(
+                      optionsLine.matchAll(/([A-D])\.\s*([^\s]+)/g),
+                    );
+                    const opts = optMatches.map((m) => ({
+                      k: m[1] ?? "",
+                      v: m[2] ?? "",
+                    }));
+
+                    const nums = numsLine
+                      .split("//")
+                      .map((s) => s.trim())
+                      .filter(Boolean)
+                      .slice(0, 3);
+
+                    return (
+                      <>
+                        <div className="q2-s2-card q2-s2-card--teal">
+                          <div className="q2-s2-kicker">KEYWORD OPTIONS</div>
+                          <div className="q2-s2-optgrid">
+                            {opts.map((o) => (
+                              <div className="q2-s2-opt" key={o.k}>
+                                <span className="q2-s2-optk">{o.k}.</span>
+                                <span className="q2-s2-optv">{o.v}</span>
+                              </div>
+                            ))}
+                          </div>
+                        </div>
+
+                        <div className="q2-s2-card q2-s2-card--violet">
+                          <div className="q2-s2-kicker q2-s2-kicker--violet">
+                            DECODE SEQUENCE
+                          </div>
+                          <div className="q2-s2-seq">
+                            {nums.map((n, idx) => (
+                              <Fragment key={`${n}-${idx}`}>
+                                <div className="q2-s2-numcard">
+                                  <div className="q2-s2-num">{n}</div>
+                                  <div className="q2-s2-numsub">번째</div>
+                                </div>
+                                {idx < nums.length - 1 && (
+                                  <div className="q2-s2-slash">//</div>
+                                )}
+                              </Fragment>
+                            ))}
+                          </div>
+                          <div className="q2-s2-arrowline">
+                            <span className="q2-s2-arrow">→</span>
+                            <span className="q2-s2-arrowtxt">
+                              {arrowLine.replace(/^→\s*/, "")}
+                            </span>
+                          </div>
+                        </div>
+                      </>
+                    );
+                  })()}
+
+                  <div className="q2-s2-inputk">ANSWER INPUT</div>
+
+                  <div className="q2-s2-inputs">
+                    {scene.inputs.map((item, idx) => {
+                      const n = (item.lbl.match(/\d+/)?.[0] ?? "").trim();
+                      return (
+                        <div key={item.lbl} className="q2-s2-inrow">
+                          <div className="q2-s2-inidx">
+                            <span className="q2-s2-innum">{n}</span>
+                            <span className="q2-s2-insub">번째</span>
+                          </div>
+                          <input
+                            className={`q2-s2-in ${multiErrors[idx] ? "err" : ""}`}
+                            value={multiInputs[idx] ?? ""}
+                            onChange={(e) => {
+                              const next = [...multiInputs];
+                              next[idx] = e.target.value;
+                              setMultiInputs(next);
+                            }}
+                            placeholder={item.ph}
+                          />
+                        </div>
+                      );
+                    })}
+                  </div>
+
+                  <button className="q2-s2-confirm" onClick={submitMulti}>
+                    확인
+                    <svg
+                      width="16"
+                      height="16"
+                      viewBox="0 0 24 24"
+                      fill="none"
+                      stroke="currentColor"
+                      strokeWidth="2.5"
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      aria-hidden
+                    >
+                      <line x1="5" y1="12" x2="19" y2="12" />
+                      <polyline points="12 5 19 12 12 19" />
+                    </svg>
+                  </button>
+                </div>
+              ) : (
+                <div className="qz-card">
+                  <div className="qz-badge">{scene.badge}</div>
+                  <div className="qz-title">{scene.title}</div>
+                  <div className="qz-body">{scene.body}</div>
+                  {scene.inputs.map((item, idx) => (
+                    <div key={item.lbl} className="mi-row">
+                      <span className="mi-lbl">{item.lbl}</span>
+                      <input
+                        className={`mi ${multiErrors[idx] ? "err" : ""}`}
+                        value={multiInputs[idx] ?? ""}
+                        onChange={(e) => {
+                          const next = [...multiInputs];
+                          next[idx] = e.target.value;
+                          setMultiInputs(next);
+                        }}
+                        placeholder={item.ph}
+                      />
+                    </div>
+                  ))}
+                  <button className="msub" onClick={submitMulti}>
+                    확인 →
+                  </button>
+                </div>
+              )}
               <div className="bot-nav">
                 <button className="nbtn" onClick={goBack}>
                   <img
@@ -926,22 +2486,148 @@ export default function Quiz2Game() {
           )}
 
           {scene.t === "result" && (
-            <div className="rs-wrap">
-              <div className="rs-lbl">{scene.lbl}</div>
-              <div className="rs-ans">{scene.ans}</div>
-              <div className="rs-desc">{scene.desc}</div>
-              <div style={{ marginTop: 14, textAlign: "center" }}>
-                <button className="nbtn p" onClick={adv}>
-                  <span>NEXT</span>
-                  <img
-                    src="https://api.iconify.design/ph/arrow-right-bold.svg?color=%234de8ea"
-                    alt=""
-                    width={18}
-                    height={18}
+            <>
+              {scene.lbl === "SIGNAL CONFIRMED" ? (
+                <div className="q2-signal-scene">
+                  <canvas
+                    ref={signalRainCanvasRef}
+                    className="q2-signal-rain"
                   />
-                </button>
-              </div>
-            </div>
+                  <div
+                    className="q2-signal-lightning"
+                    style={{ opacity: signalLightningOpacity }}
+                  />
+                  <div className="q2-signal-glow" />
+                  <div className="q2-signal-vignette" />
+                  <div className="q2-signal-scan" />
+
+                  <div
+                    className={`q2-signal-inner ${signalResultOn ? "is-on" : ""}`}
+                  >
+                    <div className="q2-signal-topbar">
+                      <div className="q2-signal-topline left" />
+                      <div className="q2-signal-pill">
+                        <span className="q2-signal-dot" />
+                        <span className="q2-signal-pilltext">
+                          SIGNAL CONFIRMED
+                        </span>
+                      </div>
+                      <div className="q2-signal-topline right" />
+                    </div>
+
+                    <div className="q2-signal-dist">
+                      <div className="q2-signal-distkicker">
+                        DISTANCE CALCULATED
+                      </div>
+                      <div className="q2-signal-distmain">
+                        <span className="q2-signal-num">
+                          {signalDistanceDisplay}
+                        </span>
+                        <span className="q2-signal-unit">km</span>
+                        <div className="q2-signal-underline" />
+                      </div>
+                    </div>
+
+                    <div className="q2-signal-coords">
+                      <div className="q2-signal-card">
+                        <div className="q2-signal-cardlbl">FROM</div>
+                        <div className="q2-signal-cardtitle">울릉도</div>
+                        <div className="q2-signal-cardsub">
+                          37°30′N 130°52′E
+                        </div>
+                      </div>
+                      <div className="q2-signal-arrow" aria-hidden="true">
+                        <svg
+                          width="20"
+                          height="20"
+                          viewBox="0 0 24 24"
+                          fill="none"
+                        >
+                          <line
+                            x1="5"
+                            y1="12"
+                            x2="19"
+                            y2="12"
+                            stroke="rgba(90,240,196,0.4)"
+                            strokeWidth="1.5"
+                            strokeLinecap="round"
+                          />
+                          <polyline
+                            points="12 5 19 12 12 19"
+                            stroke="rgba(90,240,196,0.4)"
+                            strokeWidth="1.5"
+                            strokeLinecap="round"
+                            strokeLinejoin="round"
+                            fill="none"
+                          />
+                        </svg>
+                      </div>
+                      <div className="q2-signal-card">
+                        <div className="q2-signal-cardlbl">TO</div>
+                        <div className="q2-signal-cardtitle">독도</div>
+                        <div className="q2-signal-cardsub">
+                          37°14′N 131°52′E
+                        </div>
+                      </div>
+                    </div>
+
+                    <div className="q2-signal-status">
+                      <div className="q2-signal-statushead">
+                        <span className="q2-signal-statusdot" />
+                        <span className="q2-signal-statustitle">
+                          IDENTITY VERIFIED
+                        </span>
+                      </div>
+                      <div className="q2-signal-statussep" />
+                      <p className="q2-signal-statusmsg">
+                        울릉도와 독도의 거리는{" "}
+                        <span className="q2-signal-strong">87.4km</span>
+                        입니다.
+                        <br />
+                        신원이 확인되었습니다.
+                      </p>
+                    </div>
+
+                    <div className="q2-signal-btn">
+                      <button className="nbtn p" onClick={adv}>
+                        <span>NEXT</span>
+                        <img
+                          src="https://api.iconify.design/ph/arrow-right-bold.svg?color=%234de8ea"
+                          alt=""
+                          width={18}
+                          height={18}
+                        />
+                      </button>
+                    </div>
+
+                    <div className="q2-signal-bottombar">
+                      <div className="q2-signal-bottomline left" />
+                      <span className="q2-signal-bottomtext">
+                        MISSION 02 · 새벽을 여는 독도
+                      </span>
+                      <div className="q2-signal-bottomline right" />
+                    </div>
+                  </div>
+                </div>
+              ) : (
+                <div className="rs-wrap">
+                  <div className="rs-lbl">{scene.lbl}</div>
+                  <div className="rs-ans">{scene.ans}</div>
+                  <div className="rs-desc">{scene.desc}</div>
+                  <div style={{ marginTop: 14, textAlign: "center" }}>
+                    <button className="nbtn p" onClick={adv}>
+                      <span>NEXT</span>
+                      <img
+                        src="https://api.iconify.design/ph/arrow-right-bold.svg?color=%234de8ea"
+                        alt=""
+                        width={18}
+                        height={18}
+                      />
+                    </button>
+                  </div>
+                </div>
+              )}
+            </>
           )}
 
           {scene.t === "success" && (
