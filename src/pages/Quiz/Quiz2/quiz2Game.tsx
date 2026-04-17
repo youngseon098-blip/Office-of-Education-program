@@ -165,14 +165,14 @@ const SCENES: Scene[] = [
     lines: [
       "안녕하세요 보안관리 AI 프로세서입니다.",
       "요원 A가 당신에게 전달한 기밀 문서입니다.",
-      "열람을 원하시면 버튼을 눌러주십시요.",
+      "열람을 원하시면 버튼을 눌러주십시오.",
     ],
   },
   {
     t: "quiz",
     mood: "n",
     badge: "STAGE 1 · 단어 해독",
-    title: "다음 문장에서 공통으로 가장 많이 표현된 단어를 해독하세요",
+    title: "다음 문장에서 공통으로 가장 많이 표현된 단어를 해독하세요.",
     body: "[보기 1]\n독도 등대(항로표지관리소)는 대한민국 영토 최동단에서 밤바다를 밝히며, 우리 영토의 실효적 지배를 상징하는 핵심 시설. 이 등대의 높이는 15M이다.\n\n[보기 2]\n울릉도 최초의 등대이며 1958년 4월에 첫 불을 밝혔다. 통칭 태하등대라고 하며 높이는 7.6M의 백색 원형 콘크리트 구조물로 약 50km 거리까지 불빛을 전달한다.",
     ph: "공통 단어 입력",
     ans: "등대",
@@ -288,9 +288,9 @@ const SCENES: Scene[] = [
     badge: "⚠ STAGE 4 · 최종 암호",
     title: "새로운 공식으로 최종 암호를 계산하시오 — 시간이 없습니다!",
     body: "U = 울릉도  →    87.4 km\nR = 러시아  →  6,000 km\nM = 미국    → 10,500 km\nO = 오키섬  →   157.5 km\n\n( M + R ) + U - O = ?",
-    ph: "최종 암호 입력",
+    ph: "최종 암호 입력 (",
     ans: "16,429.9",
-    hint: "10500 + 6000 + 87.4 - 157.5",
+    hint: "그런거 없다~",
   },
   { t: "success" },
 ];
@@ -298,6 +298,9 @@ const SCENES: Scene[] = [
 function norm(v: string) {
   return v.replace(/,/g, "").replace(/\s/g, "").toLowerCase();
 }
+
+const BIRD_PATH_D =
+  "M256.661,691.06l-18.2.553-25.165.525-28.234.549-27.83.559-46.007.215a7.519,7.519,0,0,1-5.7-2.72,8.822,8.822,0,0,1-1.016-7.226c2.33-7.446,6.27-13.963,10.291-20.67l15.15-25.27c9.667-16.124,18.9-31.9,27.712-48.524,6.724-12.7,12.44-25.23,18.5-38.277,8.624-18.557,16.82-36.815,24.053-56.017,7.87-20.891,13.65-41.951,19.424-63.427l6.129-22.793a101.409,101.409,0,0,0,2.461-11.183,226.618,226.618,0,0,1-55.12,8.068c-21.684.674-47.707-.651-68.815-5.44a156.159,156.159,0,0,1-69.376-35.763A101.931,101.931,0,0,1,14.77,339.228C1.958,317.5-1.017,296.649.278,271.73,1.459,249,9.024,223.985,19.251,203.538c10.03-20.054,21.914-38.854,37.047-55.576a350.784,350.784,0,0,1,40.424-37.956c30.813-24.8,71.14-48.885,106.493-66.82l51.678-26.218,13.35-6.853,9.95-4.268L290.643.435a6.638,6.638,0,0,1,7.338,1.837c1.321,1.809.44,4.55-.966,6.058-2.042,2.19-3.973,4.371-6.043,6.435l-6.824,6.8L266.692,37.892,229.655,72.239,206.892,93.215c-11.132,10.258-38.041,41.5-45.784,56.039,31.245-16.394,59.37-25.839,94.419-26.624,3.985-.089,7.6-.232,11.51-.028l10.209.532c34.413,1.792,72.613,15.437,96.771,40.88,23.245,24.48,36.7,57.128,42.307,90.127,3.181,18.738,5,38.384,3.954,57.264l-.641,11.556c-2.389,43.121-24.62,100.343-48.8,136.561l-36.627,54.865c-16.25,24.341-30.1,44.346-38.863,73-8.2,26.818-8.957,54.495-1.119,81.514a32.773,32.773,0,0,0,3.291,8.327,8.436,8.436,0,0,1,.553,7.126,7.763,7.763,0,0,1-5.222,3.944,151.7,151.7,0,0,1-22.875,2.2Zm43.908-417.846c-5.4-7.85-13.487-12.692-22.4-14.928a92.472,92.472,0,0,0-17.846-2.852,260.445,260.445,0,0,0-29.649,0l-18.342,1.115-10.4.561c-13.318.718-25.153.912-38.161-2.343a46.369,46.369,0,0,1-30.986-25.346,52.484,52.484,0,0,1-4.417-26.36c1.34-15.735,6.181-30.233,13.636-43.992a233.946,233.946,0,0,1,21.56-33.572c11.558-14.766,23.315-29.067,36.961-41.835l8.245-7.715,22.233-20.31,30.882-29.108-52.71,26.318c-34.686,17.319-72.289,40.187-102.9,63.9-10.43,8.079-19.659,16.779-29.281,25.883C57.35,161.215,41.9,183.549,29.8,207.707c-14.182,28.314-22.057,61.681-17.056,93.178a94.213,94.213,0,0,0,30.759,55.824,144.026,144.026,0,0,0,61.889,31.919c19.545,4.651,46,6.156,66.106,5.5,16.782-.549,33.136-2.156,49.5-6.585a171.4,171.4,0,0,0,50.822-23.264,79.28,79.28,0,0,0,30.019-37.218,71.581,71.581,0,0,0,5.215-28.244c-.127-8.856-1.163-17.86-6.486-25.6M117.515,682.2l38.635-.257,27.814-.546,27.258-.549,26.152-.532,17.982-.543,11.67-.477,8.784-.5,8.034-.494c.48-.03,1.163-.936.923-1.379-2.3-4.235-3.429-9.6-4.193-14.444-2.186-13.878-3.866-27.164-2.87-41.214a171.741,171.741,0,0,1,17.31-63.91,290.182,290.182,0,0,1,21.009-36.162l15.458-22.719,22.57-33.6C380.561,425.4,406,369.854,408.329,322.42l.676-13.775c.26-5.3.261-10.42,0-15.74l-.654-13.126c-.611-12.265-2.882-23.94-5.649-35.973a175.119,175.119,0,0,0-16.128-43.159,132.419,132.419,0,0,0-19.71-27.82C345.4,149.4,307.7,135.555,276.692,134.411l-12.353-.456c-16.791-.62-38.072,2.021-54.3,7.011-17.476,5.374-38.887,14.143-53.478,25.026a98.05,98.05,0,0,1-8.1,5.59,93.73,93.73,0,0,0-8.764,31.585c-1.88,18.081,7.116,34.65,24.932,40.075,11.423,3.478,24.381,3.277,36.331,2.587l28.713-1.656a286.357,286.357,0,0,1,31.214-.04,100.746,100.746,0,0,1,21.475,3.6,48.588,48.588,0,0,1,27.316,18.728c6.619,9.414,8.545,20.558,8.7,31.838a84.988,84.988,0,0,1-6.963,35.232c-7.341,17.357-19.486,31.25-35.322,41.489a195.411,195.411,0,0,1-36.185,18.394,52,52,0,0,1-1.416,11.123l-6.553,24.5c-6.251,23.369-12.358,46.385-20.891,69.112-11.248,29.964-38.99,90.59-55.11,117.659l-24.372,40.926-8.132,13.774c-2.237,3.79-4.711,7.36-5.919,11.691";
 
 export default function Quiz2Game() {
   const [cur, setCur] = useState(0);
@@ -340,6 +343,8 @@ export default function Quiz2Game() {
   const stageRainCanvasRef = useRef<HTMLCanvasElement | null>(null);
   const stageTimersRef = useRef<number[]>([]);
   const stage4TimerRef = useRef<number | null>(null);
+  const successParticleCanvasRef = useRef<HTMLCanvasElement | null>(null);
+  const successParticleRafRef = useRef<number | null>(null);
 
   const scene = SCENES[cur];
   const isIntroStage = scene.t === "stage" && scene.num === 0;
@@ -1039,6 +1044,83 @@ export default function Quiz2Game() {
   }, [scene.t, cur]);
 
   useEffect(() => {
+    if (successParticleRafRef.current != null) {
+      cancelAnimationFrame(successParticleRafRef.current);
+      successParticleRafRef.current = null;
+    }
+
+    const canvas = successParticleCanvasRef.current;
+    if (!canvas || scene.t !== "success") return;
+    const ctx = canvas.getContext("2d");
+    if (!ctx) return;
+
+    type Pt = {
+      x: number;
+      y: number;
+      vx: number;
+      vy: number;
+      life: number;
+      r: number;
+    };
+    let pts: Pt[] = [];
+
+    const resize = () => {
+      canvas.width = window.innerWidth;
+      canvas.height = window.innerHeight;
+    };
+    resize();
+    window.addEventListener("resize", resize);
+
+    const spawnPt = () => {
+      const w = canvas.width;
+      const h = canvas.height;
+      pts.push({
+        x: w * 0.25 + Math.random() * w * 0.5,
+        y: h * 0.48 + Math.random() * 60,
+        vx: (Math.random() - 0.5) * 0.9,
+        vy: -(Math.random() * 1.2 + 0.5),
+        life: 1,
+        r: Math.random() * 6.4 + 2.8,
+      });
+    };
+
+    const drawPts = () => {
+      ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+      if (pts.length < 28) spawnPt();
+      pts = pts.filter((p) => p.life > 0);
+
+      pts.forEach((p) => {
+        ctx.save();
+        ctx.globalAlpha = p.life * 0.75;
+        ctx.fillStyle = "#5af0c4";
+        ctx.shadowBlur = 8;
+        ctx.shadowColor = "#5af0c4";
+        ctx.beginPath();
+        ctx.arc(p.x, p.y, p.r, 0, Math.PI * 2);
+        ctx.fill();
+        ctx.restore();
+
+        p.x += p.vx;
+        p.y += p.vy;
+        p.life -= 0.009;
+      });
+
+      successParticleRafRef.current = requestAnimationFrame(drawPts);
+    };
+
+    successParticleRafRef.current = requestAnimationFrame(drawPts);
+
+    return () => {
+      if (successParticleRafRef.current != null) {
+        cancelAnimationFrame(successParticleRafRef.current);
+        successParticleRafRef.current = null;
+      }
+      window.removeEventListener("resize", resize);
+    };
+  }, [scene.t]);
+
+  useEffect(() => {
     introTimersRef.current.forEach((timerId) => window.clearTimeout(timerId));
     introTimersRef.current = [];
     setIntroIconVisible(false);
@@ -1196,7 +1278,7 @@ export default function Quiz2Game() {
 
   return (
     <main
-      className={`quiz2game-page ${scene.t === "dlg" ? "q2-dialogue-jisoo" : ""} ${dialogueBgClass} ${scene.t === "atmo" ? "q2-atmo-page" : ""} ${scene.t === "result" ? "q2-result-page" : ""} ${scene.t === "stage" && scene.num !== 0 ? "q2-stage-page" : ""} ${scene.t === "quiz" && (scene.badge === "3급 기밀 절차 · 항구 거리 계산" || scene.badge === "STAGE 1 · 단어 해독") ? "q2-harbor-page" : ""} ${scene.t === "quiz" && scene.badge === "⚠ STAGE 3 · 긴급 연산" ? "q2-s3-page" : ""} ${scene.t === "quiz" && scene.badge === "⚠ STAGE 4 · 최종 암호" ? "q2-s4-page" : ""}`}
+      className={`quiz2game-page ${scene.t === "dlg" ? "q2-dialogue-jisoo" : ""} ${dialogueBgClass} ${scene.t === "atmo" ? "q2-atmo-page" : ""} ${scene.t === "result" ? "q2-result-page" : ""} ${scene.t === "success" ? "q2-success-page" : ""} ${scene.t === "stage" && scene.num !== 0 ? "q2-stage-page" : ""} ${scene.t === "quiz" ? "q2-quiz-page" : ""} ${scene.t === "quiz-m" ? "q2-quizm-page" : ""} ${scene.t === "quiz" && (scene.badge === "3급 기밀 절차 · 항구 거리 계산" || scene.badge === "STAGE 1 · 단어 해독") ? "q2-harbor-page" : ""} ${scene.t === "quiz" && scene.badge === "⚠ STAGE 3 · 긴급 연산" ? "q2-s3-page" : ""} ${scene.t === "quiz" && scene.badge === "⚠ STAGE 4 · 최종 암호" ? "q2-s4-page" : ""}`}
     >
       <div id="bg-sky" />
       {scene.t === "atmo" && (
@@ -2609,6 +2691,208 @@ export default function Quiz2Game() {
                     </div>
                   </div>
                 </div>
+              ) : scene.lbl === "STAGE 1 CLEAR" ? (
+                <div className="q2-clear-scene">
+                  <div className="q2-clear-glow" />
+
+                  <div className="q2-clear-inner">
+                    <div className="q2-clear-ring">
+                      <svg
+                        className="q2-clear-ring-svg"
+                        viewBox="0 0 110 110"
+                        aria-hidden
+                      >
+                        <circle
+                          cx="55"
+                          cy="55"
+                          r="50"
+                          fill="none"
+                          stroke="rgba(90,240,196,0.1)"
+                          strokeWidth="1.5"
+                        />
+                        <circle
+                          className="q2-clear-ring-progress"
+                          cx="55"
+                          cy="55"
+                          r="50"
+                          fill="none"
+                          stroke="#5af0c4"
+                          strokeWidth="2"
+                          strokeDasharray="314"
+                          strokeDashoffset="314"
+                        />
+                        <circle
+                          cx="55"
+                          cy="55"
+                          r="40"
+                          fill="none"
+                          stroke="rgba(90,240,196,0.06)"
+                          strokeWidth="1"
+                        />
+                        <circle
+                          className="q2-clear-ring-spin"
+                          cx="55"
+                          cy="55"
+                          r="40"
+                          fill="none"
+                          stroke="rgba(90,240,196,0.25)"
+                          strokeWidth="1"
+                          strokeDasharray="15 237"
+                          strokeLinecap="round"
+                        />
+                      </svg>
+                      <div className="q2-clear-core">
+                        <svg
+                          width="22"
+                          height="22"
+                          viewBox="0 0 24 24"
+                          fill="none"
+                          stroke="#5af0c4"
+                          strokeWidth="2.5"
+                          strokeLinecap="round"
+                          strokeLinejoin="round"
+                          aria-hidden
+                        >
+                          <polyline points="20 6 9 17 4 12" />
+                        </svg>
+                        <span>CLEAR</span>
+                      </div>
+                    </div>
+
+                    <div className="q2-clear-stage-label">
+                      <div className="q2-clear-stage-line left" />
+                      <span>{scene.lbl}</span>
+                      <div className="q2-clear-stage-line right" />
+                    </div>
+
+                    <div className="q2-clear-title-box">
+                      <div className="q2-clear-title-kicker">
+                        NEXT DESTINATION
+                      </div>
+                      <h1 className="q2-clear-title">{scene.ans}</h1>
+                    </div>
+
+                    <div className="q2-clear-info-card">
+                      <div className="q2-clear-info-grid">
+                        <div className="q2-clear-info-col left">
+                          <div className="q2-clear-info-k">LOCATION</div>
+                          <div className="q2-clear-info-v">울릉도 내</div>
+                        </div>
+                        <div className="q2-clear-info-col right">
+                          <div className="q2-clear-info-k">CAUTION</div>
+                          <div className="q2-clear-caution">
+                            <span
+                              className="q2-clear-caution-dot"
+                              aria-hidden
+                            />
+                            식당 내 진입 금지
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+
+                    <div className="q2-clear-order-box">
+                      <div className="q2-clear-order-k">ORDER</div>
+                      <p className="q2-clear-order-msg">
+                        등대식당으로 이동하세요.
+                        <br />
+                        <span>단, 식당 안으로 들어가지 않습니다.</span>
+                      </p>
+                    </div>
+
+                    <div className="q2-clear-next">
+                      <button className="nbtn p" onClick={adv}>
+                        <span>NEXT</span>
+                        <img
+                          src="https://api.iconify.design/ph/arrow-right-bold.svg?color=%234de8ea"
+                          alt=""
+                          width={18}
+                          height={18}
+                        />
+                      </button>
+                    </div>
+                  </div>
+                </div>
+              ) : scene.lbl === "STAGE 2 CLEAR" ? (
+                <div className="q2-s2clear-scene">
+                  <div className="q2-s2clear-lightning" aria-hidden />
+                  <div className="q2-s2clear-bird-bg" aria-hidden>
+                    <svg viewBox="0 0 420.574 693.461" fill="none">
+                      <path d={BIRD_PATH_D} fill="rgba(90,240,196,0.22)" />
+                    </svg>
+                  </div>
+                  <div className="q2-s2clear-bird-sm" aria-hidden>
+                    <svg viewBox="0 0 420.574 693.461" fill="none">
+                      <path d={BIRD_PATH_D} fill="rgba(90,240,196,0.24)" />
+                    </svg>
+                  </div>
+
+                  <div className="q2-s2clear-main">
+                    <div className="q2-s2clear-bird-center" aria-hidden>
+                      <svg viewBox="0 0 420.574 693.461" fill="none">
+                        <path d={BIRD_PATH_D} fill="rgba(90,240,196,0.45)" />
+                      </svg>
+                    </div>
+
+                    <div className="q2-s2clear-label">
+                      <div className="q2-s2clear-line left" />
+                      <div className="q2-s2clear-pill">
+                        <svg
+                          width="10"
+                          height="10"
+                          viewBox="0 0 24 24"
+                          fill="none"
+                          stroke="#5af0c4"
+                          strokeWidth="3"
+                          strokeLinecap="round"
+                          strokeLinejoin="round"
+                          aria-hidden
+                        >
+                          <polyline points="20 6 9 17 4 12" />
+                        </svg>
+                        <span>STAGE 2 CLEAR</span>
+                      </div>
+                      <div className="q2-s2clear-line right" />
+                    </div>
+
+                    <div className="q2-s2clear-titlebox">
+                      <div className="q2-s2clear-kicker">NEXT DESTINATION</div>
+                      <h1 className="q2-s2clear-title">
+                        경상북도 <span>·</span> 울릉군
+                      </h1>
+                    </div>
+
+                    <div className="q2-s2clear-sep" />
+
+                    <div className="q2-s2clear-order">
+                      <div className="q2-s2clear-order-icon" aria-hidden>
+                        <svg viewBox="0 0 420.574 693.461" fill="none">
+                          <path d={BIRD_PATH_D} fill="rgba(90,240,196,0.68)" />
+                        </svg>
+                      </div>
+                      <div>
+                        <div className="q2-s2clear-order-k">ORDER</div>
+                        <div className="q2-s2clear-order-v">
+                          <span>한국옥외광고협회</span>
+                          <br />
+                          해당 그림을 보고 장소로 이동합니다.
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+
+                  <div className="q2-s2clear-next">
+                    <button className="nbtn p" onClick={adv}>
+                      <span>NEXT</span>
+                      <img
+                        src="https://api.iconify.design/ph/arrow-right-bold.svg?color=%234de8ea"
+                        alt=""
+                        width={18}
+                        height={18}
+                      />
+                    </button>
+                  </div>
+                </div>
               ) : (
                 <div className="rs-wrap">
                   <div className="rs-lbl">{scene.lbl}</div>
@@ -2631,21 +2915,27 @@ export default function Quiz2Game() {
           )}
 
           {scene.t === "success" && (
-            <div className="sc-wrap">
-              <div className="sc-lbl">--- MISSION COMPLETE ---</div>
-              <div className="sc-title">MISSION SUCCESS</div>
-              <div className="sc-num">"7"</div>
-              <div className="sc-msg">
-                수고하셨어요 요원!
-                <br />
-                덕분에 일본이 만든 안개 발생 기계를 멈출 수 있었어요.
-                <br />
-                <br />
-                대한민국 새벽을 여는 독도를
-                <br />
-                지키게 해준 당신들, 이번 임무는 완벽했어요.
+            <>
+              <canvas
+                ref={successParticleCanvasRef}
+                className="q2-success-particles"
+              />
+              <div className="sc-wrap">
+                <div className="sc-lbl">--- MISSION COMPLETE ---</div>
+                <div className="sc-title">MISSION SUCCESS</div>
+                <div className="sc-num">"7"</div>
+                <div className="sc-msg">
+                  수고하셨어요 요원!
+                  <br />
+                  덕분에 일본이 만든 안개 발생 기계를 멈출 수 있었어요.
+                  <br />
+                  <br />
+                  대한민국 새벽을 여는 독도를
+                  <br />
+                  지키게 해준 당신들, 이번 임무는 완벽했어요.
+                </div>
               </div>
-            </div>
+            </>
           )}
         </div>
       </div>
