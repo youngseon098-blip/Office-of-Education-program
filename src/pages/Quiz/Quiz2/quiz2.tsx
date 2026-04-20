@@ -2,6 +2,7 @@ import { Link } from "react-router-dom";
 import { useEffect, useRef, useState } from "react";
 import "../Quiz1/quiz1.css";
 import "./quiz2.css";
+import { disableIntroAudio, enableIntroAudio } from "./introAudioController";
 
 const MISSION_CODE_OK = "0817";
 
@@ -17,6 +18,14 @@ export default function Quiz2() {
     document.title = "Quiz 2 · 새벽을 여는 독도";
     return () => {
       document.title = "Office of Education Program";
+    };
+  }, []);
+
+  useEffect(() => {
+    const owner = "quiz2-page";
+    enableIntroAudio(owner);
+    return () => {
+      disableIntroAudio(owner);
     };
   }, []);
 

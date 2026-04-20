@@ -1,6 +1,7 @@
 import { Fragment, useEffect, useMemo, useRef, useState } from "react";
 import { Link } from "react-router-dom";
 import "./quiz2Game.css";
+import { disableIntroAudio, enableIntroAudio } from "./introAudioController";
 
 type Mood = "n" | "u" | "l";
 
@@ -76,9 +77,8 @@ const SCENES: Scene[] = [
     lbl: "국정원 최지수 국장",
     mood: "n",
     lines: [
-      "오셨군요. 반가워요.",
-      "저는 국정원 최지수 국장이예요.",
-      "이번에 새로 합류하게 된 신입 요원들이시죠?",
+      "오셨군요, 반가워요. 저는 국정원 최지수 국장이예요.",
+      "이번에 새로 합류하게 된 신입 요원들이시죠? 자, 다들 앉으세요. 상황이 급해서 바로 본론으로 들어갈게요.",
     ],
   },
   {
@@ -87,7 +87,6 @@ const SCENES: Scene[] = [
     lbl: "국정원 최지수 국장",
     mood: "n",
     lines: [
-      "자, 다들 앉으세요. 상황이 급해서 바로 본론으로 들어갈게요.",
       "아시다시피 울릉도는 연평균 기온 12.3도로 꽤 온화한 해양성 기후를 띠는 곳이에요.",
       "그런데 최근 들어 울릉도 일대에 안개가 너무 자주 발생한다는 주민들 신고가 빗발치고 있어요.",
     ],
@@ -136,9 +135,9 @@ const SCENES: Scene[] = [
     badge: "3급 기밀 절차 · 항구 거리 계산",
     title: "각 알파벳의 숫자를 기입한 후 연산을 계산하시오.",
     body: "1. 죽변항 : AB0.3 km  (A=1, B=3)\n2. 묵호항 : CDE.0 km  (C=1, D=6, E=1)\n3. 포항항 : 21F.0 km  (F=7)\n\nSCAPIN 제GHI호  (G=6, H=7, I=7)\n\nX = (G*F) + (D*H) + B\nY = (A+C+E) / I\n\nX + Y = ?",
-    ph: "정답 입력 (소수점 포함)",
+    ph: "정답 입력 (소수점 포함 00.0)",
     ans: "87.4",
-    hint: "힝 속았지?",
+    hint: "독도",
   },
   {
     t: "result",
@@ -256,9 +255,9 @@ const SCENES: Scene[] = [
     badge: "⚠ STAGE 3 · 긴급 연산",
     title: "각 나라까지의 거리를 계산하여 최종 암호값을 구하시오.",
     body: "U = 울릉도  →    87.4 km\nR = 러시아  →  6,000 km\nM = 미국    → 10,500 km\nO = 오키섬  →   157.5 km\n\n( M - R ) - U - O = ?",
-    ph: "정답 입력 (소수점 1자리)",
+    ph: "정답 입력 (소수점 1자리까지 입력하세요.)",
     ans: "4255.1",
-    hint: "또 속았죠?",
+    hint: "0,000.0",
   },
   { t: "stage", num: 4, title: "STAGE 4", sub: "최종 해독" },
   {
@@ -288,9 +287,9 @@ const SCENES: Scene[] = [
     badge: "⚠ STAGE 4 · 최종 암호",
     title: "새로운 공식으로 최종 암호를 계산하시오 — 시간이 없습니다!",
     body: "U = 울릉도  →    87.4 km\nR = 러시아  →  6,000 km\nM = 미국    → 10,500 km\nO = 오키섬  →   157.5 km\n\n( M + R ) + U - O = ?",
-    ph: "최종 암호 입력 (",
+    ph: "최종 암호 입력 (소수점 1자리까지 입력하세요.)",
     ans: "16,429.9",
-    hint: "그런거 없다~",
+    hint: "00,000.0",
   },
   { t: "success" },
 ];
@@ -302,8 +301,61 @@ function norm(v: string) {
 const BIRD_PATH_D =
   "M256.661,691.06l-18.2.553-25.165.525-28.234.549-27.83.559-46.007.215a7.519,7.519,0,0,1-5.7-2.72,8.822,8.822,0,0,1-1.016-7.226c2.33-7.446,6.27-13.963,10.291-20.67l15.15-25.27c9.667-16.124,18.9-31.9,27.712-48.524,6.724-12.7,12.44-25.23,18.5-38.277,8.624-18.557,16.82-36.815,24.053-56.017,7.87-20.891,13.65-41.951,19.424-63.427l6.129-22.793a101.409,101.409,0,0,0,2.461-11.183,226.618,226.618,0,0,1-55.12,8.068c-21.684.674-47.707-.651-68.815-5.44a156.159,156.159,0,0,1-69.376-35.763A101.931,101.931,0,0,1,14.77,339.228C1.958,317.5-1.017,296.649.278,271.73,1.459,249,9.024,223.985,19.251,203.538c10.03-20.054,21.914-38.854,37.047-55.576a350.784,350.784,0,0,1,40.424-37.956c30.813-24.8,71.14-48.885,106.493-66.82l51.678-26.218,13.35-6.853,9.95-4.268L290.643.435a6.638,6.638,0,0,1,7.338,1.837c1.321,1.809.44,4.55-.966,6.058-2.042,2.19-3.973,4.371-6.043,6.435l-6.824,6.8L266.692,37.892,229.655,72.239,206.892,93.215c-11.132,10.258-38.041,41.5-45.784,56.039,31.245-16.394,59.37-25.839,94.419-26.624,3.985-.089,7.6-.232,11.51-.028l10.209.532c34.413,1.792,72.613,15.437,96.771,40.88,23.245,24.48,36.7,57.128,42.307,90.127,3.181,18.738,5,38.384,3.954,57.264l-.641,11.556c-2.389,43.121-24.62,100.343-48.8,136.561l-36.627,54.865c-16.25,24.341-30.1,44.346-38.863,73-8.2,26.818-8.957,54.495-1.119,81.514a32.773,32.773,0,0,0,3.291,8.327,8.436,8.436,0,0,1,.553,7.126,7.763,7.763,0,0,1-5.222,3.944,151.7,151.7,0,0,1-22.875,2.2Zm43.908-417.846c-5.4-7.85-13.487-12.692-22.4-14.928a92.472,92.472,0,0,0-17.846-2.852,260.445,260.445,0,0,0-29.649,0l-18.342,1.115-10.4.561c-13.318.718-25.153.912-38.161-2.343a46.369,46.369,0,0,1-30.986-25.346,52.484,52.484,0,0,1-4.417-26.36c1.34-15.735,6.181-30.233,13.636-43.992a233.946,233.946,0,0,1,21.56-33.572c11.558-14.766,23.315-29.067,36.961-41.835l8.245-7.715,22.233-20.31,30.882-29.108-52.71,26.318c-34.686,17.319-72.289,40.187-102.9,63.9-10.43,8.079-19.659,16.779-29.281,25.883C57.35,161.215,41.9,183.549,29.8,207.707c-14.182,28.314-22.057,61.681-17.056,93.178a94.213,94.213,0,0,0,30.759,55.824,144.026,144.026,0,0,0,61.889,31.919c19.545,4.651,46,6.156,66.106,5.5,16.782-.549,33.136-2.156,49.5-6.585a171.4,171.4,0,0,0,50.822-23.264,79.28,79.28,0,0,0,30.019-37.218,71.581,71.581,0,0,0,5.215-28.244c-.127-8.856-1.163-17.86-6.486-25.6M117.515,682.2l38.635-.257,27.814-.546,27.258-.549,26.152-.532,17.982-.543,11.67-.477,8.784-.5,8.034-.494c.48-.03,1.163-.936.923-1.379-2.3-4.235-3.429-9.6-4.193-14.444-2.186-13.878-3.866-27.164-2.87-41.214a171.741,171.741,0,0,1,17.31-63.91,290.182,290.182,0,0,1,21.009-36.162l15.458-22.719,22.57-33.6C380.561,425.4,406,369.854,408.329,322.42l.676-13.775c.26-5.3.261-10.42,0-15.74l-.654-13.126c-.611-12.265-2.882-23.94-5.649-35.973a175.119,175.119,0,0,0-16.128-43.159,132.419,132.419,0,0,0-19.71-27.82C345.4,149.4,307.7,135.555,276.692,134.411l-12.353-.456c-16.791-.62-38.072,2.021-54.3,7.011-17.476,5.374-38.887,14.143-53.478,25.026a98.05,98.05,0,0,1-8.1,5.59,93.73,93.73,0,0,0-8.764,31.585c-1.88,18.081,7.116,34.65,24.932,40.075,11.423,3.478,24.381,3.277,36.331,2.587l28.713-1.656a286.357,286.357,0,0,1,31.214-.04,100.746,100.746,0,0,1,21.475,3.6,48.588,48.588,0,0,1,27.316,18.728c6.619,9.414,8.545,20.558,8.7,31.838a84.988,84.988,0,0,1-6.963,35.232c-7.341,17.357-19.486,31.25-35.322,41.489a195.411,195.411,0,0,1-36.185,18.394,52,52,0,0,1-1.416,11.123l-6.553,24.5c-6.251,23.369-12.358,46.385-20.891,69.112-11.248,29.964-38.99,90.59-55.11,117.659l-24.372,40.926-8.132,13.774c-2.237,3.79-4.711,7.36-5.919,11.691";
 
+const MUSIC1_TRIGGER_INDEX = SCENES.findIndex(
+  (item) =>
+    item.t === "dlg" &&
+    item.lbl === "국정원 최지수 국장" &&
+    item.lines[0] === "오셨군요. 반가워요.",
+);
+const MUSIC1_AUDIO_SRC = "/mp3/Quiz2/music1.mp3?v=20260420b";
+const MUSIC2_TRIGGER_INDEX = SCENES.findIndex(
+  (item) =>
+    item.t === "dlg" &&
+    item.ch === "laptop" &&
+    item.lines[0].includes("안녕하세요"),
+);
+const MUSIC3_TRIGGER_INDEX = SCENES.findIndex(
+  (item) =>
+    item.t === "dlg" &&
+    item.ch === "agentA" &&
+    item.lbl === "[ 요원 A · 긴급 무전 ]" &&
+    item.lines[0].includes("들리십니까? 요원!"),
+);
+const MUSIC4_TRIGGER_INDEX = SCENES.findIndex((item) => item.t === "success");
+const SUCCESS_SCENE_INDEX = SCENES.findIndex((item) => item.t === "success");
+const MUSIC2_AUDIO_SRC = "/mp3/Quiz2/music2.mp3?v=20260420";
+const MUSIC3_AUDIO_SRC = "/mp3/Quiz2/music3.mp3?v=20260420";
+const MUSIC4_AUDIO_SRC = "/mp3/Quiz2/music4.mp3?v=20260420";
+const ONE_PAGE_SFX_SRC = "/mp3/Quiz2/1.mp3?v=20260420";
+const KEYBO_SFX_SRC = "/mp3/Quiz2/keybo.mp3?v=20260420";
+const HORN_SFX_SRC = "/mp3/Quiz2/horn.mp3?v=20260420";
+const TALKIE_SFX_SRC = "/mp3/Quiz2/Talkie.mp3?v=20260420";
+const AI_SFX_SRC = "/mp3/Quiz2/ai.mp3?v=20260420";
+const DATA_SFX_SRC = "/mp3/Quiz2/data.mp3?v=20260420";
+const DIALOGUE_NEXT_DELAY_MS = 3000;
+const ATMO_NEXT_DELAY_MS = 5000;
+
+function getInitialSceneIndex() {
+  const clamp = (n: number) => Math.max(0, Math.min(SCENES.length - 1, n));
+  if (typeof window === "undefined") return 0;
+
+  const params = new URLSearchParams(window.location.search);
+  const sceneParam = params.get("scene");
+
+  if (sceneParam === "last" || sceneParam === "success") {
+    return clamp(SUCCESS_SCENE_INDEX >= 0 ? SUCCESS_SCENE_INDEX : SCENES.length - 1);
+  }
+
+  if (sceneParam != null) {
+    const parsed = Number(sceneParam);
+    if (Number.isFinite(parsed)) return clamp(parsed);
+  }
+
+  return 0;
+}
+
 export default function Quiz2Game() {
-  const [cur, setCur] = useState(0);
+  const [cur, setCur] = useState(getInitialSceneIndex);
   const [isTransitioning, setIsTransitioning] = useState(false);
   const [lineIdx, setLineIdx] = useState(0);
   const [typedText, setTypedText] = useState("");
@@ -343,8 +395,12 @@ export default function Quiz2Game() {
   const stageRainCanvasRef = useRef<HTMLCanvasElement | null>(null);
   const stageTimersRef = useRef<number[]>([]);
   const stage4TimerRef = useRef<number | null>(null);
+  const successRainCanvasRef = useRef<HTMLCanvasElement | null>(null);
   const successParticleCanvasRef = useRef<HTMLCanvasElement | null>(null);
+  const successFlashRef = useRef<HTMLDivElement | null>(null);
+  const successRainRafRef = useRef<number | null>(null);
   const successParticleRafRef = useRef<number | null>(null);
+  const transitionLockRef = useRef(false);
 
   const scene = SCENES[cur];
   const isIntroStage = scene.t === "stage" && scene.num === 0;
@@ -354,6 +410,24 @@ export default function Quiz2Game() {
   const [signalLightningOpacity, setSignalLightningOpacity] = useState(0);
   const [stageFxOn, setStageFxOn] = useState(false);
   const [stageLightningOpacity, setStageLightningOpacity] = useState(0);
+  const [music1On, setMusic1On] = useState(false);
+  const [music2On, setMusic2On] = useState(false);
+  const [music3On, setMusic3On] = useState(false);
+  const [music4On, setMusic4On] = useState(false);
+  const [dialogueNextReady, setDialogueNextReady] = useState(true);
+  const [atmoNextReady, setAtmoNextReady] = useState(true);
+  const music1Ref = useRef<HTMLAudioElement | null>(null);
+  const music2Ref = useRef<HTMLAudioElement | null>(null);
+  const music3Ref = useRef<HTMLAudioElement | null>(null);
+  const music4Ref = useRef<HTMLAudioElement | null>(null);
+  const onePageSfxRef = useRef<HTMLAudioElement | null>(null);
+  const keyboSfxRef = useRef<HTMLAudioElement | null>(null);
+  const hornSfxRef = useRef<HTMLAudioElement | null>(null);
+  const talkieSfxRef = useRef<HTMLAudioElement | null>(null);
+  const aiSfxRef = useRef<HTMLAudioElement | null>(null);
+  const dataSfxRef = useRef<HTMLAudioElement | null>(null);
+  const dialogueNextDelayTimerRef = useRef<number | null>(null);
+  const atmoNextDelayTimerRef = useRef<number | null>(null);
 
   const signalDistanceTarget = useMemo(() => {
     if (scene.t !== "result" || scene.lbl !== "SIGNAL CONFIRMED") return null;
@@ -367,6 +441,354 @@ export default function Quiz2Game() {
       document.title = "Office of Education Program";
     };
   }, []);
+
+  useEffect(() => {
+    const owner = "quiz2-game-intro";
+    if (isIntroStage) enableIntroAudio(owner);
+    else disableIntroAudio(owner);
+    return () => {
+      disableIntroAudio(owner);
+    };
+  }, [isIntroStage]);
+
+  useEffect(() => {
+    const shouldPlayMusic1 =
+      MUSIC1_TRIGGER_INDEX >= 0 &&
+      cur >= MUSIC1_TRIGGER_INDEX &&
+      (MUSIC2_TRIGGER_INDEX < 0 || cur < MUSIC2_TRIGGER_INDEX);
+    const shouldPlayMusic2 =
+      MUSIC2_TRIGGER_INDEX >= 0 &&
+      cur >= MUSIC2_TRIGGER_INDEX &&
+      (MUSIC3_TRIGGER_INDEX < 0 || cur < MUSIC3_TRIGGER_INDEX);
+    const shouldPlayMusic3 =
+      MUSIC3_TRIGGER_INDEX >= 0 &&
+      cur >= MUSIC3_TRIGGER_INDEX &&
+      (MUSIC4_TRIGGER_INDEX < 0 || cur < MUSIC4_TRIGGER_INDEX);
+    const shouldPlayMusic4 =
+      MUSIC4_TRIGGER_INDEX >= 0 && cur >= MUSIC4_TRIGGER_INDEX;
+    setMusic1On(shouldPlayMusic1);
+    setMusic2On(shouldPlayMusic2);
+    setMusic3On(shouldPlayMusic3);
+    setMusic4On(shouldPlayMusic4);
+  }, [cur]);
+
+  useEffect(() => {
+    if (!music1Ref.current) {
+      music1Ref.current = new Audio(MUSIC1_AUDIO_SRC);
+      music1Ref.current.loop = true;
+    }
+    const music1 = music1Ref.current;
+    if (music1On) {
+      void music1.play().catch(() => {
+        // 브라우저 자동재생 정책으로 재생이 막힐 수 있음
+      });
+      return;
+    }
+    music1.pause();
+    music1.currentTime = 0;
+  }, [music1On]);
+
+  useEffect(() => {
+    if (!music2Ref.current) {
+      music2Ref.current = new Audio(MUSIC2_AUDIO_SRC);
+      music2Ref.current.loop = true;
+    }
+    const music2 = music2Ref.current;
+    if (music2On) {
+      void music2.play().catch(() => {
+        // 브라우저 자동재생 정책으로 재생이 막힐 수 있음
+      });
+      return;
+    }
+    music2.pause();
+    music2.currentTime = 0;
+  }, [music2On]);
+
+  useEffect(() => {
+    if (!music3Ref.current) {
+      music3Ref.current = new Audio(MUSIC3_AUDIO_SRC);
+      music3Ref.current.loop = true;
+    }
+    const music3 = music3Ref.current;
+    if (music3On) {
+      void music3.play().catch(() => {
+        // 브라우저 자동재생 정책으로 재생이 막힐 수 있음
+      });
+      return;
+    }
+    music3.pause();
+    music3.currentTime = 0;
+  }, [music3On]);
+
+  useEffect(() => {
+    if (!music4Ref.current) {
+      music4Ref.current = new Audio(MUSIC4_AUDIO_SRC);
+      music4Ref.current.loop = true;
+    }
+    const music4 = music4Ref.current;
+    if (music4On) {
+      void music4.play().catch(() => {
+        // 브라우저 자동재생 정책으로 재생이 막힐 수 있음
+      });
+      return;
+    }
+    music4.pause();
+    music4.currentTime = 0;
+  }, [music4On]);
+
+  useEffect(() => {
+    if (!onePageSfxRef.current) {
+      onePageSfxRef.current = new Audio(ONE_PAGE_SFX_SRC);
+      onePageSfxRef.current.loop = false;
+    }
+    const onePageSfx = onePageSfxRef.current;
+    const isOnTargetPage =
+      MUSIC1_TRIGGER_INDEX >= 0 && cur === MUSIC1_TRIGGER_INDEX;
+    if (isOnTargetPage) {
+      onePageSfx.currentTime = 0;
+      void onePageSfx.play().catch(() => {
+        // 브라우저 자동재생 정책으로 재생이 막힐 수 있음
+      });
+      return;
+    }
+    onePageSfx.pause();
+    onePageSfx.currentTime = 0;
+  }, [cur]);
+
+  useEffect(() => {
+    if (!keyboSfxRef.current) {
+      keyboSfxRef.current = new Audio(KEYBO_SFX_SRC);
+      keyboSfxRef.current.loop = false;
+    }
+
+    const isAfterFirstDirectorPage =
+      MUSIC1_TRIGGER_INDEX >= 0 &&
+      (cur > MUSIC1_TRIGGER_INDEX ||
+        (cur === MUSIC1_TRIGGER_INDEX && lineIdx > 0));
+    const isTargetDialoguePage = scene.t === "dlg" && scene.ch === "director";
+    if (!isAfterFirstDirectorPage || !isTargetDialoguePage) return;
+
+    const keyboSfx = keyboSfxRef.current;
+    keyboSfx.currentTime = 0;
+    void keyboSfx.play().catch(() => {
+      // 브라우저 자동재생 정책으로 재생이 막힐 수 있음
+    });
+  }, [cur, lineIdx, scene.t, scene.t === "dlg" ? scene.ch : ""]);
+
+  useEffect(() => {
+    if (!talkieSfxRef.current) {
+      talkieSfxRef.current = new Audio(TALKIE_SFX_SRC);
+      talkieSfxRef.current.loop = false;
+    }
+
+    const isAfterFirstDirectorPage =
+      MUSIC1_TRIGGER_INDEX >= 0 &&
+      (cur > MUSIC1_TRIGGER_INDEX ||
+        (cur === MUSIC1_TRIGGER_INDEX && lineIdx > 0));
+    const isAgentADialoguePage = scene.t === "dlg" && scene.ch === "agentA";
+    if (!isAfterFirstDirectorPage || !isAgentADialoguePage) return;
+
+    const talkieSfx = talkieSfxRef.current;
+    talkieSfx.currentTime = 0;
+    void talkieSfx.play().catch(() => {
+      // 브라우저 자동재생 정책으로 재생이 막힐 수 있음
+    });
+  }, [cur, lineIdx, scene.t, scene.t === "dlg" ? scene.ch : ""]);
+
+  useEffect(() => {
+    if (!aiSfxRef.current) {
+      aiSfxRef.current = new Audio(AI_SFX_SRC);
+      aiSfxRef.current.loop = false;
+    }
+
+    const isAfterFirstDirectorPage =
+      MUSIC1_TRIGGER_INDEX >= 0 &&
+      (cur > MUSIC1_TRIGGER_INDEX ||
+        (cur === MUSIC1_TRIGGER_INDEX && lineIdx > 0));
+    const isLaptopDialoguePage = scene.t === "dlg" && scene.ch === "laptop";
+    if (!isAfterFirstDirectorPage || !isLaptopDialoguePage) return;
+
+    const aiSfx = aiSfxRef.current;
+    aiSfx.currentTime = 0;
+    void aiSfx.play().catch(() => {
+      // 브라우저 자동재생 정책으로 재생이 막힐 수 있음
+    });
+  }, [cur, lineIdx, scene.t, scene.t === "dlg" ? scene.ch : ""]);
+
+  useEffect(() => {
+    if (!hornSfxRef.current) {
+      hornSfxRef.current = new Audio(HORN_SFX_SRC);
+      hornSfxRef.current.loop = false;
+    }
+    const isTargetAtmoPage =
+      scene.t === "atmo" && scene.lbl === "울릉도로 이동 중";
+    if (!isTargetAtmoPage) return;
+
+    const hornSfx = hornSfxRef.current;
+    hornSfx.currentTime = 0;
+    void hornSfx.play().catch(() => {
+      // 브라우저 자동재생 정책으로 재생이 막힐 수 있음
+    });
+  }, [cur]);
+
+  useEffect(() => {
+    if (!dataSfxRef.current) {
+      dataSfxRef.current = new Audio(DATA_SFX_SRC);
+      dataSfxRef.current.loop = false;
+    }
+
+    const isSignalConfirmedPage =
+      scene.t === "result" && scene.lbl === "SIGNAL CONFIRMED";
+    if (!isSignalConfirmedPage) return;
+
+    const dataSfx = dataSfxRef.current;
+    dataSfx.currentTime = 0;
+    void dataSfx.play().catch(() => {
+      // 브라우저 자동재생 정책으로 재생이 막힐 수 있음
+    });
+  }, [cur]);
+
+  useEffect(() => {
+    return () => {
+      if (!music1Ref.current) return;
+      music1Ref.current.pause();
+      music1Ref.current.currentTime = 0;
+    };
+  }, []);
+
+  useEffect(() => {
+    return () => {
+      if (!music2Ref.current) return;
+      music2Ref.current.pause();
+      music2Ref.current.currentTime = 0;
+    };
+  }, []);
+
+  useEffect(() => {
+    return () => {
+      if (!music3Ref.current) return;
+      music3Ref.current.pause();
+      music3Ref.current.currentTime = 0;
+    };
+  }, []);
+
+  useEffect(() => {
+    return () => {
+      if (!music4Ref.current) return;
+      music4Ref.current.pause();
+      music4Ref.current.currentTime = 0;
+    };
+  }, []);
+
+  useEffect(() => {
+    return () => {
+      if (!onePageSfxRef.current) return;
+      onePageSfxRef.current.pause();
+      onePageSfxRef.current.currentTime = 0;
+    };
+  }, []);
+
+  useEffect(() => {
+    return () => {
+      if (!keyboSfxRef.current) return;
+      keyboSfxRef.current.pause();
+      keyboSfxRef.current.currentTime = 0;
+    };
+  }, []);
+
+  useEffect(() => {
+    return () => {
+      if (!hornSfxRef.current) return;
+      hornSfxRef.current.pause();
+      hornSfxRef.current.currentTime = 0;
+    };
+  }, []);
+
+  useEffect(() => {
+    return () => {
+      if (!talkieSfxRef.current) return;
+      talkieSfxRef.current.pause();
+      talkieSfxRef.current.currentTime = 0;
+    };
+  }, []);
+
+  useEffect(() => {
+    return () => {
+      if (!aiSfxRef.current) return;
+      aiSfxRef.current.pause();
+      aiSfxRef.current.currentTime = 0;
+    };
+  }, []);
+
+  useEffect(() => {
+    return () => {
+      if (!dataSfxRef.current) return;
+      dataSfxRef.current.pause();
+      dataSfxRef.current.currentTime = 0;
+    };
+  }, []);
+
+  useEffect(() => {
+    if (dialogueNextDelayTimerRef.current) {
+      window.clearTimeout(dialogueNextDelayTimerRef.current);
+      dialogueNextDelayTimerRef.current = null;
+    }
+
+    const shouldDelayNext =
+      scene.t === "dlg" &&
+      MUSIC1_TRIGGER_INDEX >= 0 &&
+      cur >= MUSIC1_TRIGGER_INDEX;
+
+    if (!shouldDelayNext) {
+      setDialogueNextReady(true);
+      return;
+    }
+
+    if (isTyping) {
+      setDialogueNextReady(false);
+      return;
+    }
+
+    setDialogueNextReady(false);
+    dialogueNextDelayTimerRef.current = window.setTimeout(() => {
+      setDialogueNextReady(true);
+      dialogueNextDelayTimerRef.current = null;
+    }, DIALOGUE_NEXT_DELAY_MS);
+
+    return () => {
+      if (dialogueNextDelayTimerRef.current) {
+        window.clearTimeout(dialogueNextDelayTimerRef.current);
+        dialogueNextDelayTimerRef.current = null;
+      }
+    };
+  }, [cur, lineIdx, isTyping, scene.t]);
+
+  useEffect(() => {
+    if (atmoNextDelayTimerRef.current) {
+      window.clearTimeout(atmoNextDelayTimerRef.current);
+      atmoNextDelayTimerRef.current = null;
+    }
+
+    const shouldDelayAtmoNext =
+      scene.t === "atmo" && scene.lbl === "울릉도로 이동 중";
+    if (!shouldDelayAtmoNext) {
+      setAtmoNextReady(true);
+      return;
+    }
+
+    setAtmoNextReady(false);
+    atmoNextDelayTimerRef.current = window.setTimeout(() => {
+      setAtmoNextReady(true);
+      atmoNextDelayTimerRef.current = null;
+    }, ATMO_NEXT_DELAY_MS);
+
+    return () => {
+      if (atmoNextDelayTimerRef.current) {
+        window.clearTimeout(atmoNextDelayTimerRef.current);
+        atmoNextDelayTimerRef.current = null;
+      }
+    };
+  }, [cur, scene.t, scene.t === "atmo" ? scene.lbl : ""]);
 
   useEffect(() => {
     // SIGNAL CONFIRMED result-specific animations (count up + staged reveal + lightning flash)
@@ -1044,78 +1466,141 @@ export default function Quiz2Game() {
   }, [scene.t, cur]);
 
   useEffect(() => {
+    if (successRainRafRef.current != null) {
+      cancelAnimationFrame(successRainRafRef.current);
+      successRainRafRef.current = null;
+    }
     if (successParticleRafRef.current != null) {
       cancelAnimationFrame(successParticleRafRef.current);
       successParticleRafRef.current = null;
     }
 
-    const canvas = successParticleCanvasRef.current;
-    if (!canvas || scene.t !== "success") return;
-    const ctx = canvas.getContext("2d");
-    if (!ctx) return;
+    const rc = successRainCanvasRef.current;
+    const pc = successParticleCanvasRef.current;
+    const fl = successFlashRef.current;
+    if (!rc || !pc || !fl || scene.t !== "success") return;
+    const cx = rc.getContext("2d");
+    const px = pc.getContext("2d");
+    if (!cx || !px) return;
 
-    type Pt = {
-      x: number;
-      y: number;
-      vx: number;
-      vy: number;
-      life: number;
-      r: number;
-    };
+    type Drop = { x: number; y: number; len: number; speed: number; alpha: number };
+    type Pt = { x: number; y: number; r: number; alpha: number; life: number };
+    let drops: Drop[] = [];
     let pts: Pt[] = [];
+    let width = 0;
+    let height = 0;
+    let flashTimers: number[] = [];
 
     const resize = () => {
-      canvas.width = window.innerWidth;
-      canvas.height = window.innerHeight;
+      width = rc.clientWidth || rc.parentElement?.clientWidth || 480;
+      height = rc.clientHeight || rc.parentElement?.clientHeight || 720;
+      rc.width = width;
+      rc.height = height;
+      pc.width = width;
+      pc.height = height;
+      drops = Array.from({ length: 120 }, () => ({
+        x: Math.random() * width,
+        y: Math.random() * height,
+        len: Math.random() * 14 + 6,
+        speed: Math.random() * 4 + 3,
+        alpha: Math.random() * 0.16 + 0.04,
+      }));
+      pts = Array.from({ length: 36 }, () => ({
+        x: width * 0.2 + Math.random() * width * 0.6,
+        y: height * 0.47 + Math.random() * 55,
+        r: Math.random() * 1.4 + 0.4,
+        alpha: Math.random() * 0.38 + 0.15,
+        life: Math.random(),
+      }));
     };
-    resize();
-    window.addEventListener("resize", resize);
 
-    const spawnPt = () => {
-      const w = canvas.width;
-      const h = canvas.height;
-      pts.push({
-        x: w * 0.25 + Math.random() * w * 0.5,
-        y: h * 0.48 + Math.random() * 60,
-        vx: (Math.random() - 0.5) * 0.9,
-        vy: -(Math.random() * 1.2 + 0.5),
-        life: 1,
-        r: Math.random() * 6.4 + 2.8,
+    const drawRain = () => {
+      cx.clearRect(0, 0, width, height);
+      drops.forEach((d) => {
+        cx.save();
+        cx.strokeStyle = `rgba(140,210,255,${d.alpha})`;
+        cx.lineWidth = 0.65;
+        cx.translate(d.x, d.y);
+        cx.rotate(0.17);
+        cx.beginPath();
+        cx.moveTo(0, 0);
+        cx.lineTo(0, d.len);
+        cx.stroke();
+        cx.restore();
+        d.y += d.speed;
+        d.x -= d.speed * 0.17;
+        if (d.y > height) {
+          d.y = -d.len;
+          d.x = Math.random() * width;
+        }
+        if (d.x < 0) d.x = width;
       });
+      successRainRafRef.current = requestAnimationFrame(drawRain);
     };
 
     const drawPts = () => {
-      ctx.clearRect(0, 0, canvas.width, canvas.height);
-
-      if (pts.length < 28) spawnPt();
-      pts = pts.filter((p) => p.life > 0);
-
+      px.clearRect(0, 0, width, height);
       pts.forEach((p) => {
-        ctx.save();
-        ctx.globalAlpha = p.life * 0.75;
-        ctx.fillStyle = "#5af0c4";
-        ctx.shadowBlur = 8;
-        ctx.shadowColor = "#5af0c4";
-        ctx.beginPath();
-        ctx.arc(p.x, p.y, p.r, 0, Math.PI * 2);
-        ctx.fill();
-        ctx.restore();
-
-        p.x += p.vx;
-        p.y += p.vy;
-        p.life -= 0.009;
+        p.life += 0.0045;
+        if (p.life > 1) {
+          p.x = width * 0.2 + Math.random() * width * 0.6;
+          p.y = height * 0.47 + Math.random() * 55;
+          p.life = 0;
+        }
+        const pl = Math.sin(p.life * Math.PI);
+        px.save();
+        px.globalAlpha = pl * p.alpha;
+        px.fillStyle = "#5af0c4";
+        px.shadowBlur = 6;
+        px.shadowColor = "#5af0c4";
+        px.beginPath();
+        px.arc(p.x + Math.sin(p.life * 5) * 3, p.y - p.life * height * 0.48, p.r, 0, Math.PI * 2);
+        px.fill();
+        px.restore();
       });
-
       successParticleRafRef.current = requestAnimationFrame(drawPts);
     };
 
-    successParticleRafRef.current = requestAnimationFrame(drawPts);
+    const flashLoop = () => {
+      fl.style.opacity = (Math.random() * 0.032 + 0.007).toString();
+      const tOff = window.setTimeout(() => {
+        fl.style.opacity = "0";
+        if (Math.random() > 0.5) {
+          const tSecond = window.setTimeout(() => {
+            fl.style.opacity = (Math.random() * 0.018).toString();
+            const tSecondOff = window.setTimeout(() => {
+              fl.style.opacity = "0";
+            }, 48);
+            flashTimers.push(tSecondOff);
+          }, 95);
+          flashTimers.push(tSecond);
+        }
+      }, 58);
+      const tNext = window.setTimeout(flashLoop, Math.random() * 9000 + 6000);
+      flashTimers.push(tOff, tNext);
+    };
+
+    resize();
+    window.addEventListener("resize", resize);
+    successRainRafRef.current = requestAnimationFrame(drawRain);
+    const startPtsTimer = window.setTimeout(() => {
+      successParticleRafRef.current = requestAnimationFrame(drawPts);
+    }, 1100);
+    flashTimers.push(startPtsTimer);
+    flashLoop();
 
     return () => {
+      if (successRainRafRef.current != null) {
+        cancelAnimationFrame(successRainRafRef.current);
+        successRainRafRef.current = null;
+      }
       if (successParticleRafRef.current != null) {
         cancelAnimationFrame(successParticleRafRef.current);
         successParticleRafRef.current = null;
       }
+      flashTimers.forEach((timer) => window.clearTimeout(timer));
+      flashTimers = [];
+      fl.style.opacity = "0";
       window.removeEventListener("resize", resize);
     };
   }, [scene.t]);
@@ -1180,6 +1665,8 @@ export default function Quiz2Game() {
   }, [cur]);
 
   const changeScene = (updater: (prev: number) => number) => {
+    if (transitionLockRef.current) return;
+    transitionLockRef.current = true;
     setIsTransitioning(true);
     window.setTimeout(() => {
       setCur((prev) => {
@@ -1187,11 +1674,18 @@ export default function Quiz2Game() {
         return Math.max(0, Math.min(SCENES.length - 1, next));
       });
       setIsTransitioning(false);
+      transitionLockRef.current = false;
     }, 320);
   };
 
   const adv = () => changeScene((prev) => prev + 1);
   const goBack = () => changeScene((prev) => prev - 1);
+  const onHomeClick = () => {
+    setMusic1On(false);
+    setMusic2On(false);
+    setMusic3On(false);
+    setMusic4On(false);
+  };
 
   const nextLine = () => {
     if (scene.t !== "dlg") return;
@@ -1199,6 +1693,13 @@ export default function Quiz2Game() {
       if (typeTimerRef.current) window.clearTimeout(typeTimerRef.current);
       setTypedText(scene.lines[lineIdx]);
       setIsTyping(false);
+      return;
+    }
+    if (
+      MUSIC1_TRIGGER_INDEX >= 0 &&
+      cur >= MUSIC1_TRIGGER_INDEX &&
+      !dialogueNextReady
+    ) {
       return;
     }
     if (lineIdx < scene.lines.length - 1) setLineIdx((prev) => prev + 1);
@@ -1309,6 +1810,7 @@ export default function Quiz2Game() {
         to="/"
         className="app-home-link app-home-link--fixed"
         aria-label="홈으로 이동"
+        onClick={onHomeClick}
       >
         <img
           src="https://api.iconify.design/fluent/home-24-filled.svg?color=%23ffffff"
@@ -1335,15 +1837,6 @@ export default function Quiz2Game() {
               <div className={`ci-label ${moodClass(scene.mood)}`}>
                 {scene.lbl}
               </div>
-            </div>
-          )}
-          {scene.t === "success" && (
-            <div className="ci-wrap">
-              <div className="ci laptop">
-                <span>{ICONS.director}</span>
-                <div className="scan" />
-              </div>
-              <div className="ci-label">국정원 최지수 국장</div>
             </div>
           )}
         </div>
@@ -1587,8 +2080,12 @@ export default function Quiz2Game() {
                   />
                   <span>PREV</span>
                 </button>
-                <button className="nbtn p" onClick={adv}>
-                  <span>NEXT</span>
+                <button
+                  className={`nbtn ${atmoNextReady ? "p" : ""}`}
+                  onClick={adv}
+                  disabled={!atmoNextReady}
+                >
+                  <span>{atmoNextReady ? "NEXT" : "..."}</span>
                   <img
                     src="https://api.iconify.design/ph/arrow-right-bold.svg?color=%234de8ea"
                     alt=""
@@ -1711,10 +2208,11 @@ export default function Quiz2Game() {
                   {lineIdx + 1} / {scene.lines.length}
                 </span>
                 <button
-                  className={`nbtn ${!isTyping ? "p" : ""}`}
+                  className={`nbtn ${!isTyping && dialogueNextReady ? "p" : ""}`}
                   onClick={nextLine}
+                  disabled={!isTyping && !dialogueNextReady}
                 >
-                  {isTyping ? (
+                  {isTyping || !dialogueNextReady ? (
                     "..."
                   ) : (
                     <>
@@ -2915,27 +3413,109 @@ export default function Quiz2Game() {
           )}
 
           {scene.t === "success" && (
-            <>
+            <div className="q2-success-shell">
+              <canvas ref={successRainCanvasRef} className="q2-success-rc" aria-hidden />
               <canvas
                 ref={successParticleCanvasRef}
                 className="q2-success-particles"
+                aria-hidden
               />
-              <div className="sc-wrap">
-                <div className="sc-lbl">--- MISSION COMPLETE ---</div>
-                <div className="sc-title">MISSION SUCCESS</div>
-                <div className="sc-num">"7"</div>
-                <div className="sc-msg">
-                  수고하셨어요 요원!
-                  <br />
-                  덕분에 일본이 만든 안개 발생 기계를 멈출 수 있었어요.
-                  <br />
-                  <br />
-                  대한민국 새벽을 여는 독도를
-                  <br />
-                  지키게 해준 당신들, 이번 임무는 완벽했어요.
+              <div ref={successFlashRef} className="q2-success-flash" aria-hidden />
+              <div className="q2-success-radial" aria-hidden />
+
+              <div className="q2-success-content">
+                <div id="e0" className="q2-success-a0">
+                  <div className="q2-success-avatar-box">
+                    <svg className="q2-success-avatar-spin" viewBox="0 0 90 90">
+                      <circle
+                        cx="45"
+                        cy="45"
+                        r="42"
+                        fill="none"
+                        stroke="rgba(90,240,196,0.1)"
+                        strokeWidth="1.5"
+                      />
+                      <circle
+                        cx="45"
+                        cy="45"
+                        r="42"
+                        fill="none"
+                        stroke="#5af0c4"
+                        strokeWidth="1.5"
+                        strokeDasharray="24 240"
+                        strokeLinecap="round"
+                      />
+                      <circle
+                        cx="45"
+                        cy="45"
+                        r="33"
+                        fill="none"
+                        stroke="rgba(90,240,196,0.07)"
+                        strokeWidth="1"
+                      />
+                    </svg>
+                    <div className="q2-success-avatar-inner">
+                      <span className="q2-success-avatar-emoji">🧑🏻‍🦳</span>
+                    </div>
+                    <div className="q2-success-avatar-check" aria-hidden>
+                      <svg
+                        width="8"
+                        height="8"
+                        viewBox="0 0 24 24"
+                        fill="none"
+                        stroke="#020c16"
+                        strokeWidth="4"
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                      >
+                        <polyline points="20 6 9 17 4 12" />
+                      </svg>
+                    </div>
+                  </div>
+                  <p className="q2-success-avatar-label">국정원 최지수 국장</p>
+                </div>
+
+                <div id="e1" className="q2-success-a1">
+                  <div className="line left" />
+                  <span>MISSION COMPLETE</span>
+                  <div className="line right" />
+                </div>
+
+                <div id="e2" className="q2-success-a2">
+                  <h1>MISSION SUCCESS</h1>
+                </div>
+
+                <div id="e3" className="q2-success-midline" />
+
+                <div id="e4" className="q2-success-a3">
+                  <div className="num-wrap">
+                    <span className="quote">"</span>
+                    <span className="num">7</span>
+                    <span className="quote">"</span>
+                  </div>
+                </div>
+
+                <div id="e5" className="q2-success-a4">
+                  <div className="card">
+                    <p className="p1">
+                      수고하셨어요 요원!
+                      <br />
+                      덕분에 일본이 만든 안개 발생 기계를
+                      <br />
+                      멈출 수 있었어요.
+                    </p>
+                    <div className="sep" />
+                    <p className="p2">
+                      대한민국 새벽을 여는 독도를
+                      <br />
+                      지키게 해준 당신들,
+                      <br />
+                      <span>이번 임무는 완벽했어요.</span>
+                    </p>
+                  </div>
                 </div>
               </div>
-            </>
+            </div>
           )}
         </div>
       </div>
