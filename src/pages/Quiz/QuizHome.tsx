@@ -55,6 +55,7 @@ const tarotVideos: {
 
 export default function QuizHome() {
   const canvasRef = useRef<HTMLCanvasElement>(null);
+  const bgmRef = useRef<HTMLAudioElement | null>(null);
 
   useEffect(() => {
     const canvasEl = canvasRef.current;
@@ -153,6 +154,22 @@ export default function QuizHome() {
       cancelled = true;
       cancelAnimationFrame(raf);
       window.removeEventListener("resize", onResize);
+    };
+  }, []);
+
+  useEffect(() => {
+    const audio = new Audio("/mp3/taro.mp3");
+    audio.loop = true;
+    bgmRef.current = audio;
+
+    void audio.play().catch(() => {
+      // 자동 재생 제한 환경에서는 사용자 상호작용 이후 재생됩니다.
+    });
+
+    return () => {
+      audio.pause();
+      audio.currentTime = 0;
+      bgmRef.current = null;
     };
   }, []);
 

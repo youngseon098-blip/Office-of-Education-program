@@ -2,7 +2,11 @@ import { Link } from "react-router-dom";
 import { useEffect, useRef, useState } from "react";
 import "../Quiz1/quiz1.css";
 import "./quiz2.css";
-import { disableIntroAudio, enableIntroAudio } from "./introAudioController";
+import {
+  disableIntroAudio,
+  enableIntroAudio,
+  retryIntroAudioPlayback,
+} from "./introAudioController";
 
 const MISSION_CODE_OK = "0817";
 
@@ -26,6 +30,22 @@ export default function Quiz2() {
     enableIntroAudio(owner);
     return () => {
       disableIntroAudio(owner);
+    };
+  }, []);
+
+  useEffect(() => {
+    const unlockAudio = () => {
+      retryIntroAudioPlayback();
+    };
+
+    window.addEventListener("pointerdown", unlockAudio, { passive: true });
+    window.addEventListener("keydown", unlockAudio);
+    window.addEventListener("touchstart", unlockAudio, { passive: true });
+
+    return () => {
+      window.removeEventListener("pointerdown", unlockAudio);
+      window.removeEventListener("keydown", unlockAudio);
+      window.removeEventListener("touchstart", unlockAudio);
     };
   }, []);
 
