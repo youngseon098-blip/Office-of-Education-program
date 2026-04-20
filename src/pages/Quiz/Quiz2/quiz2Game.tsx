@@ -1,7 +1,11 @@
 import { Fragment, useEffect, useMemo, useRef, useState } from "react";
 import { Link } from "react-router-dom";
 import "./quiz2Game.css";
-import { disableIntroAudio, enableIntroAudio } from "./introAudioController";
+import {
+  disableIntroAudio,
+  enableIntroAudio,
+  retryIntroAudioPlayback,
+} from "./introAudioController";
 
 type Mood = "n" | "u" | "l";
 
@@ -99,7 +103,7 @@ const SCENES: Scene[] = [
     lines: [
       "그냥 단순한 기상 현상이라고 보기엔 심상치 않아요.",
       "그래서 여러분이 직접 울릉도로 잠입해서, 이 안개의 진짜 원인이 뭔지 낱낱이 파악해 주셨으면 해요.",
-      "울릉도 현지에 도착하면 요원 A가 대기하고 있을 거예요. 접선해서 문제를 해결하세요.",
+      "울릉도 현장에 도착하면 요원 A가 대기하고 있을 거예요. 접선해서 문제를 해결하세요.",
     ],
   },
   {
@@ -114,8 +118,7 @@ const SCENES: Scene[] = [
     lbl: "[ 요원 A · 무전 수신 ]",
     mood: "n",
     lines: [
-      "아.아. 요원 A입니다.",
-      "아직 당신의 신원이 확인되지 않아 무전으로 먼저 인사 드리는 점 미리 사과 드리겠습니다.",
+      "아.아. 요원 A입니다. 아직 당신의 신원이 확인되지 않아 무전으로 먼저 인사 드리는 점 미리 사과 드리겠습니다.",
       "절차가 절차인만큼 당신들의 신원을 확인하는 점 양해부탁드립니다.",
     ],
   },
@@ -137,7 +140,7 @@ const SCENES: Scene[] = [
     body: "1. 죽변항 : AB0.3 km  (A=1, B=3)\n2. 묵호항 : CDE.0 km  (C=1, D=6, E=1)\n3. 포항항 : 21F.0 km  (F=7)\n\nSCAPIN 제GHI호  (G=6, H=7, I=7)\n\nX = (G*F) + (D*H) + B\nY = (A+C+E) / I\n\nX + Y = ?",
     ph: "정답 입력 (소수점 포함 00.0)",
     ans: "87.4",
-    hint: "독도",
+    hint: "울릉도",
   },
   {
     t: "result",
@@ -151,8 +154,7 @@ const SCENES: Scene[] = [
     lbl: "[ 요원 A · 무전 수신 ]",
     mood: "n",
     lines: [
-      "신원도 확인 되었으니 제가 있는 곳을 알려 드리겠습니다.",
-      "보는 눈이 많아 구체적인 위치는 암호로 전송하겠습니다.",
+      "신원도 확인 되었으니 제가 있는 곳을 알려 드리겠습니다. 보는 눈이 많아 구체적인 위치는 암호로 전송하겠습니다.",
     ],
   },
   { t: "stage", num: 1, title: "STAGE 1", sub: "암호 해독" },
@@ -162,8 +164,7 @@ const SCENES: Scene[] = [
     lbl: "[ 보안관리 AI 프로세서 ]",
     mood: "l",
     lines: [
-      "안녕하세요 보안관리 AI 프로세서입니다.",
-      "요원 A가 당신에게 전달한 기밀 문서입니다.",
+      "안녕하세요 보안관리 AI 프로세서입니다. 요원 A가 당신에게 전달한 기밀 문서입니다.",
       "열람을 원하시면 버튼을 눌러주십시오.",
     ],
   },
@@ -192,8 +193,7 @@ const SCENES: Scene[] = [
     lines: [
       "반갑습니다. 정식으로 인사드리죠. 요원 A입니다.",
       "여기가 그 유명한 울릉도 도동입니다. 이미 적들의 정보망이 이 골목 구석구석까지 뻗어있을 가능성이 높습니다.",
-      "저는 지금부터 울릉군청 조사관을 접선해 내부 단서를 확보하겠습니다.",
-      "그사이 요원님들께 제가 사전 조사한 기밀 파일을 보냈습니다.",
+      "저는 지금부터 울릉군청 조사관을 접선해 내부 단서를 확보하겠습니다. 그사이 요원님들께 제가 사전 조사한 기밀 파일을 보냈습니다.",
       "그 파일을 해독한다면 단서를 조금이라도 찾을 수 있을것 같습니다.",
     ],
   },
@@ -203,8 +203,7 @@ const SCENES: Scene[] = [
     lbl: "[ 보안관리 AI 프로세서 ]",
     mood: "l",
     lines: [
-      "요원 A가 당신에게 전달한 기밀 파일입니다.",
-      "해당 파일은 암호로 잠금이 걸려 있습니다.",
+      "요원 A가 당신에게 전달한 기밀 파일입니다. 해당 파일은 암호로 잠금이 걸려 있습니다.",
       "비밀번호를 풀어 단서를 찾길 바랍니다.",
     ],
   },
@@ -213,18 +212,18 @@ const SCENES: Scene[] = [
     mood: "n",
     badge: "STAGE 2 · 광고판 위치 해독",
     title: "해당 장소에는 아래의 숫자가 의미하는 단어가 있다.",
-    body: "A. 정면   B. 노란색   C. 다리   D. 하트\n\n4 // 3 // 8\n\n→ 4번째 ( ) · 3번째 ( ) · 8번째 ( )",
+    body: "A. 정면   B. 노란색   C. 다리   D. 하트\n\n4 // 3 // 8\n\n→ 4개 ( ) · 3개 ( ) · 8개 ( )",
     inputs: [
-      { lbl: "4번째", ph: "4번째 단어", ans: "경상북도" },
-      { lbl: "3번째", ph: "3번째 단어", ans: "울릉군" },
-      { lbl: "8번째", ph: "8번째 단어", ans: "한국옥외광고협회" },
+      { lbl: "4개", ph: "4개", ans: "경상북도" },
+      { lbl: "3개", ph: "3개", ans: "울릉군" },
+      { lbl: "8개", ph: "8개", ans: "한국옥외광고협회" },
     ],
   },
   {
     t: "result",
     lbl: "STAGE 2 CLEAR",
     ans: "경상북도 · 울릉군",
-    desc: "한국옥외광고협회\n해당 그림을 보고 장소로 이동합니다.",
+    desc: "본 화면은 다음 장소의 힌트입니다.\n해당 힌트 그림을 보고 장소로 이동합니다.",
   },
   { t: "stage", num: 3, title: "STAGE 3", sub: "긴급 해독" },
   {
@@ -304,8 +303,9 @@ const BIRD_PATH_D =
 const MUSIC1_TRIGGER_INDEX = SCENES.findIndex(
   (item) =>
     item.t === "dlg" &&
+    item.ch === "director" &&
     item.lbl === "국정원 최지수 국장" &&
-    item.lines[0] === "오셨군요. 반가워요.",
+    item.lines[0]?.includes("오셨군요"),
 );
 const MUSIC1_AUDIO_SRC = "/mp3/Quiz2/music1.mp3?v=20260420b";
 const MUSIC2_TRIGGER_INDEX = SCENES.findIndex(
@@ -325,13 +325,14 @@ const MUSIC4_TRIGGER_INDEX = SCENES.findIndex((item) => item.t === "success");
 const SUCCESS_SCENE_INDEX = SCENES.findIndex((item) => item.t === "success");
 const MUSIC2_AUDIO_SRC = "/mp3/Quiz2/music2.mp3?v=20260420";
 const MUSIC3_AUDIO_SRC = "/mp3/Quiz2/music3.mp3?v=20260420";
-const MUSIC4_AUDIO_SRC = "/mp3/Quiz2/music4.mp3?v=20260420";
+const MUSIC4_AUDIO_SRC = "/mp3/Quiz2/music5.mp3?v=20260421";
 const ONE_PAGE_SFX_SRC = "/mp3/Quiz2/1.mp3?v=20260420";
 const KEYBO_SFX_SRC = "/mp3/Quiz2/keybo.mp3?v=20260420";
 const HORN_SFX_SRC = "/mp3/Quiz2/horn.mp3?v=20260420";
-const TALKIE_SFX_SRC = "/mp3/Quiz2/Talkie.mp3?v=20260420";
+const TALKIE_SFX_SRC = "/mp3/Quiz2/Talkie2.mp3?v=20260420";
 const AI_SFX_SRC = "/mp3/Quiz2/ai.mp3?v=20260420";
 const DATA_SFX_SRC = "/mp3/Quiz2/data.mp3?v=20260420";
+const STAGE_SFX_SRC = "/mp3/Quiz2/STAGE.mp3?v=20260420";
 const DIALOGUE_NEXT_DELAY_MS = 3000;
 const ATMO_NEXT_DELAY_MS = 5000;
 
@@ -426,6 +427,9 @@ export default function Quiz2Game() {
   const talkieSfxRef = useRef<HTMLAudioElement | null>(null);
   const aiSfxRef = useRef<HTMLAudioElement | null>(null);
   const dataSfxRef = useRef<HTMLAudioElement | null>(null);
+  const stageSfxRef = useRef<HTMLAudioElement | null>(null);
+  const playedStageSfxRef = useRef<Set<number>>(new Set());
+  const pendingStageSfxRef = useRef<number | null>(null);
   const dialogueNextDelayTimerRef = useRef<number | null>(null);
   const atmoNextDelayTimerRef = useRef<number | null>(null);
 
@@ -450,6 +454,50 @@ export default function Quiz2Game() {
       disableIntroAudio(owner);
     };
   }, [isIntroStage]);
+
+  useEffect(() => {
+    const unlockAudio = () => {
+      if (isIntroStage) retryIntroAudioPlayback();
+      const pendingStageNum = pendingStageSfxRef.current;
+      const isPendingStagePage =
+        pendingStageNum != null &&
+        scene.t === "stage" &&
+        scene.num === pendingStageNum;
+      if (isPendingStagePage) {
+        if (!stageSfxRef.current) {
+          stageSfxRef.current = new Audio(STAGE_SFX_SRC);
+          stageSfxRef.current.loop = false;
+        }
+        const stageSfx = stageSfxRef.current;
+        stageSfx.currentTime = 0;
+        void stageSfx
+          .play()
+          .then(() => {
+            if (pendingStageSfxRef.current != null) {
+              playedStageSfxRef.current.add(pendingStageSfxRef.current);
+            }
+            pendingStageSfxRef.current = null;
+          })
+          .catch(() => {
+            // 브라우저 자동재생 정책으로 재생이 막힐 수 있음
+          });
+      }
+      if (music1On && music1Ref.current) void music1Ref.current.play().catch(() => { });
+      if (music2On && music2Ref.current) void music2Ref.current.play().catch(() => { });
+      if (music3On && music3Ref.current) void music3Ref.current.play().catch(() => { });
+      if (music4On && music4Ref.current) void music4Ref.current.play().catch(() => { });
+    };
+
+    window.addEventListener("pointerdown", unlockAudio, { passive: true });
+    window.addEventListener("keydown", unlockAudio);
+    window.addEventListener("touchstart", unlockAudio, { passive: true });
+
+    return () => {
+      window.removeEventListener("pointerdown", unlockAudio);
+      window.removeEventListener("keydown", unlockAudio);
+      window.removeEventListener("touchstart", unlockAudio);
+    };
+  }, [isIntroStage, music1On, music2On, music3On, music4On, scene]);
 
   useEffect(() => {
     const shouldPlayMusic1 =
@@ -649,6 +697,31 @@ export default function Quiz2Game() {
   }, [cur]);
 
   useEffect(() => {
+    if (scene.t !== "stage") return;
+    const stageNum = scene.num;
+    if (stageNum < 1 || stageNum > 4) return;
+    if (playedStageSfxRef.current.has(stageNum)) return;
+
+    if (!stageSfxRef.current) {
+      stageSfxRef.current = new Audio(STAGE_SFX_SRC);
+      stageSfxRef.current.loop = false;
+    }
+    const stageSfx = stageSfxRef.current;
+    stageSfx.currentTime = 0;
+    void stageSfx
+      .play()
+      .then(() => {
+        playedStageSfxRef.current.add(stageNum);
+        if (pendingStageSfxRef.current === stageNum) {
+          pendingStageSfxRef.current = null;
+        }
+      })
+      .catch(() => {
+        pendingStageSfxRef.current = stageNum;
+      });
+  }, [scene]);
+
+  useEffect(() => {
     return () => {
       if (!music1Ref.current) return;
       music1Ref.current.pause();
@@ -725,6 +798,14 @@ export default function Quiz2Game() {
       if (!dataSfxRef.current) return;
       dataSfxRef.current.pause();
       dataSfxRef.current.currentTime = 0;
+    };
+  }, []);
+
+  useEffect(() => {
+    return () => {
+      if (!stageSfxRef.current) return;
+      stageSfxRef.current.pause();
+      stageSfxRef.current.currentTime = 0;
     };
   }, []);
 
@@ -2963,7 +3044,7 @@ export default function Quiz2Game() {
                               <Fragment key={`${n}-${idx}`}>
                                 <div className="q2-s2-numcard">
                                   <div className="q2-s2-num">{n}</div>
-                                  <div className="q2-s2-numsub">번째</div>
+                                  <div className="q2-s2-numsub">개</div>
                                 </div>
                                 {idx < nums.length - 1 && (
                                   <div className="q2-s2-slash">//</div>
@@ -2991,7 +3072,7 @@ export default function Quiz2Game() {
                         <div key={item.lbl} className="q2-s2-inrow">
                           <div className="q2-s2-inidx">
                             <span className="q2-s2-innum">{n}</span>
-                            <span className="q2-s2-insub">번째</span>
+                            <span className="q2-s2-insub">개</span>
                           </div>
                           <input
                             className={`q2-s2-in ${multiErrors[idx] ? "err" : ""}`}
@@ -3371,9 +3452,9 @@ export default function Quiz2Game() {
                       <div>
                         <div className="q2-s2clear-order-k">ORDER</div>
                         <div className="q2-s2clear-order-v">
-                          <span>한국옥외광고협회</span>
+                          <span>본 화면은 다음 장소의 힌트입니다.</span>
                           <br />
-                          해당 그림을 보고 장소로 이동합니다.
+                          해당 힌트 그림을 보고 장소로 이동합니다.
                         </div>
                       </div>
                     </div>

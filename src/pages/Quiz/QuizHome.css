@@ -186,8 +186,12 @@
 .quiz-home-cards-area {
   flex: 1;
   display: grid;
-  grid-template-columns: repeat(3, 1fr);
-  gap: clamp(12px, 2vw, 24px);
+  grid-template-columns: 1fr;
+  max-width: min(100%, 376px);
+  margin: 0 auto;
+  justify-items: stretch;
+  row-gap: clamp(30px, 6vh, 52px);
+  column-gap: clamp(12px, 2vw, 20px);
   align-items: start;
   padding: 0 clamp(0px, 2vw, 20px);
 }
@@ -351,15 +355,6 @@
 }
 
 @media (max-width: 900px) {
-  .quiz-home-cards-area {
-    grid-template-columns: 1fr;
-    max-width: min(100%, 376px);
-    margin: 0 auto;
-    justify-items: stretch;
-    row-gap: clamp(30px, 6vh, 52px);
-    column-gap: clamp(12px, 2vw, 20px);
-  }
-
   .quiz-home-card-column {
     gap: clamp(16px, 2.6vh, 24px);
   }
