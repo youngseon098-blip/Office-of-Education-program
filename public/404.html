@@ -1,0 +1,14 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <script>
+      const repo = '/Office-of-Education-program';
+      const path = window.location.pathname.replace(repo, '');
+      const search = window.location.search;
+      const hash = window.location.hash;
+      const url = repo + '/?redirect=' + encodeURIComponent(path + search + hash);
+      window.location.replace(url);
+    </script>
+  </head>
+  <body></body>
+</html>
