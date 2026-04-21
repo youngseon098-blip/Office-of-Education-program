@@ -1,4 +1,14 @@
 /* eslint-disable @typescript-eslint/no-explicit-any -- SCENES-driven narrative engine */
+import {
+  playQuiz1BgmAlt,
+  playQuiz1Bgm,
+  playQuiz1CrackSfx,
+  playQuiz1KungSfx,
+  playQuiz1PaperSfx,
+  playQuiz1Ringtone,
+  restartQuiz1Bgm,
+  restartQuiz1BgmAlt,
+} from "./quiz1AudioController";
 
 type BgMode = "ocean" | "lab" | "museum";
 
@@ -268,11 +278,84 @@ export function initQuiz1Game(root: HTMLElement): () => void {
   }
 
   let bgT = 0;
+  let staticTimer = 0;
+  let doctorStaticBurstActive = false;
+  let fishermanInterferenceActive = false;
+  let fishermanInterferenceStartMs = 0;
+
+  function drawStaticBurst(
+    ctx: CanvasRenderingContext2D,
+    width: number,
+    height: number,
+  ) {
+    staticTimer++;
+    const phase = staticTimer % 200;
+
+    if (phase < 18) {
+      const intensity = 1 - phase / 18;
+      const img = ctx.createImageData(width, height);
+      const data = img.data;
+
+      for (let i = 0; i < data.length; i += 4) {
+        const v = Math.random() > 0.5 ? Math.random() * 200 * intensity : 0;
+        data[i] = v;
+        data[i + 1] = v;
+        data[i + 2] = v;
+        data[i + 3] = Math.random() * 180 * intensity;
+      }
+      ctx.putImageData(img, 0, 0);
+
+      const ty = Math.random() * height;
+      ctx.fillStyle = `rgba(255,255,255,${Math.random() * 0.25 * intensity})`;
+      ctx.fillRect(0, ty, width, Math.random() * 8 + 2);
+    } else if (phase === 18) {
+      ctx.fillStyle = "rgba(255,255,220,0.12)";
+      ctx.fillRect(0, 0, width, height);
+    }
+  }
+
+  function triggerDoctorStaticBurst() {
+    staticTimer = 0;
+    doctorStaticBurstActive = true;
+  }
+
+  function drawInterference(
+    ctx: CanvasRenderingContext2D,
+    width: number,
+    height: number,
+  ) {
+    const t = (Date.now() - fishermanInterferenceStartMs) * 0.001;
+    const bandY = ((t * 80) % (height + 80)) - 40;
+    const bandH = 10 + Math.sin(t * 3) * 5;
+
+    ctx.fillStyle = `rgba(200, 170, 80, ${0.05 + Math.random() * 0.04})`;
+    ctx.fillRect(0, bandY, width, bandH);
+
+    for (let x = 0; x < width; x += 3) {
+      if (Math.random() > 0.45) {
+        ctx.fillStyle = `rgba(230, 200, 110, ${Math.random() * 0.14})`;
+        ctx.fillRect(x, bandY, 3, bandH);
+      }
+    }
+
+    for (let i = 1; i <= 2; i++) {
+      const y2 = (bandY + height * 0.35 * i) % height;
+      ctx.fillStyle = "rgba(160, 130, 50, 0.035)";
+      ctx.fillRect(0, y2, width, 7);
+    }
+  }
+
+  function triggerFishermanInterference() {
+    fishermanInterferenceStartMs = Date.now();
+    fishermanInterferenceActive = true;
+  }
   function drawBg() {
     if (disposed) return;
     bgT += 0.016;
     const ctx2 = dom.ctx;
+    const fxCtx2 = dom.fxCtx;
     ctx2.clearRect(0, 0, W, H);
+    fxCtx2.clearRect(0, 0, W, H);
 
     /* ── 나무 바닥 베이스 ── */
     const bg = ctx2.createLinearGradient(0, 0, 0, H);
@@ -343,6 +426,12 @@ export function initQuiz1Game(root: HTMLElement): () => void {
       bloodCanvas = buildBloodCanvas();
     }
     ctx2.drawImage(bloodCanvas, 0, 0);
+    if (doctorStaticBurstActive) {
+      drawStaticBurst(fxCtx2, W, H);
+    }
+    if (fishermanInterferenceActive) {
+      drawInterference(fxCtx2, W, H);
+    }
 
     rafId = requestAnimationFrame(drawBg);
   }
@@ -384,6 +473,7 @@ export function initQuiz1Game(root: HTMLElement): () => void {
       type: "dialogue",
       char: "fisherman",
       charLabel: "개척령 시대 · 어부",
+      bgmTrack: "music7",
       lines: [
         "아.아. 들리오? 반갑소잉. 거까지 내 목소리가 들리니 참으로 신기허구만.",
         "나야 평생 괴기나 잡고 살았지마는 이렇게 미래 양반들하고 노가리도 까보고 이거 원 오래 살고 볼일이구먼.",
@@ -395,6 +485,7 @@ export function initQuiz1Game(root: HTMLElement): () => void {
       type: "dialogue",
       char: "fisherman",
       charLabel: "개척령 시대 · 어부",
+      bgmTrack: "music7",
       lines: [
         "나라에서 울릉도로 사람들을 싹 모은다 캐서, 나도 큰맘 묵고 여그까지 기어들어 오기는 했는디.",
         "막상 발을 디뎌본께 이게 머시당가? 온 천지 쪽바리 놈들뿐이여. 아주 징허게 많구만.",
@@ -461,6 +552,7 @@ export function initQuiz1Game(root: HTMLElement): () => void {
       type: "dialogue",
       char: "fisherman",
       charLabel: "개척령 시대 · 어부",
+      restartBgm: true,
       lines: [
         "문제가 솔찬히 거시기했는가 보네?",
         "미안허구만 미래 양반, 여그저그 보는 눈들이 영 많아부러서 어쩔 수가 없었당게. 이해 좀 해주시게.",
@@ -557,6 +649,8 @@ export function initQuiz1Game(root: HTMLElement): () => void {
       type: "dialogue",
       char: "fisherman",
       charLabel: "개척령 시대 · 어부",
+      bgmTrack: "music7",
+      restartBgmAlt: true,
       lines: [
         "어이쿠, 참말로 대단허구만... 요것까정 맞춰부릴 줄은 꿈에도 몰랐어이.",
         "내가 미래 양반들헌테 너무 조심조심했는갑소. 거시기, 이해 좀 해주시게나.",
@@ -569,6 +663,7 @@ export function initQuiz1Game(root: HTMLElement): () => void {
       type: "dialogue",
       char: "fisherman",
       charLabel: "개척령 시대 · 어부",
+      bgmTrack: "music7",
       lines: [
         "어이구, 시방 내가 멋허느라 요로코롬 넋두리를 길게 늘어놨다냐. 미안허구만잉.",
         "자, 거그 그짝들 손에 들고 있는 나침반 좀 한 번 보드라고.",
@@ -582,6 +677,7 @@ export function initQuiz1Game(root: HTMLElement): () => void {
       type: "dialogue",
       char: "fisherman",
       charLabel: "개척령 시대 · 어부",
+      bgmTrack: "music7",
       lines: [
         "미래 양반들, 요로코롬 실제로 보게 되부렁게 징허게 반갑구만잉!",
         "개척령이 시작은 됐다지만, 아직은 살기가 거시기허게 팍팍허네잉.",
@@ -598,11 +694,11 @@ export function initQuiz1Game(root: HTMLElement): () => void {
       question: "아래 설명에 해당하는 식당과 메뉴를 찾아\n정답을 입력하세요.",
       hint: "1. 조개껍데기가 삿갓 모양을 닮아 삿갓조개라고도 불린다.\n2. 전복과 비슷한 풍미를 지녀 작은 전복이라고 불린다.\n3. 거센 파도가 치는 해안가 절벽이나 바위에 서식한다.\n4. 식당 이름은 ㄷㅂㅅㄷ\n\n📍 식당의 위치는 황금 동상의 2시 방향이다.",
       placeholder: "식당명 입력 (예: ○○식당)",
-      placeholder2: "메뉴명 입력",
+      placeholder2: "메뉴명 입력 (예: ○○○○○○)",
       answer: "대박식당",
       answerAlt: ["대박", "대박 식당"],
       answer2: "따개비칼국수",
-      answerAlt2: [],
+      answerAlt2: ["따개비 칼국수"],
     },
     /* 정답 (식당) */
     {
@@ -655,6 +751,8 @@ export function initQuiz1Game(root: HTMLElement): () => void {
   let sceneApplyTimer: ReturnType<typeof setTimeout> | null = null;
   let deferTimer: ReturnType<typeof setTimeout> | null = null;
   let quizFocusTimer: ReturnType<typeof setTimeout> | null = null;
+  let dialogueNextDelayTimer: ReturnType<typeof setTimeout> | null = null;
+  let paperSfxTimer: ReturnType<typeof setTimeout> | null = null;
   let isSceneTransitioning = false;
 
   function clearSceneApplyTimer() {
@@ -675,11 +773,25 @@ export function initQuiz1Game(root: HTMLElement): () => void {
       quizFocusTimer = null;
     }
   }
+  function clearDialogueNextDelayTimer() {
+    if (dialogueNextDelayTimer !== null) {
+      clearTimeout(dialogueNextDelayTimer);
+      dialogueNextDelayTimer = null;
+    }
+  }
+  function clearPaperSfxTimer() {
+    if (paperSfxTimer !== null) {
+      clearTimeout(paperSfxTimer);
+      paperSfxTimer = null;
+    }
+  }
   /** 씬 전환·지연 UI 타이머 정리 (빠른 NEXT/PREV 시 이전 타이머가 나중에 실행되는 것 방지) */
   function clearPendingSceneTimers() {
     clearSceneApplyTimer();
     clearDeferTimer();
     clearQuizFocusTimer();
+    clearDialogueNextDelayTimer();
+    clearPaperSfxTimer();
   }
 
   function setBg(mode: string) {
@@ -705,6 +817,11 @@ export function initQuiz1Game(root: HTMLElement): () => void {
     if (typeTimer) clearTimeout(typeTimer);
     typeTimer = null;
     typing = false;
+  }
+
+  function setNextButtonLabel(label: string) {
+    const labelEl = dom.next.querySelector("span");
+    if (labelEl) labelEl.textContent = label;
   }
 
   /* ── 씬 전환 ── */
@@ -758,17 +875,35 @@ export function initQuiz1Game(root: HTMLElement): () => void {
     el: HTMLElement,
     completedLineIndex: number,
   ) {
+    void el;
     typing = false;
-    dom.next.classList.add("q1g-next-ready");
+    dom.next.classList.remove("q1g-next-ready");
+    setNextButtonLabel("...");
+    dom.next.disabled = true;
     dom.next.style.display = "block";
-    if (completedLineIndex >= lines.length - 1) {
-      dom.next.onclick = () => nextScene();
-    } else {
-      dom.next.onclick = () => {
-        dialogueLine = completedLineIndex + 1;
-        startTypewriter(lines, el);
-      };
-    }
+    dom.next.onclick = null;
+    clearDialogueNextDelayTimer();
+    dialogueNextDelayTimer = window.setTimeout(() => {
+      dialogueNextDelayTimer = null;
+      if (disposed) return;
+      dom.next.classList.add("q1g-next-ready");
+      setNextButtonLabel("NEXT");
+      dom.next.disabled = false;
+      if (completedLineIndex >= lines.length - 1) {
+        dom.next.onclick = () => nextScene();
+      } else {
+        dom.next.onclick = () => {
+          const cur = SCENES[currentScene] as any;
+          if (cur?.type === "dialogue" && cur?.char === "doctor") {
+            triggerDoctorStaticBurst();
+          } else if (cur?.type === "dialogue" && cur?.char === "fisherman") {
+            triggerFishermanInterference();
+          }
+          dialogueLine = completedLineIndex + 1;
+          startTypewriter(lines, el);
+        };
+      }
+    }, 3000);
     syncPrevVisibility();
   }
 
@@ -1118,16 +1253,33 @@ export function initQuiz1Game(root: HTMLElement): () => void {
     dialogueLine = lineIndex;
     const raw = lines[lineIndex] ?? "";
     el.innerHTML = raw.replace(/\n/g, "<br>");
-    dom.next.classList.add("q1g-next-ready");
+    dom.next.classList.remove("q1g-next-ready");
+    setNextButtonLabel("...");
+    dom.next.disabled = true;
     dom.next.style.display = "block";
-    if (lineIndex >= lines.length - 1) {
-      dom.next.onclick = () => nextScene();
-    } else {
-      dom.next.onclick = () => {
-        dialogueLine = lineIndex + 1;
-        startTypewriter(lines, el);
-      };
-    }
+    dom.next.onclick = null;
+    clearDialogueNextDelayTimer();
+    dialogueNextDelayTimer = window.setTimeout(() => {
+      dialogueNextDelayTimer = null;
+      if (disposed) return;
+      dom.next.classList.add("q1g-next-ready");
+      setNextButtonLabel("NEXT");
+      dom.next.disabled = false;
+      if (lineIndex >= lines.length - 1) {
+        dom.next.onclick = () => nextScene();
+      } else {
+        dom.next.onclick = () => {
+          const cur = SCENES[currentScene] as any;
+          if (cur?.type === "dialogue" && cur?.char === "doctor") {
+            triggerDoctorStaticBurst();
+          } else if (cur?.type === "dialogue" && cur?.char === "fisherman") {
+            triggerFishermanInterference();
+          }
+          dialogueLine = lineIndex + 1;
+          startTypewriter(lines, el);
+        };
+      }
+    }, 3000);
     syncPrevVisibility();
   }
 
@@ -1182,11 +1334,34 @@ export function initQuiz1Game(root: HTMLElement): () => void {
     clearCrackStamps();
     setBg((s as any).bg || "ocean");
     dom.next.style.display = "none";
+    dom.next.disabled = false;
+    setNextButtonLabel("NEXT");
     dom.next.classList.remove("q1g-next-ready");
     dom.next.onclick = () => nextScene();
     dom.home?.style.removeProperty("display");
     syncPrevVisibility();
     dom.stage.innerHTML = "";
+    doctorStaticBurstActive =
+      (s as any).type === "dialogue" && (s as any).char === "doctor";
+    fishermanInterferenceActive =
+      (s as any).type === "dialogue" && (s as any).char === "fisherman";
+    if (doctorStaticBurstActive) {
+      triggerDoctorStaticBurst();
+    }
+    if (fishermanInterferenceActive) {
+      triggerFishermanInterference();
+    }
+    if ((s as any).type === "phone") {
+      playQuiz1Ringtone();
+    } else if ((s as any).restartBgmAlt) {
+      restartQuiz1BgmAlt();
+    } else if ((s as any).bgmTrack === "music7") {
+      playQuiz1BgmAlt();
+    } else if ((s as any).restartBgm) {
+      restartQuiz1Bgm();
+    } else {
+      playQuiz1Bgm();
+    }
 
     switch ((s as any).type) {
       case "narration":
@@ -1215,6 +1390,7 @@ export function initQuiz1Game(root: HTMLElement): () => void {
 
   /* ── 내러션 ── */
   function renderNarration(s: any) {
+    playQuiz1KungSfx();
     showStageBadge(null);
     const d = document.createElement("div");
     d.className = "narration-scene";
@@ -1323,6 +1499,7 @@ export function initQuiz1Game(root: HTMLElement): () => void {
         const target = e.target as HTMLElement | null;
         if (target?.closest(".phone-btn-wrap")) return;
         spawnCrackStamp(e.clientX, e.clientY);
+        playQuiz1CrackSfx();
       };
       dom.stage.addEventListener("click", handleStageClick);
       detachPhoneCrackClick = () => {
@@ -1349,6 +1526,12 @@ export function initQuiz1Game(root: HTMLElement): () => void {
 
   /* ── 메모 ── */
   function renderMemo(s: any) {
+    clearPaperSfxTimer();
+    paperSfxTimer = window.setTimeout(() => {
+      paperSfxTimer = null;
+      if (disposed) return;
+      playQuiz1PaperSfx();
+    }, 250);
     showStageBadge("CLUE · MEMO");
     const d = document.createElement("div");
     d.className = "memo-scene";
