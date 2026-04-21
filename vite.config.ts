@@ -7,6 +7,7 @@ const projectRoot = fileURLToPath(new URL(".", import.meta.url));
 const topTrumpsMissionRoot = path.resolve(projectRoot, "..", "..", "toptrumps-mission");
 
 export default defineConfig({
+  base: '/Office-of-Education-program/', 
   plugins: [react()],
   server: {
     host: true,
