@@ -1,0 +1,2448 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Top Trumps Quiz - Mission</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Noto+Serif+KR:wght@400;600;700&family=Open+Sans:wght@600;700&family=Oswald:wght@500;700&display=swap" rel="stylesheet">
+  <style>
+    *, *::before, *::after {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    body {
+      height: 100dvh;
+      display: flex;
+      justify-content: center;
+      align-items: stretch;
+      font-family: "Oswald", sans-serif;
+      background: #c8a96e url("./images/map-bg.png") center top / cover no-repeat;
+      color: #fff;
+      padding: 0;
+      overflow: hidden;
+    }
+
+    body.intro-active > main.page {
+      visibility: hidden !important;
+      pointer-events: none !important;
+    }
+
+    #introVideo.intro-video {
+      position: fixed;
+      inset: 0;
+      z-index: 119;
+      width: 100vw;
+      height: 100vh;
+      object-fit: cover;
+      background: #000;
+      pointer-events: none;
+    }
+
+    #introVideo.intro-video.intro-video--phase2-audio {
+      z-index: 124;
+      width: 1px;
+      height: 1px;
+      opacity: 0;
+      pointer-events: none;
+    }
+
+    #introVideo.intro-video.intro-video--hidden {
+      display: none !important;
+    }
+
+    .intro-overlay {
+      position: fixed;
+      inset: 0;
+      z-index: 120;
+      display: none;
+      align-items: center;
+      justify-content: center;
+      background: transparent;
+      pointer-events: none;
+      min-width: 100vw;
+      min-height: 100dvh;
+      isolation: isolate;
+    }
+
+    .intro-overlay.is-open {
+      display: flex;
+      pointer-events: auto;
+    }
+
+    .intro-overlay .intro-overlay-image {
+      pointer-events: none;
+      z-index: 1;
+    }
+
+    .intro-overlay .intro-start-button {
+      pointer-events: auto;
+      z-index: 2;
+    }
+
+    .intro-video {
+      width: 100vw;
+      height: 100vh;
+      object-fit: cover;
+      background: #000;
+    }
+
+    @font-face {
+      font-family: "MYHaemalgeunSangsang";
+      src: url("./images/music/MYHaemalgeunSangsang.ttf") format("truetype");
+      font-weight: 400;
+      font-style: normal;
+    }
+
+    .intro-phase2-root {
+      display: none;
+      position: fixed;
+      inset: 0;
+      z-index: 125;
+      box-sizing: border-box;
+      margin: 0;
+      font-family: "Oswald", sans-serif;
+      background: #000 url("./images/grunge-paper-background.jpg") center top / cover no-repeat;
+      color: #fff;
+      overflow: hidden;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .intro-phase2-root.is-visible {
+      display: flex;
+    }
+
+    .intro-phase2-root .intro-phase2-credit-roll {
+      position: absolute;
+      left: 50%;
+      top: 0;
+      bottom: clamp(150px, 22vh, 240px);
+      transform: translateX(-50%);
+      width: min(92vw, 980px);
+      overflow-x: hidden;
+      overflow-y: auto;
+      z-index: 1;
+      padding: 0;
+    }
+
+    .intro-phase2-root .credit-roll-inner {
+      transform: translateY(0);
+      will-change: transform;
+    }
+
+    .intro-phase2-root .credit-text {
+      white-space: pre-wrap;
+      font-family: "MYHaemalgeunSangsang", "Courier New", Courier, monospace;
+      font-size: clamp(24px, 3.9vw, 52px);
+      line-height: 1.35;
+      color: rgba(0, 0, 0, 0.92);
+      text-shadow: none;
+      padding: 0;
+      border-radius: 0;
+      background: transparent;
+      border: none;
+      letter-spacing: 0.01em;
+      will-change: transform;
+    }
+
+    .intro-phase2-root .intro-phase2-big-line {
+      font-weight: 900;
+      font-size: clamp(34px, 6.5vw, 80px);
+      letter-spacing: 0.02em;
+      display: inline-block;
+    }
+
+    .intro-phase2-root .intro-title {
+      width: 100%;
+      text-align: center;
+      font-weight: 900;
+      font-size: clamp(32px, 6.4vw, 74px);
+      line-height: 1.05;
+      margin: 0 0 10px 0;
+    }
+
+    .intro-phase2-root .intro-phase2-cursor {
+      display: inline-block;
+      width: 0.6ch;
+      color: rgba(0, 0, 0, 0.92);
+      animation: intro-phase2-cursor-blink 500ms steps(1) infinite;
+    }
+
+    @keyframes intro-phase2-cursor-blink {
+      50% {
+        opacity: 0;
+      }
+    }
+
+    .intro-phase2-root .intro-phase2-start {
+      position: absolute;
+      bottom: clamp(34px, 7vh, 70px);
+      left: 50%;
+      transform: translateX(-50%);
+      z-index: 10;
+    }
+
+    @media (prefers-reduced-motion: reduce) {
+      .intro-phase2-root .credit-roll-inner {
+        animation: none !important;
+      }
+      .intro-phase2-root .intro-phase2-cursor {
+        animation: none;
+        opacity: 1;
+      }
+    }
+
+    .intro-overlay-image {
+      position: absolute;
+      left: 50%;
+      top: clamp(20px, 6vh, 72px);
+      transform: translateX(-50%);
+      width: min(84vw, 980px);
+      max-height: 24vh;
+      object-fit: contain;
+      filter: drop-shadow(0 4px 12px rgba(0, 0, 0, 0.5));
+      pointer-events: none;
+    }
+
+    .intro-start-button {
+      position: absolute;
+      bottom: clamp(34px, 7vh, 70px);
+      left: 50%;
+      transform: translateX(-50%);
+      border: 2px solid rgba(255, 255, 255, 0.95);
+      border-radius: 999px;
+      min-width: clamp(170px, 34vw, 280px);
+      padding: clamp(13px, 2.1vw, 18px) clamp(24px, 4.2vw, 40px);
+      background: rgba(15, 20, 28, 0.85);
+      color: #f6f1e7;
+      font-family: "Open Sans", sans-serif;
+      font-weight: 800;
+      font-size: clamp(1.05rem, 3vw, 1.45rem);
+      letter-spacing: 0.03em;
+      box-shadow: 0 8px 18px rgba(0, 0, 0, 0.45), inset 0 0 0 1px rgba(255, 255, 255, 0.14);
+      cursor: pointer;
+    }
+
+    .page {
+      position: relative;
+      width: 100vw;
+      height: 100vh;
+      min-height: 100dvh;
+      overflow: hidden;
+      padding: 0;
+      background-image: url("./images/map-bg.png");
+      background-size: cover;
+      background-position: center top;
+      background-repeat: no-repeat;
+      background-color: #c8a96e;
+    }
+
+    .content {
+      position: relative;
+      z-index: 1;
+      width: min(94vw, calc((100dvh - 24px) * 0.82));
+      padding: clamp(10px, 2.5dvh, 24px) 0;
+      margin: 0 auto;
+      --left-col-width: 40%;
+    }
+
+    .wood-banner {
+      position: relative;
+      left: calc((100vw - 100%) / -2);
+      display: flex;
+      align-items: center;
+      width: 56%;
+      min-height: clamp(56px, 9vw, 78px);
+      margin-bottom: clamp(10px, 2.2vw, 16px);
+      padding: 0 clamp(12px, 2vw, 18px);
+      background-image: url("./images/wood-banner_T.png");
+      background-size: 100% 100%;
+      background-repeat: no-repeat;
+      filter: drop-shadow(0 2px 2px rgba(0, 0, 0, 0.35));
+    }
+
+    .content > .wood-banner:not(.fact) {
+      margin-top: clamp(4px, 0.8vw, 10px);
+    }
+
+    .wood-banner.fact {
+      left: calc((100vw - 100%) / -2);
+      width: calc(var(--left-col-width) + ((100vw - 100%) / 2) - clamp(44px, 6vw, 72px));
+      min-height: clamp(60px, 9.5vw, 84px);
+      margin-top: clamp(10px, 2vw, 16px);
+      margin-bottom: clamp(10px, 2vw, 16px);
+      justify-content: center;
+      text-align: center;
+      line-height: 0.9;
+      padding-inline: clamp(12px, 2vw, 18px);
+      background-image: url("./images/wood-banner_T.png");
+      transform: translateY(clamp(-56px, -7.4vw, -36px));
+    }
+
+    .wood-banner.fact span {
+      display: block;
+      color: #f8f8f8;
+      text-shadow: 0 2px 3px rgba(0, 0, 0, 0.5);
+    }
+
+    .wood-banner span {
+      font-size: clamp(2.05rem, 6vw, 2.9rem);
+      letter-spacing: 0.025em;
+      text-shadow: 0 2px 4px rgba(0, 0, 0, 0.55);
+      white-space: nowrap;
+      font-family: "Bebas Neue", "Oswald", sans-serif;
+    }
+
+    .wood-banner span.mission-banner-word {
+      font-family: "Algerian", "Bebas Neue", "Oswald", sans-serif;
+    }
+
+    .mission-banner-word {
+      display: inline-block;
+      font-family: "Algerian", "Bebas Neue", "Oswald", sans-serif;
+    }
+
+    /* BONUS ?? ?? ?? ?? */
+    .mission-banner-impact-digit + .mission-banner-word {
+      margin-left: 0.34em;
+    }
+
+    .mission-banner-word--label {
+      margin-right: 0.26em;
+    }
+
+    .wood-banner span.mission-banner-number {
+      font-family: "Algerian", "Bebas Neue", "Oswald", sans-serif;
+      font-size: clamp(4.2rem, 11.6vw, 6.3rem);
+      line-height: 0.82;
+      vertical-align: -0.14em;
+    }
+
+    .wood-banner span.mission-banner-impact-digit {
+      display: inline-block;
+      transform-origin: center center;
+      will-change: transform, opacity;
+      font-family: "Algerian", "Bebas Neue", "Oswald", sans-serif;
+      color: #ffffff;
+      text-shadow: 0 2px 4px rgba(0, 0, 0, 0.55);
+    }
+
+    .mission-banner-impact-digit.fired {
+      visibility: hidden;
+    }
+
+    .mission-impact-float {
+      position: fixed;
+      left: 0;
+      top: 0;
+      z-index: 9999;
+      pointer-events: none;
+      font-family: "Algerian", "Bebas Neue", "Oswald", sans-serif;
+      font-size: clamp(2.05rem, 6vw, 2.9rem);
+      line-height: 1;
+      color: #ff2a2a;
+      will-change: transform, color, text-shadow;
+      text-shadow: none;
+    }
+
+    .mission-impact-backdrop {
+      position: fixed;
+      inset: 0;
+      z-index: 9998;
+      pointer-events: none;
+      background: rgba(0, 0, 0, 0.72);
+      opacity: 0;
+      will-change: opacity;
+    }
+
+    .wrong-crack-layer {
+      position: fixed;
+      inset: 0;
+      z-index: 9990;
+      pointer-events: none;
+      overflow: hidden;
+    }
+
+    .wrong-crack-mark {
+      position: absolute;
+      width: clamp(180px, 34vw, 420px);
+      height: auto;
+      opacity: 0;
+      transform-origin: center center;
+      filter: drop-shadow(0 4px 8px rgba(0, 0, 0, 0.38));
+      mix-blend-mode: screen;
+      animation: wrong-crack-pop 260ms ease-out forwards;
+    }
+
+    @keyframes wrong-crack-pop {
+      0% {
+        opacity: 0;
+        transform: translate(-50%, -50%) scale(0.84);
+      }
+      100% {
+        opacity: 0.98;
+        transform: translate(-50%, -50%) scale(1);
+      }
+    }
+
+    .wood-banner.fact span {
+      white-space: normal;
+      font-size: clamp(1.45rem, 4vw, 1.95rem);
+      line-height: 0.88;
+    }
+
+    .wood-banner.fact .line {
+      display: block;
+      white-space: nowrap;
+    }
+
+    .wood-banner.fact .line-top {
+      font-size: 1.04em;
+      letter-spacing: -0.01em;
+      font-weight: 400;
+      font-family: "Bebas Neue", "Oswald", sans-serif;
+    }
+
+    .wood-banner.fact .line-bottom {
+      font-size: 0.97em;
+      letter-spacing: 0.01em;
+      font-family: "Georgia", "Times New Roman", serif;
+      font-weight: 600;
+    }
+
+    .card {
+      width: 94%;
+      margin: 0 auto;
+      background: transparent;
+      box-shadow: none;
+      padding: 0;
+      aspect-ratio: 1.34;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .card-wrap {
+      position: relative;
+      transform: translateY(clamp(-18px, -2.8vw, -10px));
+    }
+
+    .zoom-button {
+      position: absolute;
+      left: 50%;
+      top: 50%;
+      transform: translate(-50%, -50%);
+      width: clamp(52px, 9vw, 72px);
+      height: clamp(52px, 9vw, 72px);
+      border: 1px solid rgba(48, 32, 18, 0.55);
+      border-radius: 999px;
+      background: rgba(255, 251, 240, 0.92);
+      color: #2b1b0f;
+      font-size: clamp(1.5rem, 3vw, 2rem);
+      cursor: pointer;
+      box-shadow:
+        0 8px 18px rgba(0, 0, 0, 0.55),
+        0 0 0 2px rgba(255, 255, 255, 0.28);
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      overflow: visible;
+    }
+
+    .zoom-button:hover {
+      transform: translate(-50%, calc(-50% - 1px));
+    }
+
+    .zoom-button::before {
+      content: "??? ????";
+      position: absolute;
+      top: calc(-1 * clamp(40px, 5.3vw, 51px));
+      left: 50%;
+      transform: translateX(-50%);
+      color: #ffffff;
+      font-size: clamp(0.75rem, 2.4vw, 28px);
+      font-weight: 700;
+      white-space: nowrap;
+      text-shadow:
+        0 2px 6px rgba(0, 0, 0, 0.9),
+        1px 0 0 rgba(0, 0, 0, 0.85),
+        -1px 0 0 rgba(0, 0, 0, 0.85),
+        0 1px 0 rgba(0, 0, 0, 0.85),
+        0 -1px 0 rgba(0, 0, 0, 0.85);
+      pointer-events: none;
+    }
+
+    .problem-modal {
+      position: fixed;
+      inset: 0;
+      display: none;
+      align-items: flex-start;
+      justify-content: flex-start;
+      padding: 18px;
+      background: rgba(0, 0, 0, 0.52);
+      z-index: 20;
+      opacity: 0;
+      transition: opacity 240ms ease;
+    }
+
+    .problem-modal.is-open {
+      display: flex;
+      opacity: 1;
+    }
+
+    .problem-modal-card {
+      width: min(94vw, 790px);
+      max-height: 92dvh;
+      background: #f5e7ca;
+      border: 5px solid #800714;
+      border-radius: 12px;
+      box-shadow: 0 10px 24px rgba(0, 0, 0, 0.38);
+      padding: 12px;
+      color: #2f2316;
+      display: flex;
+      flex-direction: column;
+      position: relative;
+      opacity: 0;
+      transform: translateY(16px) scale(0.72);
+      transform-origin: center center;
+      will-change: transform, opacity;
+    }
+
+    .problem-modal.is-open .problem-modal-card {
+      opacity: 1;
+      transform: translateY(0) scale(1);
+      animation: problem-modal-pop-in 480ms cubic-bezier(0.34, 1.02, 0.64, 1) both;
+    }
+
+    .problem-modal.is-closing {
+      opacity: 0;
+    }
+
+    .problem-modal.is-closing .problem-modal-card {
+      opacity: 0;
+      transform: translateY(10px) scale(0.965);
+      animation: problem-modal-pop-out 360ms ease both;
+    }
+
+    @keyframes problem-modal-pop-in {
+      0% {
+        opacity: 0;
+        transform: translateY(16px) scale(0.72);
+      }
+      58% {
+        opacity: 1;
+        transform: translateY(0) scale(1.045);
+      }
+      100% {
+        opacity: 1;
+        transform: translateY(0) scale(1);
+      }
+    }
+
+    @keyframes problem-modal-pop-out {
+      0% {
+        opacity: 1;
+        transform: translateY(0) scale(1) rotate(0deg);
+      }
+      100% {
+        opacity: 0;
+        transform: translateY(12px) scale(0.955) rotate(-0.35deg);
+      }
+    }
+
+    @media (prefers-reduced-motion: reduce) {
+      .problem-modal,
+      .problem-modal-card,
+      .problem-modal.is-open .problem-modal-card,
+      .problem-modal.is-closing .problem-modal-card {
+        transition: none !important;
+        animation: none !important;
+        transform: none !important;
+      }
+    }
+
+    .problem-modal-close {
+      position: absolute;
+      top: 8px;
+      right: 24px;
+      z-index: 2;
+      border: none;
+      background: transparent;
+      color: #ffffff;
+      font-size: 4.2rem;
+      cursor: pointer;
+      line-height: 1;
+      text-shadow: 0 2px 6px rgba(0, 0, 0, 0.8);
+    }
+
+    .problem-modal-body {
+      flex: 1;
+      min-height: 0;
+      overflow: hidden;
+      display: flex;
+      flex-direction: column;
+      align-items: stretch;
+      justify-content: flex-start;
+      gap: 8px;
+      font-family: "Open Sans", sans-serif;
+      font-size: 1rem;
+      line-height: 1.45;
+    }
+
+    .problem-modal-image {
+      width: 100%;
+      height: auto;
+      flex: 0 1 auto;
+      max-width: 100%;
+      max-height: 68dvh;
+      display: block;
+      margin: 0 auto;
+      object-fit: contain;
+      border-radius: 8px;
+      box-shadow: 0 2px 8px rgba(0, 0, 0, 0.25);
+    }
+
+    .problem-modal-question {
+      flex: 0 0 auto;
+      min-height: calc(1.5em * 3 + 20px);
+      max-height: calc(1.5em * 3 + 20px);
+      overflow-y: auto;
+      padding: 10px 12px;
+      border-radius: 8px;
+      border: 1px solid rgba(64, 42, 20, 0.35);
+      background: rgba(255, 250, 240, 0.78);
+      color: #2f2316;
+      font-family: "Noto Serif KR", serif;
+      font-size: clamp(16px, 2.8vw, 24px);
+      font-weight: 700;
+      line-height: 1.5;
+      white-space: pre-wrap;
+      word-break: keep-all;
+      overflow-wrap: anywhere;
+    }
+
+    .page-turn-overlay {
+      position: fixed;
+      inset: 0;
+      z-index: 35;
+      display: none;
+      pointer-events: none;
+      overflow: hidden;
+      perspective: 2200px;
+    }
+
+    .page-turn-overlay.is-active {
+      display: block;
+    }
+
+    .page-turn-sheet {
+      position: absolute;
+      right: -10%;
+      top: -8%;
+      width: 132%;
+      height: 136%;
+      transform-origin: right center;
+      transform: rotate(0deg) scaleX(1);
+      border-left: 1px solid rgba(0, 0, 0, 0.2);
+      border-radius: 42% 0 0 42% / 58% 0 0 58%;
+      background: linear-gradient(126deg, #ffffff 0%, #f5f5f5 44%, #dfdfdf 70%, #cbcbcb 100%);
+      box-shadow:
+        -18px 0 34px rgba(0, 0, 0, 0.24),
+        -44px 0 68px rgba(0, 0, 0, 0.2);
+      transition: transform 0.75s cubic-bezier(0.645, 0.045, 0.355, 1);
+    }
+
+    .page-turn-sheet.is-back {
+      background: linear-gradient(114deg, #f3f3f3 0%, #e8e8e8 55%, #d7d7d7 100%);
+      box-shadow:
+        -12px 0 28px rgba(0, 0, 0, 0.2),
+        -32px 0 52px rgba(0, 0, 0, 0.16);
+    }
+
+    .page-turn-sheet.back {
+      transform: rotate(0deg) translate(0, 0) scaleX(0);
+      opacity: 0;
+      transition:
+        transform 1.05s cubic-bezier(0.645, 0.045, 0.355, 1),
+        opacity 0.2s linear;
+    }
+
+    .page-turn-sheet::after {
+      content: "";
+      position: absolute;
+      inset: 0;
+      background:
+        linear-gradient(102deg, rgba(255, 255, 255, 0.7) 0%, rgba(255, 255, 255, 0.2) 24%, rgba(0, 0, 0, 0.1) 62%, rgba(0, 0, 0, 0.24) 100%);
+      border-radius: inherit;
+      mix-blend-mode: multiply;
+    }
+
+    .page-turn-overlay.phase-1 .page-turn-sheet.front {
+      transform: rotate(0deg) scaleX(0);
+    }
+
+    .page-turn-overlay.phase-2 .page-turn-sheet.back {
+      opacity: 1;
+      transform: rotate(0deg) translate(-46%, 0) scaleX(-1);
+    }
+
+    .card img {
+      width: 100%;
+      height: 100%;
+      object-fit: contain;
+      object-position: center center;
+      display: block;
+      filter: contrast(1.04);
+      transform: none;
+      clip-path: none;
+    }
+
+    .fact-grid {
+      width: 100%;
+      margin: clamp(14px, 2.2vw, 20px) 0 0;
+      display: grid;
+      grid-template-columns: var(--left-col-width) calc((100% - var(--left-col-width)) / 2) calc((100% - var(--left-col-width)) / 2);
+      grid-template-rows: repeat(3, minmax(46px, 1.08fr)) minmax(34px, 0.72fr) minmax(90px, 2.1fr);
+      gap: clamp(20px, 3.8vw, 30px);
+      min-height: clamp(280px, 44vw, 390px);
+      transform: translateY(clamp(-24px, -3.4vw, -16px));
+    }
+
+    .cell {
+      background: #efefef;
+      box-shadow: 2px 4px 8px rgba(0, 0, 0, 0.34);
+      border: none;
+      filter: drop-shadow(0 3px 4px rgba(0, 0, 0, 0.2));
+    }
+
+    .cell-label {
+      position: relative;
+      display: flex;
+      align-items: center;
+      justify-content: flex-start;
+      gap: clamp(6px, 1vw, 10px);
+      padding-inline: clamp(12px, 2vw, 18px);
+      padding-block: clamp(6px, 0.9vw, 10px);
+      color: #3f2f1d;
+      font-family: "Open Sans", sans-serif;
+      font-weight: 700;
+      font-size: clamp(1.35rem, 2.35vw, 1.95rem);
+      letter-spacing: 0.01em;
+      text-align: left;
+      overflow: visible;
+    }
+
+    .label-name {
+      white-space: nowrap;
+      text-align: left;
+    }
+
+    .label-value {
+      position: absolute;
+      left: calc(100% - clamp(100px, 17.2vw, 158px));
+      top: 50%;
+      transform: translateY(-50%);
+      min-width: 1.2ch;
+      text-align: left;
+      font-family: "Open Sans", "Oswald", sans-serif;
+      font-weight: 800;
+      font-size: clamp(4.29rem, 8.32vw, 6.37rem);
+      line-height: 0.9;
+      letter-spacing: 0;
+      color: #e9dfd9;
+      -webkit-text-stroke: 0;
+      text-shadow:
+        2px 0 0 #2a1b14,
+        -2px 0 0 #2a1b14,
+        0 2px 0 #2a1b14,
+        0 -2px 0 #2a1b14,
+        1.5px 1.5px 0 #2a1b14,
+        -1.5px 1.5px 0 #2a1b14,
+        1.5px -1.5px 0 #2a1b14,
+        -1.5px -1.5px 0 #2a1b14,
+        0 2px 4px rgba(0, 0, 0, 0.55);
+      z-index: 3;
+    }
+
+    @media (max-width: 640px) {
+      .cell-label {
+        padding-inline: clamp(8px, 1.6vw, 12px);
+      }
+
+      .label-value {
+        font-size: clamp(1.56rem, 6.5vw, 2.34rem);
+      }
+    }
+
+    .cell-left {
+      grid-column: 1;
+      grid-row: 1 / 6;
+      transform: rotate(-1deg) scale(1.22);
+      transform-origin: center center;
+      box-shadow: none;
+      z-index: 1;
+      padding: clamp(22px, 3vw, 32px) clamp(18px, 2.8vw, 30px);
+      display: flex;
+      flex-direction: column;
+      gap: clamp(14px, 1.8vw, 20px);
+      align-items: center;
+      justify-content: flex-start;
+      background: transparent url("./images/panel-3.png") center / contain no-repeat !important;
+      border: none;
+      filter: none;
+      overflow: hidden;
+    }
+
+    .question-title {
+      color: #f6f2eb;
+      font-family: "Open Sans", sans-serif;
+      font-weight: 800;
+      font-size: clamp(1.45rem, 2.8vw, 2.05rem);
+      line-height: 1.28;
+      white-space: pre-line;
+      text-align: center;
+      width: 100%;
+      margin-top: clamp(40px, 6.4vw, 60px);
+      transform: translateX(-8px);
+      text-shadow: 0 2px 4px rgba(0, 0, 0, 0.45);
+    }
+
+    .question-title .answer-emphasis {
+      color: #8b1414;
+      font-weight: 900;
+      text-shadow: 0 1px 2px rgba(0, 0, 0, 0.35);
+    }
+
+    .question-options {
+      display: flex;
+      flex-direction: column;
+      gap: clamp(8px, 1vw, 12px);
+      align-items: center;
+      width: 100%;
+      margin-top: clamp(16px, 2.8vw, 24px);
+      transform: translateX(-8px);
+    }
+
+    .question-option {
+      border: 1px solid rgba(69, 49, 29, 0.35);
+      background: rgba(240, 218, 178, 0.72);
+      color: #352818;
+      text-align: center;
+      cursor: pointer;
+      font-family: "Open Sans", sans-serif;
+      font-size: clamp(1.14rem, 2.1vw, 1.5rem);
+      line-height: 1.25;
+      padding: clamp(6px, 1vw, 10px) clamp(8px, 1.4vw, 11px);
+      border-radius: 8px;
+      min-width: min(70%, 250px);
+      box-shadow: 0 2px 5px rgba(0, 0, 0, 0.16);
+      transition: transform 0.12s ease, box-shadow 0.12s ease, background-color 0.12s ease;
+    }
+
+    .question-option:hover {
+      background: rgba(243, 224, 189, 0.9);
+      box-shadow: 0 3px 8px rgba(0, 0, 0, 0.2);
+      transform: translateY(-1px);
+    }
+
+    .question-option.selected {
+      background: rgba(245, 230, 200, 0.95);
+      border-color: #7a1e36;
+      box-shadow:
+        0 0 0 2px rgba(122, 30, 54, 0.95),
+        0 0 0 5px rgba(122, 30, 54, 0.28),
+        0 3px 8px rgba(0, 0, 0, 0.22);
+    }
+
+    .question-option:disabled {
+      opacity: 0.7;
+      cursor: default;
+      transform: none;
+    }
+
+    .top-timer {
+      position: absolute;
+      top: clamp(22px, 3.8dvh, 34px);
+      right: clamp(62px, 6vw, 84px);
+      z-index: 3;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 0;
+      width: auto;
+      color: #f2efe7;
+    }
+
+    .timer-value {
+      font-family: "Bebas Neue", "Oswald", sans-serif;
+      font-size: clamp(3.3rem, 6.8vw, 5rem);
+      letter-spacing: 0.06em;
+      line-height: 1;
+      color: #f6f1e7;
+      text-shadow:
+        1px 0 0 #3f2416,
+        -1px 0 0 #3f2416,
+        0 1px 0 #3f2416,
+        0 -1px 0 #3f2416,
+        0 2px 3px rgba(0, 0, 0, 0.45);
+    }
+
+    .timer-label {
+      margin-top: 4px;
+      display: block;
+      font-family: "Bebas Neue", "Oswald", sans-serif;
+      font-size: clamp(1.35rem, 2.8vw, 1.95rem);
+      letter-spacing: 0.14em;
+      text-transform: uppercase;
+      font-weight: 800;
+      color: #efe9dc;
+      white-space: nowrap;
+      text-shadow:
+        1px 0 0 #3f2416,
+        -1px 0 0 #3f2416,
+        0 1px 0 #3f2416,
+        0 -1px 0 #3f2416,
+        0 2px 3px rgba(0, 0, 0, 0.45);
+    }
+
+    .cell-r1 { grid-column: 2 / 4; grid-row: 1; transform: translateY(clamp(14px, 1.9vw, 20px)); }
+    .cell-r2 { grid-column: 2 / 4; grid-row: 2; transform: translateY(clamp(14px, 1.9vw, 20px)); }
+    .cell-r3 { grid-column: 2 / 4; grid-row: 3; transform: translateY(clamp(14px, 1.9vw, 20px)); }
+    .cell-b2 {
+      grid-column: 2 / 4;
+      grid-row: 5;
+      width: 100%;
+      justify-self: stretch;
+      background: transparent;
+      border: none;
+      box-shadow: none;
+      filter: none;
+      transform: translateY(clamp(-10px, -1.4vw, -6px));
+    }
+
+    .action-button {
+      width: 100%;
+      height: 100%;
+      border: none;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      background: transparent url("./images/answer-submit-wood.png") center 44% / contain no-repeat;
+      color: #f7efe2;
+      font-family: "Open Sans", sans-serif;
+      font-weight: 800;
+      font-size: clamp(1.02rem, 1.9vw, 1.3rem);
+      letter-spacing: 0.02em;
+      cursor: pointer;
+      text-shadow: 0 1px 2px rgba(0, 0, 0, 0.55);
+      transform: translateY(-8px) scale(1.18);
+      transform-origin: center;
+    }
+
+    .action-button:hover {
+      text-decoration: none;
+    }
+
+    @media (max-width: 420px) {
+      .page {
+        padding-top: 0;
+        padding-bottom: 0;
+      }
+
+      .wood-banner {
+        width: min(72%, 280px);
+      }
+
+      .wood-banner span {
+        font-size: clamp(1.8rem, 10.2vw, 2.7rem);
+      }
+
+      .wood-banner.fact span {
+        font-size: clamp(1.4rem, 7.2vw, 1.95rem);
+      }
+
+      .fact-grid {
+        grid-template-columns: var(--left-col-width) calc((100% - var(--left-col-width)) / 2) calc((100% - var(--left-col-width)) / 2);
+        grid-template-rows: repeat(3, minmax(40px, 1fr)) minmax(26px, 0.66fr) minmax(85px, 2fr);
+        min-height: clamp(220px, 40vw, 295px);
+      }
+    }
+
+    @media (max-width: 340px) {
+      .wood-banner {
+        width: min(78%, 250px);
+        min-height: 50px;
+      }
+
+      .wood-banner span {
+        font-size: clamp(1.45rem, 9vw, 2.15rem);
+      }
+
+      .wood-banner.fact span {
+        font-size: clamp(1.15rem, 6.4vw, 1.6rem);
+      }
+
+      .card {
+        width: 94%;
+      }
+
+      .fact-grid {
+        width: 96%;
+      }
+    }
+
+    @media (max-height: 740px) and (max-width: 500px) {
+      .page {
+        padding-top: 0;
+        padding-bottom: 0;
+      }
+
+      .wood-banner {
+        margin-bottom: 10px;
+      }
+
+      .wood-banner.fact {
+        margin-top: 10px;
+        margin-bottom: 10px;
+      }
+
+      .fact-grid {
+        min-height: clamp(210px, 50dvh, 300px);
+      }
+    }
+
+    @media (min-width: 700px) {
+      body {
+        padding: 0;
+      }
+
+      .page {
+        border-radius: 0;
+      }
+    }
+  </style>
+</head>
+<body>
+  <video id="introVideo" class="intro-video" preload="auto" playsinline loop muted>
+    <source src="./videos/mission-intro.mp4" type="video/mp4">
+    <source src="./images/music/kaeribianyihaejeogost-1sigan-hes-a-pirate-ytshorts.savetube.vip.mp4" type="video/mp4">
+  </video>
+  <div class="intro-overlay" id="introOverlay" aria-hidden="true">
+    <img id="introOverlayImage" class="intro-overlay-image" src="./images/intro-overlay-logo.png" alt="Intro logo">
+    <button id="introStartButton" class="intro-start-button" type="button">??</button>
+  </div>
+  <div id="introPhase2Root" class="intro-phase2-root" aria-hidden="true">
+    <div class="intro-phase2-credit-roll credit-roll" aria-hidden="false">
+      <div class="credit-roll-inner">
+        <div class="credit-text intro-phase2-credit-text">
+          <div id="phase2IntroTitle" class="intro-title">HWASUNG COMPANY<br/>EDUCATION</div>
+          <span id="phase2TypeText"></span><span id="phase2TypeCursor" class="intro-phase2-cursor">|</span>
+        </div>
+      </div>
+    </div>
+    <button id="introPhase2StartButton" class="intro-start-button intro-phase2-start" type="button">??</button>
+  </div>
+  <video id="mission1BgmVideo" src="./images/music/kaeribianyihaejeogost-1sigan-hes-a-pirate-ytshorts.savetube.vip.mp4" preload="auto" playsinline loop muted style="display:none"></video>
+  <audio id="sfxCorrect" src="./images/music/CrowdReaction_DIGII01-82-2.mp3" preload="auto"></audio>
+  <audio id="sfxWrong" src="./images/music/GUNPis_Hand%20Gun-Indoor%202%20Shots_SIDEA_GENHD5_HD5-47221_01.mp3" preload="auto"></audio>
+  <audio id="sfxClick" src="./images/music/Clicked_01.mp3" preload="auto"></audio>
+  <audio id="sfxPaper" src="./images/music/Paper%201.mp3" preload="auto"></audio>
+  <main class="page">
+    <div class="top-timer" aria-label="Final timer">
+      <span class="timer-value" id="timerProgressText">00:00</span>
+      <span class="timer-label">Hwasung Time</span>
+    </div>
+
+    <section class="content">
+      <div class="wood-banner">
+        <span>MISSION 01</span>
+      </div>
+
+      <div class="card-wrap">
+        <button class="zoom-button" id="openProblemModalButton" type="button" aria-label="?? ??">??</button>
+      </div>
+
+      <div class="wood-banner fact">
+        <span><span class="line line-top">TOP TRUMPS QUIZ</span><span class="line line-bottom">FACT FILE</span></span>
+      </div>
+
+      <section class="fact-grid" aria-label="Top trumps fact file fields">
+        <div class="cell cell-left">
+          <p class="question-title">&#xC120;&#xB0B4;&#xC5D0;&#xC11C; &#xC774;&#xBBF8;&#xC9C0;&#xC758;<br><span class="answer-emphasis">&#xC815;&#xB2F5;</span>&#xC744; &#xB9DE;&#xCD94;&#xC138;&#xC694;.</p>
+          <div class="question-options">
+            <button class="question-option" data-answer="false">1. &#xB113;&#xC774; 102.4km</button>
+            <button class="question-option" data-answer="true">2. &#xD574;&#xBC1C; 986.5m</button>
+            <button class="question-option" data-answer="false">3. &#xD615;&#xC131; 2&#xB9CC;&#xB144; &#xC804;</button>
+          </div>
+        </div>
+        <div class="cell cell-r1 cell-label"><span class="label-name">&#xC815;&#xB2F5; &#xC218;</span><span class="label-value" id="correctCount">0</span></div>
+        <div class="cell cell-r2 cell-label"><span class="label-name">&#xC624;&#xB2F5; &#xC218;</span><span class="label-value" id="wrongCount">0</span></div>
+        <div class="cell cell-r3 cell-label"><span class="label-name">&#xBCF4;&#xB108;&#xC2A4;&#xC810;&#xC218;</span><span class="label-value" id="bonusScore">0</span></div>
+        <div class="cell cell-b2"><button class="action-button" id="submitAnswerButton" type="button">&#xC815;&#xB2F5; &#xC81C;&#xCD9C;</button></div>
+      </section>
+    </section>
+  </main>
+
+    <div class="problem-modal" id="problemModal" aria-hidden="true">
+    <div class="problem-modal-card" id="problemModalCard" role="dialog" aria-modal="true" aria-label="&#xBB38;&#xC81C; &#xD31D;&#xC5C5;">
+      <button class="problem-modal-close" id="closeProblemModalButton" type="button" aria-label="&#xB2EB;&#xAE30;">&#x00D7;</button>
+      <div class="problem-modal-body">
+        <img class="problem-modal-image" src="./images/problem-popup-mission01.png" alt="1&#xBC88; &#xBB38;&#xC81C; &#xC774;&#xBBF8;&#xC9C0;">
+        <p class="problem-modal-question">&#xB2E4;&#xC74C; &#xC0AC;&#xC9C4;&#xC758; (  ?  ) &#xC758; &#xC815;&#xB2F5;&#xC740;?</p>
+      </div>
+    </div>
+  </div>
+  <script src="./missions-config.js"></script>
+  <script>
+    const TIMER_START_KEY = "toptrumps_final_timer_start_ms";
+    const SKIP_INTRO_OVERLAY_KEY = "toptrumps_skip_intro_overlay";
+    const AUTOPLAY_UNLOCK_KEY = "toptrumps_autoplay_unlocked";
+    const SHARED_COUNT_KEYS = {
+      correct: "toptrumps_shared_correct_count",
+      wrong: "toptrumps_shared_wrong_count",
+      bonusScore: "toptrumps_shared_bonus_score"
+    };
+    const TIMER_MAX_MINUTES = 60;
+    const TIMER_MAX_MS = TIMER_MAX_MINUTES * 60 * 1000;
+    const missionBannerElement = document.querySelector(".content > .wood-banner > span");
+    const introOverlayElement = document.getElementById("introOverlay");
+    const introVideoElement = document.getElementById("introVideo");
+    const introStartButtonElement = document.getElementById("introStartButton");
+    const introPhase2Root = document.getElementById("introPhase2Root");
+    const introPhase2StartButton = document.getElementById("introPhase2StartButton");
+    const phase2TypeTextEl = document.getElementById("phase2TypeText");
+    const phase2TypeCursorEl = document.getElementById("phase2TypeCursor");
+    const phase2CreditRollEl = document.querySelector("#introPhase2Root .intro-phase2-credit-roll");
+    const mission1BgmVideoElement = document.getElementById("mission1BgmVideo");
+    const timerProgressTextElement = document.getElementById("timerProgressText");
+    const questionTitleElement = document.querySelector(".question-title");
+    const questionOptionsContainerElement = document.querySelector(".question-options");
+    const problemModalImageElement = document.querySelector(".problem-modal-image");
+    const problemModalQuestionElement = document.querySelector(".problem-modal-question");
+
+    // ?? ???? ???? ?? ??? ??? ??? ?????.
+    (function applyUiTextFallback() {
+      const styleFixEl = document.createElement("style");
+      styleFixEl.textContent = '.zoom-button::before{content:"\\C774\\BBF8\\C9C0\\0020\\D655\\C778\\D558\\AE30" !important;}';
+      document.head.appendChild(styleFixEl);
+      if (introStartButtonElement) introStartButtonElement.textContent = "\uC2DC\uC791";
+      if (introPhase2StartButton) introPhase2StartButton.textContent = "\uC2DC\uC791";
+      const openBtn = document.getElementById("openProblemModalButton");
+      if (openBtn) {
+        openBtn.textContent = "\uD83D\uDD0E";
+        openBtn.setAttribute("aria-label", "\uBB38\uC81C \uBCF4\uAE30");
+      }
+      const submitBtn = document.getElementById("submitAnswerButton");
+      if (submitBtn) submitBtn.textContent = "\uC815\uB2F5 \uC81C\uCD9C";
+    })();
+
+    const currentPageName = window.location.pathname.split("/").pop() || "";
+    const navEntries = typeof performance.getEntriesByType === "function"
+      ? performance.getEntriesByType("navigation")
+      : [];
+    const navType = navEntries.length > 0 ? navEntries[0].type : "";
+    // ????? ?? ? ????(F5/Ctrl+R/Cmd+R)? ????.
+    window.addEventListener("keydown", (event) => {
+      const key = String(event.key || "").toLowerCase();
+      const isReloadHotkey =
+        key === "f5" || ((event.ctrlKey || event.metaKey) && key === "r");
+      if (!isReloadHotkey) return;
+      event.preventDefault();
+      event.stopPropagation();
+    });
+    const WRONG_CRACK_IMAGE_SRC = "./images/\uae68\uc9c0\ub294 \uc774\ubbf8\uc9c03.png";
+    const MAX_WRONG_CRACK_MARKS = 6;
+    if (navType === "reload") {
+      // ??? ????? ????? ????, ?? ??? ?????.
+    }
+
+    function isMissionStartPage() {
+      return currentPageName === "" || currentPageName === "index.html" || currentPageName === "mission01.html";
+    }
+
+    let phase2TypewriterTimerId = null;
+    let phase2PenSfxAudio = null;
+
+    function stopIntroPhase2PenSfx() {
+      const a = phase2PenSfxAudio;
+      if (!a) return;
+      try {
+        a.pause();
+        a.currentTime = 0;
+      } catch (_) {}
+    }
+
+    function startIntroPhase2PenSfx() {
+      if (!phase2PenSfxAudio) {
+        phase2PenSfxAudio = new Audio("./images/music/Writing%20With%20A%20Pen.wav");
+        phase2PenSfxAudio.loop = true;
+        phase2PenSfxAudio.preload = "auto";
+      }
+      try {
+        phase2PenSfxAudio.currentTime = 0;
+        const p = phase2PenSfxAudio.play();
+        if (p && typeof p.catch === "function") p.catch(() => {});
+      } catch (_) {}
+    }
+
+    function hideIntroPhase2Panel() {
+      if (!introPhase2Root) return;
+      introPhase2Root.classList.remove("is-visible");
+      introPhase2Root.setAttribute("aria-hidden", "true");
+      stopIntroPhase2PenSfx();
+      if (phase2TypewriterTimerId) {
+        clearTimeout(phase2TypewriterTimerId);
+        phase2TypewriterTimerId = null;
+      }
+    }
+
+    function startIntroPhase2Typewriter() {
+      if (!phase2TypeTextEl || !phase2TypeCursorEl) return;
+      if (introPhase2StartButton) {
+        introPhase2StartButton.disabled = true;
+        introPhase2StartButton.style.opacity = "0.5";
+        introPhase2StartButton.style.pointerEvents = "none";
+      }
+
+      if (phase2TypewriterTimerId) {
+        clearTimeout(phase2TypewriterTimerId);
+        phase2TypewriterTimerId = null;
+      }
+      stopIntroPhase2PenSfx();
+
+      const fullText = `
+\uB300\uD56D\uD574\uC2DC\uB300\uC758 \uC6B8\uB989\uB3C4!
+
+\uB098\uCE68\uBC18\uC740 \uC815\uD574\uC9C4 \uAE38\uC744 \uAC00\uB9AC\uD0A4\uC9C0 \uC54A\uC2B5\uB2C8\uB2E4.
+\uC624\uC9C1 \uB2F9\uC2E0\uC774 \uB098\uC544\uAC00\uB294 \uBC1C\uC790\uCDE8\uAC00 \uACE7 \uC0C8\uB85C\uC6B4 \uD56D\uB85C\uAC00 \uB420 \uAC83\uC785\uB2C8\uB2E4.
+\uC6B8\uB989\uB3C4\uC640 \uB3C5\uB3C4\uC758 \uD478\uB978 \uBC14\uB2E4\uB97C \uAC00\uB974\uBA70
+\uC0C8\uB85C\uC6B4 \uAE38\uC744 \uAC1C\uCC99\uD560 \uB2F9\uC2E0\uC758 \uC6A9\uAE30\uB97C \uC751\uC6D0\uD569\uB2C8\uB2E4.
+
+[\uAC8C\uC784 \uC124\uBA85]
+\uB300\uD56D\uD574\uC2DC\uB300\uC758 \uC6B8\uB989\uB3C4\uB294 \uC8FC\uC694 \uC0AC\uC9C4\uACFC \uD0A4\uC6CC\uB4DC\uB97C \uD65C\uC6A9\uD574
+\uC218\uD589\uD558\uB294 \uBBF8\uC158 \uD504\uB85C\uADF8\uB7A8\uC785\uB2C8\uB2E4.
+
+\uC0AC\uC9C4 \uC18D \uC228\uACA8\uC9C4 \uB2E8\uC11C\uB97C \uCC3E\uACE0 \uB2E4\uC591\uD55C \uD034\uC988\uB97C \uD574\uACB0\uD574 \uBCF4\uC138\uC694.
+
+\uC815\uB2F5\uC740 \uC810\uC218\uAC00 \uB418\uACE0 \uC624\uB2F5\uC740 \uAE30\uB85D\uC774 \uB429\uB2C8\uB2E4.
+
+\uC810\uC218\uAC00 \uAC19\uB2E4\uBA74 \uAC00\uC7A5 \uBE60\uB974\uAC8C \uD56D\uD574\uB97C \uB9C8\uCE5C \uD300\uC774
+\uC2B9\uB9AC\uC758 \uC601\uAD11\uC744 \uCC28\uC9C0\uD569\uB2C8\uB2E4.
+
+\uC790, \uBBF8\uC9C0\uC758 \uD56D\uB85C\uB97C \uD5A5\uD574 \uB3DB\uC744 \uC62C\uB9AC\uC2ED\uC2DC\uC624!`;
+      const bigLine = "\uB300\uD56D\uD574\uC2DC\uB300\uC758 \uC6B8\uB989\uB3C4!";
+      let bigStart = fullText.indexOf(bigLine);
+      let bigEnd = bigStart >= 0 ? bigStart + bigLine.length : -1;
+
+      function renderTyped(upto) {
+        if (bigStart < 0) {
+          phase2TypeTextEl.textContent = fullText.slice(0, upto);
+          return;
+        }
+        phase2TypeTextEl.textContent = "";
+        const frag = document.createDocumentFragment();
+        const beforeEnd = Math.min(upto, bigStart);
+        if (beforeEnd > 0) frag.appendChild(document.createTextNode(fullText.slice(0, beforeEnd)));
+        if (upto > bigStart) {
+          const midEnd = Math.min(upto, bigEnd);
+          const mid = fullText.slice(bigStart, midEnd);
+          const span = document.createElement("span");
+          span.className = "intro-phase2-big-line";
+          span.textContent = mid;
+          frag.appendChild(span);
+        }
+        if (upto > bigEnd) frag.appendChild(document.createTextNode(fullText.slice(bigEnd, upto)));
+        phase2TypeTextEl.appendChild(frag);
+      }
+
+      function updateCreditScroll() {
+        if (!phase2CreditRollEl) return;
+        const maxScrollTop = Math.max(0, phase2CreditRollEl.scrollHeight - phase2CreditRollEl.clientHeight);
+        phase2CreditRollEl.scrollTop = maxScrollTop;
+      }
+
+      const reduced = window.matchMedia && window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+      if (reduced) {
+        renderTyped(fullText.length);
+        phase2TypeCursorEl.style.display = "none";
+        updateCreditScroll();
+        stopIntroPhase2PenSfx();
+        if (introPhase2StartButton) {
+          introPhase2StartButton.disabled = false;
+          introPhase2StartButton.style.opacity = "";
+          introPhase2StartButton.style.pointerEvents = "";
+        }
+        return;
+      }
+
+      phase2TypeTextEl.textContent = "";
+      phase2TypeCursorEl.style.display = "inline-block";
+      let i = 0;
+      const baseDelay = 55;
+
+      const tick = () => {
+        if (i >= fullText.length) {
+          phase2TypeCursorEl.style.display = "none";
+          updateCreditScroll();
+          phase2TypewriterTimerId = null;
+          stopIntroPhase2PenSfx();
+          if (introPhase2StartButton) {
+            introPhase2StartButton.disabled = false;
+            introPhase2StartButton.style.opacity = "";
+            introPhase2StartButton.style.pointerEvents = "";
+          }
+          return;
+        }
+        i += 1;
+        renderTyped(i);
+        updateCreditScroll();
+        const jitter = Math.random() * 18;
+        const isNewLine = fullText[i - 1] === "\n";
+        const nlDelay = isNewLine ? 140 : 0;
+        phase2TypewriterTimerId = setTimeout(tick, baseDelay + jitter + nlDelay);
+      };
+
+      phase2TypewriterTimerId = setTimeout(() => {
+        startIntroPhase2PenSfx();
+        tick();
+      }, 260);
+    }
+
+    function closeIntroOverlay() {
+      if (isMissionStartPage()) {
+        stopIntroAutoplayRetry();
+        try {
+          sessionStorage.setItem("toptrumps_intro_bgm_resume_s", String(introVideoElement.currentTime || 0));
+        } catch (_) {}
+        try {
+          localStorage.removeItem(SKIP_INTRO_OVERLAY_KEY);
+        } catch (_) {}
+        try {
+          sessionStorage.setItem("toptrumps_pending_intro2", "1");
+        } catch (_) {}
+        window.location.replace("intro2.html");
+        return;
+      }
+      introOverlayElement.classList.remove("is-open");
+      introOverlayElement.setAttribute("aria-hidden", "true");
+      document.body.classList.remove("intro-active");
+      stopIntroAutoplayRetry();
+      introVideoElement.classList.add("intro-video--hidden");
+      introVideoElement.muted = true;
+      introVideoElement.volume = 0;
+      introVideoElement.pause();
+      introVideoElement.currentTime = 0;
+    }
+
+    let introAudioContext = null;
+    let introGainNode = null;
+    let introMediaSourceNode = null;
+    let introAutoplayRetryTimerId = null;
+    let introAutoplayRetryCount = 0;
+    function ensureIntroLoudGain() {
+      try {
+        const Ctx = window.AudioContext || window.webkitAudioContext;
+        if (!Ctx) return;
+        if (!introAudioContext) introAudioContext = new Ctx();
+        if (introAudioContext.state === "suspended") introAudioContext.resume().catch(() => {});
+        if (!introGainNode) {
+          introGainNode = introAudioContext.createGain();
+          // Louder intro: ~20x boost
+          introGainNode.gain.value = 20.0;
+          introGainNode.connect(introAudioContext.destination);
+        }
+        if (!introMediaSourceNode) {
+          introMediaSourceNode = introAudioContext.createMediaElementSource(introVideoElement);
+          introMediaSourceNode.connect(introGainNode);
+        }
+      } catch (_) {
+        // Ignore if browser blocks/doesn't support MediaElementSource in this context.
+      }
+    }
+
+    function stopIntroAutoplayRetry() {
+      if (introAutoplayRetryTimerId) {
+        clearInterval(introAutoplayRetryTimerId);
+        introAutoplayRetryTimerId = null;
+      }
+      introAutoplayRetryCount = 0;
+    }
+
+    function scheduleIntroAutoplayRetry() {
+      if (introAutoplayRetryTimerId) return;
+      introAutoplayRetryCount = 0;
+      introAutoplayRetryTimerId = setInterval(() => {
+        const introNeedsAudio =
+          introOverlayElement.classList.contains("is-open") ||
+          (introPhase2Root && introPhase2Root.classList.contains("is-visible"));
+        if (!introNeedsAudio) {
+          stopIntroAutoplayRetry();
+          return;
+        }
+        introAutoplayRetryCount += 1;
+        // Try a few seconds; if blocked by policy it will keep failing until user interacts.
+        if (introAutoplayRetryCount > 14) {
+          stopIntroAutoplayRetry();
+          return;
+        }
+        ensureIntroLoudGain();
+        introVideoElement.muted = false;
+        introVideoElement.volume = 1;
+        introVideoElement.play().catch(() => {});
+      }, 350);
+    }
+
+    function openIntroOverlayIfNeeded() {
+      if (!isMissionStartPage()) return;
+
+      hideIntroPhase2Panel();
+
+      const skipIntro = localStorage.getItem(SKIP_INTRO_OVERLAY_KEY) === "1";
+      if (skipIntro) {
+        document.body.classList.remove("intro-active");
+        if (introVideoElement) {
+          introVideoElement.classList.add("intro-video--hidden");
+          introVideoElement.classList.remove("intro-video--phase2-audio");
+        }
+        try {
+          localStorage.removeItem(SKIP_INTRO_OVERLAY_KEY);
+        } catch (_) {}
+        // Ensure we're on mission 01
+        if (String(window.location.hash || "").toLowerCase() !== "#mission01") {
+          window.location.hash = "mission01";
+        }
+        // Auto-start after mission UI has been configured.
+        setTimeout(() => {
+          // Mission UI exists now; trigger the same start effects as if "??  ?? was pressed.
+          startFinalTimerAtMission1Entry();
+          playMissionStartImpact();
+          startMission1Bgm();
+        }, 40);
+        return;
+      }
+
+      if (introVideoElement) {
+        introVideoElement.classList.remove("intro-video--hidden", "intro-video--phase2-audio");
+      }
+      introOverlayElement.classList.add("is-open");
+      introOverlayElement.setAttribute("aria-hidden", "false");
+      document.body.classList.add("intro-active");
+      stopMission1Bgm();
+      // If URL hash was left at a later mission, force intro to start from Mission 1.
+      if (String(window.location.hash || "").toLowerCase() !== "#mission01") {
+        window.location.hash = "mission01";
+        try {
+          setMissionNumber(1);
+        } catch (_) {}
+      }
+      ensureIntroLoudGain();
+      introVideoElement.muted = false;
+      introVideoElement.volume = 1;
+      const playPromise = introVideoElement.play();
+      if (playPromise && typeof playPromise.catch === "function") {
+        playPromise.catch(() => {
+          // Autoplay with sound can be blocked by browser policy. Keep trying without forcing mute.
+          scheduleIntroAutoplayRetry();
+        });
+      }
+    }
+
+    function unlockAutoplayOnce() {
+      try {
+        localStorage.setItem(AUTOPLAY_UNLOCK_KEY, "1");
+      } catch (_) {}
+      ensureIntroLoudGain();
+      // Try immediately after first user gesture.
+      const phase2On = introPhase2Root && introPhase2Root.classList.contains("is-visible");
+      if (introOverlayElement.classList.contains("is-open") || phase2On) {
+        introVideoElement.muted = false;
+        introVideoElement.volume = 1;
+        introVideoElement.play().catch(() => {});
+      }
+    }
+
+    const GLOBAL_BGM_TIME_KEY = "toptrumps_global_bgm_time_s";
+    let lastBgmTimeSaveMs = 0;
+
+    function restoreBgmTimeWhenReady() {
+      if (!mission1BgmVideoElement) return;
+      const saved = Number(localStorage.getItem(GLOBAL_BGM_TIME_KEY));
+      if (!Number.isFinite(saved) || saved <= 0) return;
+      const apply = () => {
+        try {
+          if (Number.isFinite(mission1BgmVideoElement.duration) && saved >= mission1BgmVideoElement.duration) {
+            return;
+          }
+          mission1BgmVideoElement.currentTime = saved;
+        } catch (_) {}
+      };
+      if (mission1BgmVideoElement.readyState >= 1) apply();
+      else mission1BgmVideoElement.addEventListener("loadedmetadata", apply, { once: true });
+    }
+
+    function saveBgmTimeThrottled() {
+      if (!mission1BgmVideoElement) return;
+      const now = Date.now();
+      if (now - lastBgmTimeSaveMs < 900) return;
+      lastBgmTimeSaveMs = now;
+      try {
+        localStorage.setItem(GLOBAL_BGM_TIME_KEY, String(mission1BgmVideoElement.currentTime || 0));
+      } catch (_) {}
+    }
+
+    function saveBgmTimeNow() {
+      if (!mission1BgmVideoElement) return;
+      lastBgmTimeSaveMs = Date.now();
+      try {
+        localStorage.setItem(GLOBAL_BGM_TIME_KEY, String(mission1BgmVideoElement.currentTime || 0));
+      } catch (_) {}
+    }
+
+    function startMission1Bgm() {
+      if (!mission1BgmVideoElement) return;
+      mission1BgmVideoElement.loop = true;
+      mission1BgmVideoElement.muted = false;
+      mission1BgmVideoElement.volume = 0.7;
+      restoreBgmTimeWhenReady();
+      const p = mission1BgmVideoElement.play();
+      if (p && typeof p.catch === "function") {
+        p.catch(() => {
+          // Autoplay policy fallback
+          mission1BgmVideoElement.muted = true;
+          mission1BgmVideoElement.play().catch(() => {});
+        });
+      }
+    }
+
+    function stopMission1Bgm() {
+      if (!mission1BgmVideoElement) return;
+      saveBgmTimeThrottled();
+      mission1BgmVideoElement.pause();
+    }
+
+    function tryEnableIntroSound() {
+      const phase2On = introPhase2Root && introPhase2Root.classList.contains("is-visible");
+      if (!introOverlayElement.classList.contains("is-open") && !phase2On) return;
+      if (!introVideoElement.muted) return;
+      ensureIntroLoudGain();
+      introVideoElement.muted = false;
+      introVideoElement.volume = 1;
+      const playPromise = introVideoElement.play();
+      if (playPromise && typeof playPromise.catch === "function") {
+        playPromise.catch(() => {
+          introVideoElement.muted = true;
+        });
+      }
+    }
+
+    introStartButtonElement.addEventListener("click", closeIntroOverlay);
+    if (introPhase2StartButton) {
+      introPhase2StartButton.addEventListener("click", () => {
+        if (introPhase2StartButton.disabled) return;
+        hideIntroPhase2Panel();
+        document.body.classList.remove("intro-active");
+        stopIntroAutoplayRetry();
+        introVideoElement.classList.add("intro-video--hidden");
+        introVideoElement.classList.remove("intro-video--phase2-audio");
+        introVideoElement.muted = true;
+        introVideoElement.volume = 0;
+        introVideoElement.pause();
+        introVideoElement.currentTime = 0;
+        try {
+          sessionStorage.removeItem("toptrumps_intro_bgm_resume_s");
+          sessionStorage.removeItem("toptrumps_pending_intro2");
+        } catch (_) {}
+        setTimeout(() => {
+          startFinalTimerAtMission1Entry();
+          playMissionStartImpact();
+          startMission1Bgm();
+        }, 40);
+      });
+    }
+    introOverlayElement.addEventListener("pointerdown", tryEnableIntroSound);
+    if (introPhase2Root) introPhase2Root.addEventListener("pointerdown", tryEnableIntroSound);
+    document.addEventListener("keydown", tryEnableIntroSound);
+    openIntroOverlayIfNeeded();
+
+    // If the user has ever interacted once, autoplay is usually allowed on reload.
+    if (localStorage.getItem(AUTOPLAY_UNLOCK_KEY) === "1") {
+      setTimeout(() => {
+        const phase2On = introPhase2Root && introPhase2Root.classList.contains("is-visible");
+        if (!introOverlayElement.classList.contains("is-open") && !phase2On) return;
+        ensureIntroLoudGain();
+        introVideoElement.muted = false;
+        introVideoElement.volume = 1;
+        introVideoElement.play().catch(() => scheduleIntroAutoplayRetry());
+      }, 0);
+    }
+
+    // First user gesture on this site unlocks audio for future reloads.
+    document.addEventListener("pointerdown", unlockAutoplayOnce, { once: true });
+    document.addEventListener("keydown", unlockAutoplayOnce, { once: true });
+
+    // Non-start missions should keep BGM running (resume from saved position).
+    if (!isMissionStartPage()) startMission1Bgm();
+
+    window.addEventListener("beforeunload", () => {
+      saveBgmTimeNow();
+    });
+
+    function getCurrentMissionNumber() {
+      const hash = String(window.location.hash || "");
+      const hashMatch = hash.match(/#mission(\d{2})/i);
+      if (hashMatch) return Number.parseInt(hashMatch[1], 10) || 1;
+      if (currentPageName === "" || currentPageName === "index.html" || currentPageName === "mission01.html") return 1;
+      const match = currentPageName.match(/^mission(\d{2})\.html$/i);
+      if (!match) return 1;
+      return Number.parseInt(match[1], 10) || 1;
+    }
+
+    function getDefaultNextMissionUrl(missionNumber) {
+      if (!Number.isFinite(missionNumber) || missionNumber >= 27) return null;
+      return `mission${String(missionNumber + 1).padStart(2, "0")}.html`;
+    }
+
+    function formatElapsed(ms) {
+      const totalSeconds = Math.max(0, Math.floor(ms / 1000));
+      const minutes = Math.floor(totalSeconds / 60);
+      const seconds = totalSeconds % 60;
+      return `${String(minutes).padStart(2, "0")}:${String(seconds).padStart(2, "0")}`;
+    }
+
+    function ensureWrongCrackLayer() {
+      let layer = document.getElementById("wrongCrackLayer");
+      if (layer) return layer;
+      layer = document.createElement("div");
+      layer.id = "wrongCrackLayer";
+      layer.className = "wrong-crack-layer";
+      document.body.appendChild(layer);
+      return layer;
+    }
+
+    function clearWrongCrackLayer() {
+      const layer = document.getElementById("wrongCrackLayer");
+      if (!layer) return;
+      layer.innerHTML = "";
+    }
+
+    function spawnWrongCrackMark() {
+      const layer = ensureWrongCrackLayer();
+      const mark = document.createElement("img");
+      mark.className = "wrong-crack-mark";
+      mark.src = WRONG_CRACK_IMAGE_SRC;
+      mark.alt = "";
+      mark.setAttribute("aria-hidden", "true");
+
+      const x = Math.random() * window.innerWidth;
+      // Bias towards bottom area (roughly lower 55% ~ 98% of screen)
+      const y = (0.55 + Math.random() * 0.43) * window.innerHeight;
+      const rotation = -28 + Math.random() * 56;
+      const scale = 0.78 + Math.random() * 0.52;
+      const clampedX = Math.max(40, Math.min(window.innerWidth - 40, x));
+      const clampedY = Math.max(40, Math.min(window.innerHeight - 40, y));
+      mark.style.left = `${clampedX}px`;
+      mark.style.top = `${clampedY}px`;
+      mark.style.transform = `translate(-50%, -50%) rotate(${rotation}deg) scale(${scale})`;
+      mark.onerror = () => {
+        mark.style.width = "120px";
+        mark.style.height = "120px";
+        mark.style.border = "3px solid rgba(255,255,255,0.95)";
+        mark.style.borderRadius = "999px";
+        mark.style.background = "transparent";
+      };
+
+      layer.appendChild(mark);
+      const marks = layer.querySelectorAll(".wrong-crack-mark");
+      if (marks.length > MAX_WRONG_CRACK_MARKS) {
+        marks[0].remove();
+      }
+    }
+
+    function renderMissionBannerText(rawText) {
+      const text = String(rawText || "").trim();
+      const bonusMatch = text.match(/^BONUS\b/i);
+      if (bonusMatch) {
+        const restText = text.slice(bonusMatch[0].length);
+        missionBannerElement.innerHTML = `
+          <span class="mission-banner-impact-digit">${bonusMatch[0]}</span><span class="mission-banner-word">${restText}</span>
+        `;
+        return;
+      }
+
+      const digitMatch = text.match(/^(.*?)(\d+)$/);
+      if (!digitMatch) {
+        missionBannerElement.textContent = text;
+        return;
+      }
+
+      const labelText = digitMatch[1];
+      const numberText = digitMatch[2];
+      const compactNumber = String(Number.parseInt(numberText, 10));
+      const safeNumber = compactNumber === "NaN" ? numberText : compactNumber;
+      const impactDigit = safeNumber;
+
+      missionBannerElement.innerHTML = `
+        <span class="mission-banner-word mission-banner-word--label">${labelText}</span><span class="mission-banner-impact-digit mission-banner-number">${impactDigit}</span>
+      `;
+    }
+
+    function playMissionStartImpact() {
+      const chars = missionBannerElement.querySelectorAll(".mission-banner-impact-digit");
+      if (chars.length === 0) return;
+
+      chars.forEach((c) => {
+        c.classList.remove("fired");
+      });
+
+      chars.forEach((c) => {
+        const rect = c.getBoundingClientRect();
+        const targetCenterX = rect.left + rect.width / 2;
+        const targetCenterY = rect.top + rect.height / 2;
+        const viewportCenterX = window.innerWidth / 2;
+        const viewportCenterY = window.innerHeight / 2;
+        const isBonusText = (c.textContent || "").trim().toUpperCase() === "BONUS";
+        const viewportSafeWidth = window.innerWidth * 0.9;
+        const viewportSafeHeight = window.innerHeight * 0.75;
+        const maxScaleByWidth = viewportSafeWidth / Math.max(rect.width, 1);
+        const maxScaleByHeight = viewportSafeHeight / Math.max(rect.height, 1);
+        const maxAllowedScale = Math.max(1.25, Math.min(maxScaleByWidth, maxScaleByHeight));
+        // Keep the impact readable but not overly huge (was too big for '1').
+        const impactScaleCap = isBonusText ? 6.6 : 7.4;
+        const impactScale = Math.min(impactScaleCap, maxAllowedScale);
+        const holdScaleCap = isBonusText ? 5.6 : 6.2;
+        const holdScale = Math.min(holdScaleCap, Math.max(1.1, impactScale * (isBonusText ? 0.82 : 0.84)));
+        const centerBaseX = viewportCenterX - rect.width / 2;
+        const centerBaseY = viewportCenterY - rect.height / 2;
+        const targetBaseX = targetCenterX - rect.width / 2;
+        const targetBaseY = targetCenterY - rect.height / 2;
+
+        const floatChar = document.createElement("span");
+        floatChar.className = "mission-impact-float";
+        floatChar.textContent = c.textContent || "";
+        const targetStyle = window.getComputedStyle(c);
+        floatChar.style.fontSize = targetStyle.fontSize;
+        floatChar.style.lineHeight = targetStyle.lineHeight;
+        floatChar.style.fontFamily = targetStyle.fontFamily;
+        floatChar.style.fontWeight = targetStyle.fontWeight;
+        const backdrop = document.createElement("div");
+        backdrop.className = "mission-impact-backdrop";
+        document.body.appendChild(backdrop);
+        document.body.appendChild(floatChar);
+
+        c.classList.add("fired");
+
+        const backdropAnimation = backdrop.animate(
+          [
+            { opacity: 0 },
+            { offset: 0.12, opacity: 1 },
+            { offset: 0.82, opacity: 1 },
+            { opacity: 0 }
+          ],
+          {
+            duration: 1100,
+            easing: "linear",
+            fill: "forwards"
+          }
+        );
+
+        const animation = floatChar.animate(
+          [
+            {
+              transform: `translate(${centerBaseX}px, ${centerBaseY}px) scale(${impactScale})`,
+              color: "#ff2a2a",
+              textShadow: "none",
+              easing: "cubic-bezier(0.14, 0.95, 0.22, 1)"
+            },
+            {
+              offset: 0.05,
+              transform: `translate(${centerBaseX}px, ${centerBaseY}px) scale(${holdScale})`,
+              color: "#ff2a2a",
+              textShadow: "none",
+              easing: "cubic-bezier(0.18, 0.86, 0.24, 1)"
+            },
+            {
+              offset: 0.55,
+              transform: `translate(${centerBaseX}px, ${centerBaseY}px) scale(${holdScale})`,
+              color: "#ff2a2a",
+              textShadow: "none",
+              easing: "linear"
+            },
+            {
+              transform: `translate(${targetBaseX}px, ${targetBaseY}px) scale(1)`,
+              color: "#ffffff",
+              textShadow: "0 2px 4px rgba(0, 0, 0, 0.55)",
+              easing: "cubic-bezier(0.06, 1, 0.14, 1)"
+            }
+          ],
+          {
+            duration: 1100,
+            easing: "linear",
+            fill: "forwards"
+          }
+        );
+
+        animation.onfinish = () => {
+          c.classList.remove("fired");
+          floatChar.remove();
+          backdrop.remove();
+        };
+        animation.oncancel = () => {
+          c.classList.remove("fired");
+          floatChar.remove();
+          backdrop.remove();
+        };
+        backdropAnimation.oncancel = () => {
+          backdrop.remove();
+        };
+      });
+    }
+
+    function getInitialFinalTimerStartMs() {
+      const pageName = window.location.pathname.split("/").pop() || "";
+      const onMissionEntryPage = pageName === "" || pageName === "index.html" || pageName === "mission01.html";
+      if (onMissionEntryPage) {
+        return null;
+      }
+      const saved = Number(localStorage.getItem(TIMER_START_KEY));
+      if (Number.isFinite(saved) && saved > 0) return saved;
+      const now = Date.now();
+      localStorage.setItem(TIMER_START_KEY, String(now));
+      return now;
+    }
+
+    let finalTimerStartMs = getInitialFinalTimerStartMs();
+
+    function startFinalTimerAtMission1Entry() {
+      const now = Date.now();
+      localStorage.setItem(TIMER_START_KEY, String(now));
+      finalTimerStartMs = now;
+    }
+
+    function renderTimer() {
+      if (finalTimerStartMs === null) {
+        timerProgressTextElement.textContent = "00:00";
+        return;
+      }
+      const now = Date.now();
+      const elapsed = now - finalTimerStartMs;
+      timerProgressTextElement.textContent = formatElapsed(elapsed);
+    }
+
+    renderTimer();
+    setInterval(renderTimer, 1000);
+
+    const correctCountElement = document.getElementById("correctCount");
+    const wrongCountElement = document.getElementById("wrongCount");
+    const bonusScoreElement = document.getElementById("bonusScore");
+    const sfxCorrectElement = document.getElementById("sfxCorrect");
+    const sfxWrongElement = document.getElementById("sfxWrong");
+    const sfxClickElement = document.getElementById("sfxClick");
+    const sfxPaperElement = document.getElementById("sfxPaper");
+    const submitAnswerButton = document.getElementById("submitAnswerButton");
+    const openProblemModalButton = document.getElementById("openProblemModalButton");
+    const closeProblemModalButton = document.getElementById("closeProblemModalButton");
+    const problemModal = document.getElementById("problemModal");
+    const problemModalCard = document.getElementById("problemModalCard");
+    const cardWrap = document.querySelector(".card-wrap");
+    const optionButtons = document.querySelectorAll(".question-option");
+    let currentMissionNumber = getCurrentMissionNumber();
+    let bonusGatePassedKey = `toptrumps_bonus_gate_passed_${currentMissionNumber}`;
+    const missionDefaultConfig = {
+      questionTitleHtml: '\uc120\ub0b4\uc5d0\uc11c \uc774\ubbf8\uc9c0\uc758<br><span class="answer-emphasis">\uc815\ub2f5</span>\uc744 \ub9de\ucd94\uc138\uc694.',
+      popupQuestionText: "\ub2e4\uc74c \uc0ac\uc9c4\uc758 (  ?  ) \uc758 \uc815\ub2f5\uc740?",
+      popupImageSrc: "./images/problem-popup-mission01.png",
+      popupImageAlt: "\ubb38\uc81c \uc774\ubbf8\uc9c0",
+      options: [
+        { label: "1. ?? 102.4km", correct: false },
+        { label: "2. ?? 986.5m", correct: true },
+        { label: "3. ?? 2?? ?", correct: false }
+      ]
+    };
+    const missionConfigMap = window.MISSION_CONFIGS || {};
+    let missionConfig = {
+      ...missionDefaultConfig,
+      ...(missionConfigMap[currentMissionNumber] || {})
+    };
+    let isBonusMission = Boolean(missionConfig.isBonus);
+    let requiresPasscode = Boolean(missionConfig.requirePasscode);
+
+    function ensureBonusActions(config) {
+      let bonusActions = document.getElementById("bonusActions");
+      if (!bonusActions) {
+        bonusActions = document.createElement("div");
+        bonusActions.id = "bonusActions";
+        bonusActions.style.display = "flex";
+        bonusActions.style.flexDirection = "column";
+        bonusActions.style.gap = "8px";
+        bonusActions.style.alignItems = "center";
+        bonusActions.style.marginTop = "8px";
+        questionOptionsContainerElement.insertAdjacentElement("afterend", bonusActions);
+      }
+
+      bonusActions.innerHTML = "";
+      // If this bonus mission doesn't require a passcode UI, hide the whole area.
+      bonusActions.style.display = requiresPasscode ? "flex" : "none";
+      if (!requiresPasscode) {
+        submitAnswerButton.disabled = false;
+        return;
+      }
+
+      const passcodeLives = document.createElement("p");
+      passcodeLives.style.margin = "0";
+      passcodeLives.style.fontSize = "clamp(1.6rem, 2.8vw, 2.2rem)";
+      passcodeLives.style.letterSpacing = "0.1em";
+      passcodeLives.style.userSelect = "none";
+      passcodeLives.style.fontFamily = "\"Courier New\", monospace";
+      passcodeLives.style.fontWeight = "900";
+      passcodeLives.style.lineHeight = "1";
+      passcodeLives.setAttribute("aria-label", "\ud328\uc2a4\ucf54\ub4dc \ubaa9\uc228");
+
+      const failCountKey = `toptrumps_bonus_passcode_fail_count_${currentMissionNumber}`;
+      const MAX_FAIL_COUNT = 3;
+      function readFailCount() {
+        const n = Number.parseInt(localStorage.getItem(failCountKey) || "0", 10);
+        return Number.isFinite(n) && n >= 0 ? n : 0;
+      }
+      function writeFailCount(value) {
+        localStorage.setItem(failCountKey, String(Math.max(0, value)));
+      }
+      let failCount = readFailCount();
+      function renderLives() {
+        passcodeLives.innerHTML = "";
+        const remaining = Math.max(0, MAX_FAIL_COUNT - failCount);
+        for (let i = 0; i < MAX_FAIL_COUNT; i += 1) {
+          const heart = document.createElement("span");
+          heart.textContent = "\u2665";
+          heart.style.display = "inline-block";
+          heart.style.margin = "0 2px";
+          heart.style.textShadow = "1px 0 0 rgba(0,0,0,0.35), -1px 0 0 rgba(0,0,0,0.35), 0 1px 0 rgba(0,0,0,0.35), 0 -1px 0 rgba(0,0,0,0.35)";
+          heart.style.color = i < remaining ? "#e01919" : "rgba(100, 100, 100, 0.35)";
+          passcodeLives.appendChild(heart);
+        }
+      }
+      renderLives();
+
+      const passcodeInput = document.createElement("input");
+      passcodeInput.type = "text";
+      passcodeInput.id = "bonusPasscodeInput";
+      passcodeInput.placeholder = config.passcodePlaceholder || "?? ??";
+      passcodeInput.autocomplete = "off";
+      passcodeInput.spellcheck = false;
+      passcodeInput.style.width = "min(70%, 250px)";
+      passcodeInput.style.height = "42px";
+      passcodeInput.style.border = "1px solid rgba(69, 49, 29, 0.35)";
+      passcodeInput.style.borderRadius = "8px";
+      passcodeInput.style.background = "rgba(240, 218, 178, 0.82)";
+      passcodeInput.style.color = "#352818";
+      passcodeInput.style.padding = "0 12px";
+      passcodeInput.style.fontFamily = "\"Open Sans\", sans-serif";
+      passcodeInput.style.fontSize = "clamp(0.95rem, 1.6vw, 1.1rem)";
+
+      const passcodeButton = document.createElement("button");
+      passcodeButton.type = "button";
+      passcodeButton.id = "bonusPasscodeConfirmButton";
+      passcodeButton.className = "question-option";
+      passcodeButton.textContent = config.passcodeButtonText || "??";
+      passcodeButton.style.minWidth = "min(70%, 250px)";
+
+      const passcodeError = document.createElement("p");
+      passcodeError.textContent = "";
+      passcodeError.style.minHeight = "1.1em";
+      passcodeError.style.color = "#8b0000";
+      passcodeError.style.fontFamily = "\"Open Sans\", sans-serif";
+      passcodeError.style.fontWeight = "700";
+      passcodeError.style.fontSize = "clamp(0.8rem, 1.3vw, 0.92rem)";
+      passcodeError.style.textAlign = "center";
+
+      const passcodeSuccess = document.createElement("p");
+      passcodeSuccess.textContent = "";
+      passcodeSuccess.style.minHeight = "1.1em";
+      passcodeSuccess.style.color = "#1d6b2a";
+      passcodeSuccess.style.fontFamily = "\"Open Sans\", sans-serif";
+      passcodeSuccess.style.fontWeight = "700";
+      passcodeSuccess.style.fontSize = "clamp(0.8rem, 1.3vw, 0.92rem)";
+      passcodeSuccess.style.textAlign = "center";
+
+      const triggerWrongFeedback = () => {
+        if (sfxWrongElement) {
+          try {
+            sfxWrongElement.pause();
+            sfxWrongElement.currentTime = 0;
+          } catch (_) {}
+          const p = sfxWrongElement.play();
+          if (p && typeof p.catch === "function") p.catch(() => {});
+        }
+        spawnWrongCrackMark();
+      };
+
+      const validatePasscode = () => {
+        if (localStorage.getItem(bonusGatePassedKey) === "1") {
+          passcodeError.textContent = "";
+          passcodeSuccess.textContent = config.passcodeSuccessText || "\uc554\ud638\uac00 \ub9de\uc2b5\ub2c8\ub2e4. \ub2e4\uc74c \ubbf8\uc158 \ubc84\ud2bc\uc744 \ub20c\ub7ec\uc8fc\uc138\uc694.";
+          passcodeInput.disabled = true;
+          passcodeButton.disabled = true;
+          submitAnswerButton.disabled = false;
+          return;
+        }
+
+        const expectedPasscode = String(config.passcode || "").trim();
+        const enteredPasscode = passcodeInput.value.trim();
+        if (expectedPasscode && enteredPasscode === expectedPasscode) {
+          localStorage.setItem(bonusGatePassedKey, "1");
+          localStorage.removeItem(failCountKey);
+          bonusScore += 5;
+          saveSharedCounts();
+          renderSharedCounts();
+          submitAnswerButton.disabled = false;
+          passcodeInput.disabled = true;
+          passcodeButton.disabled = true;
+          passcodeError.textContent = "";
+          passcodeSuccess.textContent = config.passcodeSuccessText || "\uc554\ud638 \ud655\uc778 \uc644\ub8cc. \ub2e4\uc74c \ubbf8\uc158 \ubc84\ud2bc\uc744 \ub20c\ub7ec\uc8fc\uc138\uc694.";
+          failCount = 0;
+          renderLives();
+          return;
+        }
+        passcodeInput.value = "";
+        passcodeSuccess.textContent = "";
+        failCount += 1;
+        writeFailCount(failCount);
+        renderLives();
+        triggerWrongFeedback();
+        if (failCount >= MAX_FAIL_COUNT) {
+          passcodeInput.disabled = true;
+          passcodeButton.disabled = true;
+          submitAnswerButton.disabled = true;
+          passcodeError.textContent = "\uc554\ud638 \uc785\ub825 3\ud68c \uc2e4\ud328\ub85c \uc790\ub3d9\uc73c\ub85c \ub2e4\uc74c \ubbf8\uc158\uc73c\ub85c \uc774\ub3d9\ud569\ub2c8\ub2e4.";
+          setTimeout(() => {
+            const configuredNextUrl = typeof config.nextUrl === "string" ? config.nextUrl.trim() : "";
+            const targetNextUrl = configuredNextUrl || getDefaultNextMissionUrl(currentMissionNumber);
+            if (targetNextUrl) goToNextMission(targetNextUrl);
+          }, 800);
+          return;
+        }
+        passcodeError.textContent = `${config.passcodeErrorText || "\uc554\ud638\uac00 \uc62c\ubc14\ub974\uc9c0 \uc54a\uc2b5\ub2c8\ub2e4."} (${failCount}/${MAX_FAIL_COUNT})`;
+      };
+
+      passcodeButton.addEventListener("click", validatePasscode);
+      passcodeInput.addEventListener("keydown", (event) => {
+        if (event.key === "Enter") validatePasscode();
+      });
+      passcodeInput.addEventListener("input", () => {
+        passcodeError.textContent = "";
+        passcodeSuccess.textContent = "";
+      });
+
+      bonusActions.appendChild(passcodeLives);
+      bonusActions.appendChild(passcodeInput);
+      bonusActions.appendChild(passcodeButton);
+      bonusActions.appendChild(passcodeError);
+      bonusActions.appendChild(passcodeSuccess);
+
+      if (failCount >= MAX_FAIL_COUNT && localStorage.getItem(bonusGatePassedKey) !== "1") {
+        passcodeInput.disabled = true;
+        passcodeButton.disabled = true;
+        submitAnswerButton.disabled = true;
+        passcodeError.textContent = "\uc554\ud638 \uc785\ub825 3\ud68c \uc2e4\ud328\ub85c \uc790\ub3d9\uc73c\ub85c \ub2e4\uc74c \ubbf8\uc158\uc73c\ub85c \uc774\ub3d9\ud569\ub2c8\ub2e4.";
+        setTimeout(() => {
+          const configuredNextUrl = typeof config.nextUrl === "string" ? config.nextUrl.trim() : "";
+          const targetNextUrl = configuredNextUrl || getDefaultNextMissionUrl(currentMissionNumber);
+          if (targetNextUrl) goToNextMission(targetNextUrl);
+        }, 600);
+      }
+    }
+
+    function applyMissionConfig(config) {
+      const defaultBannerText = `MISSION ${String(currentMissionNumber).padStart(2, "0")}`;
+      renderMissionBannerText(config.bannerText || defaultBannerText);
+      questionTitleElement.innerHTML = config.questionTitleHtml || missionDefaultConfig.questionTitleHtml;
+      problemModalQuestionElement.innerHTML = config.popupQuestionText || missionDefaultConfig.popupQuestionText;
+      problemModalImageElement.src = config.popupImageSrc || missionDefaultConfig.popupImageSrc;
+      problemModalImageElement.alt = config.popupImageAlt || missionDefaultConfig.popupImageAlt;
+
+      const options = Array.isArray(config.options) ? config.options : missionDefaultConfig.options;
+      optionButtons.forEach((button, index) => {
+        const option = options[index] || missionDefaultConfig.options[index];
+        if (!option) return;
+        button.textContent = option.label;
+        button.dataset.answer = option.correct ? "true" : "false";
+      });
+
+      if (isBonusMission) {
+        questionOptionsContainerElement.style.display = "none";
+        submitAnswerButton.textContent = config.submitButtonText || "\uC815\uB2F5 \uC81C\uCD9C";
+        submitAnswerButton.disabled = requiresPasscode
+          ? localStorage.getItem(bonusGatePassedKey) !== "1"
+          : false;
+        ensureBonusActions(config);
+      } else {
+        questionOptionsContainerElement.style.display = "flex";
+        // Make sure bonus UI doesn't occupy layout space in normal missions.
+        const bonusActions = document.getElementById("bonusActions");
+        if (bonusActions) {
+          bonusActions.style.display = "none";
+          bonusActions.innerHTML = "";
+        }
+        submitAnswerButton.textContent = "\uC815\uB2F5 \uC81C\uCD9C";
+        submitAnswerButton.disabled = false;
+      }
+    }
+
+    applyMissionConfig(missionConfig);
+    if (!window.location.hash) {
+      window.location.hash = `mission${String(currentMissionNumber).padStart(2, "0")}`;
+    }
+    if (!isMissionStartPage()) {
+      setTimeout(() => {
+        playMissionStartImpact();
+      }, 40);
+    }
+    let problemModalAutoCloseTimer = null;
+    const PROBLEM_MODAL_ANIM_MS = 360;
+    let selectedOptionButton = null;
+    let isSolved = false;
+    let correctCount = 0;
+    let wrongCount = 0;
+    let bonusScore = 0;
+
+    function readSharedCount(key, fallbackValue) {
+      const saved = Number.parseInt(localStorage.getItem(key) || "", 10);
+      return Number.isFinite(saved) && saved >= 0 ? saved : fallbackValue;
+    }
+
+    function saveSharedCounts() {
+      localStorage.setItem(SHARED_COUNT_KEYS.correct, String(correctCount));
+      localStorage.setItem(SHARED_COUNT_KEYS.wrong, String(wrongCount));
+      localStorage.setItem(SHARED_COUNT_KEYS.bonusScore, String(bonusScore));
+    }
+
+    function renderSharedCounts() {
+      correctCountElement.textContent = String(correctCount);
+      wrongCountElement.textContent = String(wrongCount);
+      bonusScoreElement.textContent = String(bonusScore);
+    }
+
+    correctCount = readSharedCount(SHARED_COUNT_KEYS.correct, Number.parseInt(correctCountElement.textContent || "0", 10) || 0);
+    wrongCount = readSharedCount(SHARED_COUNT_KEYS.wrong, Number.parseInt(wrongCountElement.textContent || "0", 10) || 0);
+    bonusScore = readSharedCount(SHARED_COUNT_KEYS.bonusScore, Number.parseInt(bonusScoreElement.textContent || "0", 10) || 0);
+    renderSharedCounts();
+
+    optionButtons.forEach((button) => {
+      button.addEventListener("click", () => {
+        if (isSolved) return;
+        if (sfxClickElement) {
+          try {
+            sfxClickElement.pause();
+            sfxClickElement.currentTime = 0;
+          } catch (_) {}
+          const p = sfxClickElement.play();
+          if (p && typeof p.catch === "function") p.catch(() => {});
+        }
+        selectedOptionButton = button;
+        optionButtons.forEach((btn) => btn.classList.remove("selected"));
+        button.classList.add("selected");
+      });
+    });
+
+    function setMissionNumber(nextMissionNumber) {
+      const n = Number.parseInt(String(nextMissionNumber), 10);
+      if (!Number.isFinite(n) || n <= 0) return;
+      currentMissionNumber = n;
+      bonusGatePassedKey = `toptrumps_bonus_gate_passed_${currentMissionNumber}`;
+      missionConfig = {
+        ...missionDefaultConfig,
+        ...(missionConfigMap[currentMissionNumber] || {})
+      };
+      isBonusMission = Boolean(missionConfig.isBonus);
+      requiresPasscode = Boolean(missionConfig.requirePasscode);
+
+      // Reset per-mission UI state
+      isSolved = false;
+      selectedOptionButton = null;
+      optionButtons.forEach((btn) => btn.classList.remove("selected"));
+      clearWrongCrackLayer();
+
+      applyMissionConfig(missionConfig);
+
+      setTimeout(() => {
+        playMissionStartImpact();
+      }, 30);
+    }
+
+    function goToNextMission(url) {
+      // Stay on the same page (no reload) so BGM never cuts.
+      const match = String(url || "").match(/mission(\d{2})\.html/i);
+      const nextNumber = match ? Number.parseInt(match[1], 10) : null;
+      if (!nextNumber) return;
+      window.location.hash = `mission${String(nextNumber).padStart(2, "0")}`;
+      setMissionNumber(nextNumber);
+    }
+
+    let correctSfxPendingNextUrl = null;
+    let correctSfxPlaying = false;
+    function playCorrectSfxThenNavigate(nextUrl) {
+      const targetUrl = String(nextUrl || "").trim();
+      if (!targetUrl) return;
+
+      if (!sfxCorrectElement) {
+        goToNextMission(targetUrl);
+        return;
+      }
+
+      if (correctSfxPlaying) {
+        correctSfxPendingNextUrl = targetUrl;
+        return;
+      }
+
+      correctSfxPlaying = true;
+      correctSfxPendingNextUrl = targetUrl;
+
+      try {
+        sfxCorrectElement.pause();
+        sfxCorrectElement.currentTime = 0;
+      } catch (_) {}
+
+      const finalize = () => {
+        if (!correctSfxPlaying) return;
+        correctSfxPlaying = false;
+        const url = correctSfxPendingNextUrl;
+        correctSfxPendingNextUrl = null;
+        if (url) goToNextMission(url);
+      };
+
+      sfxCorrectElement.onended = finalize;
+      sfxCorrectElement.onpause = null;
+
+      const p = sfxCorrectElement.play();
+      if (p && typeof p.catch === "function") {
+        p.catch(() => {
+          // If autoplay is blocked for SFX, just move on immediately.
+          finalize();
+        });
+      }
+
+      // Make navigation slightly faster: finalize a bit before the real 'ended'.
+      // (Audio may still be finishing while the next mission UI appears.)
+      const EARLY_OFFSET_MS = 180;
+      const durationMs = Number.isFinite(sfxCorrectElement.duration) ? Math.floor(sfxCorrectElement.duration * 1000) : 0;
+      if (durationMs > 0) {
+        const earlyMs = Math.max(0, durationMs - EARLY_OFFSET_MS);
+        setTimeout(finalize, earlyMs);
+        // Safety fallback in case 'ended' doesn't fire.
+        const fallbackMs = Math.max(300, Math.min(7000, durationMs + 160));
+        setTimeout(finalize, fallbackMs);
+      } else {
+        // If duration isn't available yet, fall back to a short constant delay.
+        setTimeout(finalize, 900);
+      }
+    }
+
+    window.addEventListener("hashchange", () => {
+      const n = getCurrentMissionNumber();
+      if (n !== currentMissionNumber) setMissionNumber(n);
+    });
+
+    function getFinalTimerElapsedMs() {
+      const savedStart = Number(localStorage.getItem(TIMER_START_KEY));
+      if (Number.isFinite(savedStart) && savedStart > 0) {
+        return Math.max(0, Date.now() - savedStart);
+      }
+      return 0;
+    }
+
+    function goToFinalSummaryPage() {
+      const elapsedMs = getFinalTimerElapsedMs();
+      try {
+        localStorage.setItem("toptrumps_final_timer_result_ms", String(elapsedMs));
+      } catch (_) {}
+      window.location.href = "final-summary.html";
+    }
+
+    submitAnswerButton.addEventListener("click", () => {
+      if (isSolved) return;
+
+      if (isBonusMission) {
+        if (requiresPasscode && localStorage.getItem(bonusGatePassedKey) !== "1") return;
+        isSolved = true;
+        submitAnswerButton.disabled = true;
+        const configuredNextUrl = typeof missionConfig.nextUrl === "string" ? missionConfig.nextUrl.trim() : "";
+        const targetNextUrl = configuredNextUrl || getDefaultNextMissionUrl(currentMissionNumber);
+        if (targetNextUrl) {
+          playCorrectSfxThenNavigate(targetNextUrl);
+        } else {
+          goToFinalSummaryPage();
+        }
+        return;
+      }
+
+      if (!selectedOptionButton) return;
+      const isCorrect = selectedOptionButton.dataset.answer === "true";
+      if (isCorrect) {
+        correctCount += 1;
+      } else {
+        wrongCount += 1;
+        if (sfxWrongElement) {
+          try {
+            sfxWrongElement.pause();
+            sfxWrongElement.currentTime = 0;
+          } catch (_) {}
+          const p = sfxWrongElement.play();
+          if (p && typeof p.catch === "function") p.catch(() => {});
+        }
+        spawnWrongCrackMark();
+      }
+      saveSharedCounts();
+      renderSharedCounts();
+
+      if (isCorrect) {
+        isSolved = true;
+        const configuredNextUrl = typeof missionConfig.nextUrl === "string" ? missionConfig.nextUrl.trim() : "";
+        const targetNextUrl = configuredNextUrl || getDefaultNextMissionUrl(currentMissionNumber);
+        if (targetNextUrl) {
+          playCorrectSfxThenNavigate(targetNextUrl);
+        } else {
+          goToFinalSummaryPage();
+        }
+        return;
+      }
+    });
+
+    function positionProblemModalCard() {
+      const rect = cardWrap.getBoundingClientRect();
+      problemModalCard.style.position = "fixed";
+      problemModalCard.style.left = `${Math.max(12, rect.left)}px`;
+      problemModalCard.style.top = `${Math.max(12, rect.top)}px`;
+      problemModalCard.style.width = `${Math.min(window.innerWidth - 24, rect.width)}px`;
+    }
+
+    function openProblemModal() {
+      if (sfxPaperElement) {
+        try {
+          sfxPaperElement.pause();
+          sfxPaperElement.currentTime = 0;
+        } catch (_) {}
+        const p = sfxPaperElement.play();
+        if (p && typeof p.catch === "function") p.catch(() => {});
+      }
+      problemModal.classList.remove("is-closing");
+      problemModal.classList.add("is-open");
+      problemModal.setAttribute("aria-hidden", "false");
+      positionProblemModalCard();
+      if (problemModalAutoCloseTimer) clearTimeout(problemModalAutoCloseTimer);
+      problemModalAutoCloseTimer = setTimeout(closeProblemModal, 5000);
+    }
+
+    function closeProblemModal() {
+      if (!problemModal.classList.contains("is-open")) return;
+      if (problemModal.classList.contains("is-closing")) return;
+      if (sfxPaperElement) {
+        try {
+          sfxPaperElement.pause();
+          sfxPaperElement.currentTime = 0;
+        } catch (_) {}
+        const p = sfxPaperElement.play();
+        if (p && typeof p.catch === "function") p.catch(() => {});
+      }
+      problemModal.classList.add("is-closing");
+      if (problemModalAutoCloseTimer) {
+        clearTimeout(problemModalAutoCloseTimer);
+        problemModalAutoCloseTimer = null;
+      }
+
+      window.setTimeout(() => {
+        problemModal.classList.remove("is-open");
+        problemModal.classList.remove("is-closing");
+        problemModal.setAttribute("aria-hidden", "true");
+      }, PROBLEM_MODAL_ANIM_MS);
+    }
+
+    openProblemModalButton.addEventListener("click", openProblemModal);
+    closeProblemModalButton.addEventListener("click", closeProblemModal);
+    problemModal.addEventListener("click", (event) => {
+      if (event.target === problemModal) closeProblemModal();
+    });
+    document.addEventListener("keydown", (event) => {
+      if (event.key === "Escape") closeProblemModal();
+    });
+    window.addEventListener("resize", () => {
+      if (problemModal.classList.contains("is-open")) positionProblemModalCard();
+    });
+
+    // timer helper
+    window.topTrumpsFinalTimer = {
+      reset() {
+        const now = Date.now();
+        localStorage.setItem(TIMER_START_KEY, String(now));
+        finalTimerStartMs = now;
+      },
+      stopAndSave() {
+        if (finalTimerStartMs === null) return;
+        localStorage.setItem("toptrumps_final_timer_result_ms", String(Date.now() - finalTimerStartMs));
+      }
+    };
+  </script>
+  <script>
+    (function () {
+      const HOME_PASSWORD = "0000";
+
+      function clearTopTrumpsStorage() {
+        try {
+          Object.keys(localStorage).forEach((key) => {
+            if (key.startsWith("toptrumps_")) localStorage.removeItem(key);
+          });
+        } catch (_) {}
+        try {
+          Object.keys(sessionStorage).forEach((key) => {
+            if (key.startsWith("toptrumps_")) sessionStorage.removeItem(key);
+          });
+        } catch (_) {}
+      }
+
+      function createHomeButton() {
+        if (document.getElementById("toptrumpsHomeResetBtn")) return;
+        const btn = document.createElement("button");
+        btn.id = "toptrumpsHomeResetBtn";
+        btn.type = "button";
+        btn.textContent = "\u2302";
+        Object.assign(btn.style, {
+          position: "fixed",
+          top: "14px",
+          right: "14px",
+          zIndex: "260",
+          border: "none",
+          borderRadius: "0",
+          padding: "0",
+          width: "42px",
+          height: "42px",
+          background: "transparent",
+          color: "rgba(255,255,255,0.52)",
+          fontWeight: "900",
+          fontSize: "30px",
+          lineHeight: "1",
+          letterSpacing: "0",
+          cursor: "pointer",
+          opacity: "0.72"
+        });
+
+        btn.addEventListener("click", () => {
+          const entered = window.prompt("\ud648\uc73c\ub85c \ub3cc\uc544\uac00\ub824\uba74 \ube44\ubc00\ubc88\ud638\ub97c \uc785\ub825\ud558\uc138\uc694");
+          if (entered === null) return;
+          if (entered !== HOME_PASSWORD) {
+            window.alert("\ube44\ubc00\ubc88\ud638\uac00 \uc62c\ubc14\ub974\uc9c0 \uc54a\uc2b5\ub2c8\ub2e4.");
+            return;
+          }
+          clearTopTrumpsStorage();
+          window.top.location.href = "/";
+        });
+
+        document.body.appendChild(btn);
+      }
+
+      createHomeButton();
+    })();
+  </script>
+</body>
+</html>
