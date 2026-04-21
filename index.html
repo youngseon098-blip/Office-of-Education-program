@@ -1,6 +1,12 @@
 <!doctype html>
 <html lang="ko">
   <head>
+    <script>
+  const redirect = new URLSearchParams(window.location.search).get('redirect');
+  if (redirect) {
+    window.history.replaceState(null, '', redirect);
+  }
+</script>
     <meta charset="UTF-8" />
     <meta
       name="viewport"
