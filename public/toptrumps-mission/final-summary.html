@@ -1,0 +1,376 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>최종 결과</title>
+  <style>
+    @font-face {
+      font-family: "KCC-Ahnchangho";
+      src: url("./images/music/KCC-Ahnchangho.otf") format("opentype");
+      font-weight: 400;
+      font-style: normal;
+    }
+
+    * {
+      box-sizing: border-box;
+    }
+
+    body {
+      margin: 0;
+      min-height: 100vh;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 0;
+      background: #0e1118;
+      color: #2c2117;
+      font-family: "KCC-Ahnchangho", "Noto Sans KR", sans-serif;
+      overflow: hidden;
+    }
+
+    .final-wrap {
+      width: 100vw;
+      height: 100vh;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      position: relative;
+    }
+
+    .paper {
+      position: relative;
+      width: 100vw;
+      height: 100vh;
+      background: #0e1118;
+      filter: none;
+      opacity: 0;
+      transform: translateY(28px) scale(0.88);
+      animation: paper-in 760ms cubic-bezier(0.2, 0.95, 0.3, 1) forwards;
+      overflow: hidden;
+    }
+
+    .paper::before {
+      content: "";
+      position: absolute;
+      left: 50%;
+      top: 50%;
+      width: 100vh;
+      height: 100vw;
+      transform: translate(-50%, -50%) rotate(90deg);
+      transform-origin: center center;
+      background: url("./images/a6ea7152e2f841ed078d2323ea8bb6e0.jpg") center center / cover no-repeat;
+      z-index: 0;
+    }
+
+    .paper-content {
+      position: absolute;
+      left: 50%;
+      top: 50%;
+      width: min(82vw, 1200px);
+      transform: translate(-50%, -50%);
+      display: flex;
+      flex-direction: column;
+      gap: clamp(16px, 2.8vw, 28px);
+      align-items: center;
+      justify-content: center;
+      color: #2b2016;
+      font-family: "KCC-Ahnchangho", "Noto Sans KR", sans-serif;
+      font-weight: 800;
+      font-size: clamp(4.2rem, 9vw, 7.2rem);
+      line-height: 1.34;
+      letter-spacing: 0.01em;
+      white-space: pre-wrap;
+      text-align: center;
+      z-index: 1;
+    }
+
+    .typed-line {
+      min-height: 1.4em;
+      width: 100%;
+    }
+
+    .cursor {
+      display: inline-block;
+      width: 0.6ch;
+      animation: cursor-blink 550ms steps(1) infinite;
+    }
+
+    .guide {
+      margin: 0;
+      text-align: center;
+      color: #f7f1e7;
+      font-weight: 700;
+      font-family: "KCC-Ahnchangho", "Noto Sans KR", sans-serif;
+      font-size: clamp(1.2rem, 3vw, 1.65rem);
+      text-shadow: 0 2px 8px rgba(0, 0, 0, 0.48);
+      position: absolute;
+      left: 50%;
+      bottom: 13%;
+      transform: translateX(-50%);
+      width: min(90vw, 900px);
+    }
+
+    .guide .share-word {
+      color: #ff2f2f;
+      font-weight: 900;
+    }
+
+    @keyframes paper-in {
+      0% {
+        opacity: 0;
+        transform: translateY(28px) scale(0.88);
+      }
+      100% {
+        opacity: 1;
+        transform: translateY(0) scale(1);
+      }
+    }
+
+    @keyframes cursor-blink {
+      50% {
+        opacity: 0;
+      }
+    }
+
+    @media (prefers-reduced-motion: reduce) {
+      .paper {
+        animation: none;
+        opacity: 1;
+        transform: none;
+      }
+      .cursor {
+        animation: none;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div class="final-wrap">
+    <section class="paper" aria-label="최종 결과 종이">
+      <div class="paper-content" id="paperContent" aria-live="polite"></div>
+    </section>
+    <p class="guide">화면 사진을 찍어 단톡방에 <span class="share-word">공유</span>해주세요</p>
+  </div>
+  <video
+    id="finalBgmVideo"
+    src="./images/music/kaeribianyihaejeogost-1sigan-hes-a-pirate-ytshorts.savetube.vip.mp4"
+    preload="auto"
+    playsinline
+    loop
+    muted
+    style="position: absolute; width: 0; height: 0; opacity: 0; pointer-events: none;"
+    aria-hidden="true"
+  ></video>
+
+  <script>
+    const TIMER_START_KEY = "toptrumps_final_timer_start_ms";
+    const TIMER_RESULT_KEY = "toptrumps_final_timer_result_ms";
+    const CORRECT_KEY = "toptrumps_shared_correct_count";
+    const WRONG_KEY = "toptrumps_shared_wrong_count";
+    const BONUS_KEY = "toptrumps_shared_bonus_score";
+    const PAPER_SFX_PATH = "./images/music/Paper 1.mp3";
+    const GLOBAL_BGM_TIME_KEY = "toptrumps_global_bgm_time_s";
+    const finalBgmVideoEl = document.getElementById("finalBgmVideo");
+
+    function formatElapsed(ms) {
+      const safeMs = Number.isFinite(ms) ? Math.max(0, ms) : 0;
+      const totalSeconds = Math.floor(safeMs / 1000);
+      const minutes = Math.floor(totalSeconds / 60);
+      const seconds = totalSeconds % 60;
+      return `${String(minutes).padStart(2, "0")}:${String(seconds).padStart(2, "0")}`;
+    }
+
+    function readCount(key) {
+      const value = Number.parseInt(localStorage.getItem(key) || "0", 10);
+      return Number.isFinite(value) && value >= 0 ? value : 0;
+    }
+
+    function getElapsedMs() {
+      const savedResult = Number(localStorage.getItem(TIMER_RESULT_KEY));
+      if (Number.isFinite(savedResult) && savedResult >= 0) return savedResult;
+      const startMs = Number(localStorage.getItem(TIMER_START_KEY));
+      if (Number.isFinite(startMs) && startMs > 0) return Math.max(0, Date.now() - startMs);
+      return 0;
+    }
+
+    function restoreFinalBgmTimeWhenReady() {
+      if (!finalBgmVideoEl) return;
+      const saved = Number(localStorage.getItem(GLOBAL_BGM_TIME_KEY));
+      if (!Number.isFinite(saved) || saved <= 0) return;
+      const apply = () => {
+        try {
+          if (Number.isFinite(finalBgmVideoEl.duration) && saved >= finalBgmVideoEl.duration) return;
+          finalBgmVideoEl.currentTime = saved;
+        } catch (_) {}
+      };
+      if (finalBgmVideoEl.readyState >= 1) apply();
+      else finalBgmVideoEl.addEventListener("loadedmetadata", apply, { once: true });
+    }
+
+    function saveFinalBgmTimeNow() {
+      if (!finalBgmVideoEl) return;
+      try {
+        localStorage.setItem(GLOBAL_BGM_TIME_KEY, String(finalBgmVideoEl.currentTime || 0));
+      } catch (_) {}
+    }
+
+    function startFinalBgm() {
+      if (!finalBgmVideoEl) return;
+      restoreFinalBgmTimeWhenReady();
+      finalBgmVideoEl.loop = true;
+      finalBgmVideoEl.muted = false;
+      finalBgmVideoEl.volume = 0.7;
+      const p = finalBgmVideoEl.play();
+      if (p && typeof p.catch === "function") {
+        p.catch(() => {
+          finalBgmVideoEl.muted = true;
+          finalBgmVideoEl.play().catch(() => {});
+        });
+      }
+    }
+
+    function playPaperSfxOnce() {
+      const paperSfx = new Audio(PAPER_SFX_PATH);
+      paperSfx.preload = "auto";
+      const tryPlay = () => {
+        const p = paperSfx.play();
+        if (p && typeof p.catch === "function") {
+          p.catch(() => {});
+        }
+      };
+      tryPlay();
+
+      // autoplay 차단 대비: 첫 인터랙션에서 1회 재시도
+      const kick = () => {
+        tryPlay();
+      };
+      document.addEventListener("pointerdown", kick, { once: true });
+      document.addEventListener("keydown", kick, { once: true });
+    }
+
+    function startTypewriterSummary() {
+      const contentEl = document.getElementById("paperContent");
+      if (!contentEl) return;
+
+      const lines = [
+        `소요시간 ${formatElapsed(getElapsedMs())}`,
+        `정답 수 ${readCount(CORRECT_KEY)}`,
+        `오답 수 ${readCount(WRONG_KEY)}`,
+        `보너스 점수 ${readCount(BONUS_KEY)}`
+      ];
+
+      const reduced = window.matchMedia && window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+      if (reduced) {
+        contentEl.innerHTML = lines.map((line) => `<div class="typed-line">${line}</div>`).join("");
+        return;
+      }
+
+      const lineNodes = lines.map(() => {
+        const row = document.createElement("div");
+        row.className = "typed-line";
+        contentEl.appendChild(row);
+        return row;
+      });
+
+      let lineIndex = 0;
+      let charIndex = 0;
+      const baseDelay = 42;
+
+      const tick = () => {
+        if (lineIndex >= lines.length) return;
+
+        const row = lineNodes[lineIndex];
+        const text = lines[lineIndex];
+        const visible = text.slice(0, charIndex + 1);
+        row.innerHTML = `${visible}<span class="cursor">|</span>`;
+        charIndex += 1;
+
+        if (charIndex > text.length) {
+          row.textContent = text;
+          lineIndex += 1;
+          charIndex = 0;
+          setTimeout(tick, 120);
+          return;
+        }
+
+        const prevChar = text[Math.max(0, charIndex - 1)];
+        const extra = prevChar === " " ? 36 : 0;
+        const jitter = Math.random() * 20;
+        setTimeout(tick, baseDelay + extra + jitter);
+      };
+
+      setTimeout(tick, 260);
+    }
+
+    playPaperSfxOnce();
+    startFinalBgm();
+    startTypewriterSummary();
+
+    if (finalBgmVideoEl) {
+      finalBgmVideoEl.addEventListener("timeupdate", saveFinalBgmTimeNow);
+      window.addEventListener("pagehide", saveFinalBgmTimeNow);
+      document.addEventListener("visibilitychange", () => {
+        if (document.visibilityState === "hidden") saveFinalBgmTimeNow();
+      });
+    }
+  </script>
+  <script>
+    (function () {
+      const HOME_PASSWORD = "0000";
+
+      function clearTopTrumpsStorage() {
+        try {
+          Object.keys(localStorage).forEach((key) => {
+            if (key.startsWith("toptrumps_")) localStorage.removeItem(key);
+          });
+        } catch (_) {}
+        try {
+          Object.keys(sessionStorage).forEach((key) => {
+            if (key.startsWith("toptrumps_")) sessionStorage.removeItem(key);
+          });
+        } catch (_) {}
+      }
+
+      if (document.getElementById("toptrumpsHomeResetBtn")) return;
+      const btn = document.createElement("button");
+      btn.id = "toptrumpsHomeResetBtn";
+      btn.type = "button";
+      btn.textContent = "⌂";
+      Object.assign(btn.style, {
+        position: "fixed",
+        top: "14px",
+        right: "14px",
+        zIndex: "260",
+        border: "none",
+        borderRadius: "0",
+        padding: "0",
+        width: "42px",
+        height: "42px",
+        background: "transparent",
+        color: "rgba(255,255,255,0.52)",
+        fontWeight: "900",
+        fontSize: "30px",
+        lineHeight: "1",
+        letterSpacing: "0",
+        cursor: "pointer",
+        opacity: "0.72"
+      });
+
+      btn.addEventListener("click", () => {
+        const entered = window.prompt("처음으로 돌아가려면 비밀번호를 입력하세요.");
+        if (entered === null) return;
+        if (entered !== HOME_PASSWORD) {
+          window.alert("비밀번호가 올바르지 않습니다.");
+          return;
+        }
+        clearTopTrumpsStorage();
+        window.top.location.href = "/";
+      });
+
+      document.body.appendChild(btn);
+    })();
+  </script>
+</body>
+</html>

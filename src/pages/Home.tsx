@@ -2,6 +2,8 @@ import { Link, useNavigate } from "react-router-dom";
 import { useEffect, useState } from "react";
 import "./Home.css";
 
+const TOPTRUMPS_SKIP_INTRO_KEY = "toptrumps_skip_intro_overlay";
+
 function pad(n: number) {
   return String(n).padStart(2, "0");
 }
@@ -22,6 +24,13 @@ const programs = [
 export default function Home() {
   const navigate = useNavigate();
   const [now, setNow] = useState(new Date());
+
+  function goToTopTrumpsMission() {
+    try {
+      localStorage.removeItem(TOPTRUMPS_SKIP_INTRO_KEY);
+    } catch (_) {}
+    navigate(programs[0].to);
+  }
 
   useEffect(() => {
     const timer = window.setInterval(() => setNow(new Date()), 1000);
@@ -95,11 +104,11 @@ export default function Home() {
             role="link"
             tabIndex={0}
             aria-label="팬톤 컬러 찾기 페이지로 이동"
-            onClick={() => navigate("/pantone")}
+            onClick={goToTopTrumpsMission}
             onKeyDown={(e) => {
               if (e.key === "Enter" || e.key === " ") {
                 e.preventDefault();
-                navigate("/pantone");
+                goToTopTrumpsMission();
               }
             }}
           >
@@ -107,6 +116,10 @@ export default function Home() {
               className="home-program-link home-pantone-link"
               to={programs[0].to}
               aria-label={programs[0].title}
+              onClick={(event) => {
+                event.preventDefault();
+                goToTopTrumpsMission();
+              }}
             >
               <div className="center-bg">
                 <div className="wave-lines" aria-hidden="true">
