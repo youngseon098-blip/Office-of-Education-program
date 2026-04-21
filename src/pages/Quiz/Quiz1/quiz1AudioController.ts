@@ -1,10 +1,12 @@
-const QUIZ1_BGM_SRC = "/mp3/Quiz1/music6.mp3?v=20260421b";
-const QUIZ1_BGM_ALT_SRC = "/mp3/Quiz1/music7.mp3?v=20260421b";
-const QUIZ1_RINGTONE_SRC = "/mp3/Quiz1/ringtone.mp3?v=20260421b";
-const QUIZ1_CRACK_SFX_SRC = "/mp3/Quiz1/crack.mp3?v=20260421";
-const QUIZ1_PAPER_SFX_SRC = "/mp3/Quiz1/paper.mp3?v=20260421b";
-const QUIZ1_SAGAK_SFX_SRC = "/mp3/Quiz1/sagak.mp3?v=20260421";
-const QUIZ1_KUNG_SFX_SRC = "/mp3/Quiz1/kung.mp3?v=20260421";
+import { BASE } from "../../../utils/base";
+
+const QUIZ1_BGM_SRC = `${BASE}mp3/Quiz1/music6.mp3?v=20260421b`;
+const QUIZ1_BGM_ALT_SRC = `${BASE}mp3/Quiz1/music7.mp3?v=20260421b`;
+const QUIZ1_RINGTONE_SRC = `${BASE}mp3/Quiz1/ringtone.mp3?v=20260421b`;
+const QUIZ1_CRACK_SFX_SRC = `${BASE}mp3/Quiz1/crack.mp3?v=20260421`;
+const QUIZ1_PAPER_SFX_SRC = `${BASE}mp3/Quiz1/paper.mp3?v=20260421b`;
+const QUIZ1_SAGAK_SFX_SRC = `${BASE}mp3/Quiz1/sagak.mp3?v=20260421`;
+const QUIZ1_KUNG_SFX_SRC = `${BASE}mp3/Quiz1/kung.mp3?v=20260421`;
 const QUIZ1_BGM_VOLUME = 1;
 const QUIZ1_RINGTONE_VOLUME = 1;
 const QUIZ1_SAGAK_VOLUME = 1;

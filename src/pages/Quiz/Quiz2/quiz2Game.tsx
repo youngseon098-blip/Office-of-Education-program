@@ -309,7 +309,7 @@ const MUSIC1_TRIGGER_INDEX = SCENES.findIndex(
     item.lbl === "국정원 최지수 국장" &&
     item.lines[0]?.includes("오셨군요"),
 );
-const MUSIC1_AUDIO_SRC = "/mp3/Quiz2/music1.mp3?v=20260420b";
+const MUSIC1_AUDIO_SRC = `${BASE}mp3/Quiz2/music1.mp3?v=20260420b`;
 const MUSIC2_TRIGGER_INDEX = SCENES.findIndex(
   (item) =>
     item.t === "dlg" &&
@@ -325,16 +325,16 @@ const MUSIC3_TRIGGER_INDEX = SCENES.findIndex(
 );
 const MUSIC4_TRIGGER_INDEX = SCENES.findIndex((item) => item.t === "success");
 const SUCCESS_SCENE_INDEX = SCENES.findIndex((item) => item.t === "success");
-const MUSIC2_AUDIO_SRC = "/mp3/Quiz2/music2.mp3?v=20260420";
-const MUSIC3_AUDIO_SRC = "/mp3/Quiz2/music3.mp3?v=20260420";
-const MUSIC4_AUDIO_SRC = "/mp3/Quiz2/music5.mp3?v=20260421";
-const ONE_PAGE_SFX_SRC = "/mp3/Quiz2/1.mp3?v=20260420";
-const KEYBO_SFX_SRC = "/mp3/Quiz2/keybo.mp3?v=20260420";
-const HORN_SFX_SRC = "/mp3/Quiz2/horn.mp3?v=20260420";
-const TALKIE_SFX_SRC = "/mp3/Quiz2/Talkie2.mp3?v=20260420";
-const AI_SFX_SRC = "/mp3/Quiz2/ai.mp3?v=20260420";
-const DATA_SFX_SRC = "/mp3/Quiz2/data.mp3?v=20260420";
-const STAGE_SFX_SRC = "/mp3/Quiz2/STAGE.mp3?v=20260420";
+const MUSIC2_AUDIO_SRC = `${BASE}mp3/Quiz2/music2.mp3?v=20260420`;
+const MUSIC3_AUDIO_SRC = `${BASE}mp3/Quiz2/music3.mp3?v=20260420`;
+const MUSIC4_AUDIO_SRC = `${BASE}mp3/Quiz2/music5.mp3?v=20260421`;
+const ONE_PAGE_SFX_SRC = `${BASE}mp3/Quiz2/1.mp3?v=20260420`;
+const KEYBO_SFX_SRC = `${BASE}mp3/Quiz2/keybo.mp3?v=20260420`;
+const HORN_SFX_SRC = `${BASE}mp3/Quiz2/horn.mp3?v=20260420`;
+const TALKIE_SFX_SRC = `${BASE}mp3/Quiz2/Talkie2.mp3?v=20260420`;
+const AI_SFX_SRC = `${BASE}mp3/Quiz2/ai.mp3?v=20260420`;
+const DATA_SFX_SRC = `${BASE}mp3/Quiz2/data.mp3?v=20260420`;
+const STAGE_SFX_SRC = `${BASE}mp3/Quiz2/STAGE.mp3?v=20260420`;
 const DIALOGUE_NEXT_DELAY_MS = 3000;
 const ATMO_NEXT_DELAY_MS = 5000;
 

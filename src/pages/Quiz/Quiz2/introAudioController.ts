@@ -1,7 +1,9 @@
+import { BASE } from "../../../utils/base";
+
 let introAudio: HTMLAudioElement | null = null;
 const activeOwners = new Set<string>();
 let stopTimer: number | null = null;
-const INTRO_AUDIO_SRC = "/mp3/Quiz2/intro.mp3?v=20260420";
+const INTRO_AUDIO_SRC = `${BASE}mp3/Quiz2/intro.mp3?v=20260420`;
 let unlockListenerBound = false;
 
 function ensureAudio() {
