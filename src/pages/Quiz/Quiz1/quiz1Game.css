@@ -636,7 +636,7 @@
   right: 0;
   top: -28px;
   bottom: -6px;
-  background-image: url("/img/Quiz/Quiz1/BlackPaper3.webp");
+  background-image: var(--q1g-black-paper-url);
   background-size: 108% 100%;
   background-position: center top;
   background-repeat: no-repeat;

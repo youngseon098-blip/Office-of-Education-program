@@ -1,6 +1,8 @@
 import { Fragment, useEffect, useMemo, useRef, useState } from "react";
+import type { CSSProperties } from "react";
 import { Link } from "react-router-dom";
 import "./quiz2Game.css";
+import { BASE } from "../../../utils/base";
 import {
   disableIntroAudio,
   enableIntroAudio,
@@ -1861,12 +1863,19 @@ export default function Quiz2Game() {
   return (
     <main
       className={`quiz2game-page ${scene.t === "dlg" ? "q2-dialogue-jisoo" : ""} ${dialogueBgClass} ${scene.t === "atmo" ? "q2-atmo-page" : ""} ${scene.t === "result" ? "q2-result-page" : ""} ${scene.t === "success" ? "q2-success-page" : ""} ${scene.t === "stage" && scene.num !== 0 ? "q2-stage-page" : ""} ${scene.t === "quiz" ? "q2-quiz-page" : ""} ${scene.t === "quiz-m" ? "q2-quizm-page" : ""} ${scene.t === "quiz" && (scene.badge === "3급 기밀 절차 · 항구 거리 계산" || scene.badge === "STAGE 1 · 단어 해독") ? "q2-harbor-page" : ""} ${scene.t === "quiz" && scene.badge === "⚠ STAGE 3 · 긴급 연산" ? "q2-s3-page" : ""} ${scene.t === "quiz" && scene.badge === "⚠ STAGE 4 · 최종 암호" ? "q2-s4-page" : ""}`}
+      style={
+        {
+          "--q2-jisoo-bg-url": `url("${BASE}img/Quiz/Quiz2/jisoo2.webp")`,
+          "--q2-walkie-bg-url": `url("${BASE}img/Quiz/Quiz2/walkie.webp")`,
+          "--q2-note-bg-url": `url("${BASE}img/Quiz/Quiz2/note.webp")`,
+        } as CSSProperties
+      }
     >
       <div id="bg-sky" />
       {scene.t === "atmo" && (
         <video
           className="q2-atmo-video"
-          src="/img/Quiz/Quiz2/yacht.mp4"
+          src={BASE + "img/Quiz/Quiz2/yacht.mp4"}
           autoPlay
           muted
           loop

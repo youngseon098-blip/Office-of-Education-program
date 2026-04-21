@@ -51,7 +51,7 @@
       rgba(5, 16, 34, 0.58) 42%,
       rgba(4, 12, 28, 0.7) 100%
     ),
-    url("/img/Quiz/Quiz2/jisoo2.webp");
+    var(--q2-jisoo-bg-url);
   background-size: cover;
   background-position: center -120px;
   background-repeat: no-repeat;
@@ -65,7 +65,7 @@
       rgba(5, 16, 34, 0.58) 42%,
       rgba(4, 12, 28, 0.7) 100%
     ),
-    url("/img/Quiz/Quiz2/walkie.webp");
+    var(--q2-walkie-bg-url);
   background-size: cover;
   background-position: center -120px;
   background-repeat: no-repeat;
@@ -2272,7 +2272,7 @@
   margin-left: calc(50% - 50vw);
   margin-right: calc(50% - 50vw);
   margin-top: -18px;
-  background-image: url("/img/Quiz/Quiz2/note.webp");
+  background-image: var(--q2-note-bg-url);
   background-size: 115% auto;
   background-position: center 12px;
   background-repeat: no-repeat;
@@ -2302,7 +2302,7 @@
       rgba(2, 10, 22, 0.44) 62%,
       rgba(3, 12, 26, 0) 100%
     ),
-    url("/img/Quiz/Quiz2/jisoo2.webp");
+    var(--q2-jisoo-bg-url);
   background-size: cover;
   background-position: center -80px;
   background-repeat: no-repeat;
@@ -2319,7 +2319,7 @@
       rgba(2, 10, 22, 0.44) 62%,
       rgba(3, 12, 26, 0) 100%
     ),
-    url("/img/Quiz/Quiz2/walkie.webp");
+    var(--q2-walkie-bg-url);
   background-position: center -80px;
 }
 

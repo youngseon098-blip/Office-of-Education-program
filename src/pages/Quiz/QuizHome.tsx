@@ -2,6 +2,7 @@ import { Link } from "react-router-dom";
 import { useEffect, useRef } from "react";
 import type { ReactNode } from "react";
 import "./QuizHome.css";
+import { BASE } from "../../utils/base";
 
 type Star = {
   x: number;
@@ -24,7 +25,7 @@ const tarotVideos: {
   {
     id: "moon",
     title: "달",
-    src: "/tarot-videos/moon.mp4",
+    src: "tarot-videos/moon.mp4",
     to: "/quiz1",
     quizLabel: "Quiz 1:",
     quizTitle: (
@@ -38,7 +39,7 @@ const tarotVideos: {
   {
     id: "fire",
     title: "불",
-    src: "/tarot-videos/fire.mp4?v=2",
+    src: "tarot-videos/fire.mp4?v=2",
     to: "/quiz2",
     quizLabel: "Quiz 2:",
     quizTitle: "새벽을 여는 독도",
@@ -46,7 +47,7 @@ const tarotVideos: {
   {
     id: "three",
     title: "삼",
-    src: "/tarot-videos/three.mp4",
+    src: "tarot-videos/three.mp4",
     to: "/quiz3",
     quizLabel: "Quiz 3:",
     quizTitle: "깨진 안용복의 영혼구슬",
@@ -158,7 +159,7 @@ export default function QuizHome() {
   }, []);
 
   useEffect(() => {
-    const audio = new Audio("/mp3/taro.mp3");
+    const audio = new Audio(BASE + "mp3/taro.mp3");
     audio.loop = true;
     bgmRef.current = audio;
 
@@ -260,7 +261,7 @@ export default function QuizHome() {
                     playsInline
                     preload="auto"
                   >
-                    <source src={video.src} type="video/mp4" />
+                    <source src={BASE + video.src} type="video/mp4" />
                     브라우저가 영상을 지원하지 않습니다.
                   </video>
                 </div>

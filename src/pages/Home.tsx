@@ -1,6 +1,7 @@
 import { Link, useNavigate } from "react-router-dom";
 import { useEffect, useState } from "react";
 import "./Home.css";
+import { BASE } from "../utils/base";
 
 const TOPTRUMPS_SKIP_INTRO_KEY = "toptrumps_skip_intro_overlay";
 
@@ -46,17 +47,17 @@ export default function Home() {
       </div>
       <img
         className="home-deco home-deco-top"
-        src="/img/home/다각형.webp"
+        src={BASE + "img/home/다각형.webp"}
         alt=""
       />
       <img
         className="home-deco home-deco-right"
-        src="/img/home/사각형.webp"
+        src={BASE + "img/home/사각형.webp"}
         alt=""
       />
       <img
         className="home-deco home-deco-bottom"
-        src="/img/home/사각형2.webp"
+        src={BASE + "img/home/사각형2.webp"}
         alt=""
       />
 

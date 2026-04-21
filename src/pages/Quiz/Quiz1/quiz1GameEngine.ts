@@ -9,6 +9,7 @@ import {
   restartQuiz1Bgm,
   restartQuiz1BgmAlt,
 } from "./quiz1AudioController";
+import { BASE } from "../../../utils/base";
 
 type BgMode = "ocean" | "lab" | "museum";
 
@@ -111,10 +112,10 @@ export function initQuiz1Game(root: HTMLElement): () => void {
     const rot = (Math.random() - 0.5) * 38;
 
     const img = document.createElement("img");
-    img.src = "/img/Quiz/Quiz1/crack.webp";
+    img.src = BASE + "img/Quiz/Quiz1/crack.webp";
     img.onerror = () => {
-      if (!img.src.endsWith("/img/Quiz/Quiz1/crack.webp")) return;
-      img.src = "img/Quiz/Quiz1/crack.webp";
+      if (!img.src.endsWith("img/Quiz/Quiz1/crack.webp")) return;
+      img.src = BASE + "img/Quiz/Quiz1/crack.webp";
     };
     img.alt = "";
     img.className = "q1g-crack-stamp";
@@ -436,9 +437,9 @@ export function initQuiz1Game(root: HTMLElement): () => void {
     rafId = requestAnimationFrame(drawBg);
   }
 
-  const FISHERMAN_CHAR_HTML = `<img src="/img/Quiz/Quiz1/Fisherman2.webp" alt="" class="char-silhouette q1g-char-fisher" decoding="async" />`;
+  const FISHERMAN_CHAR_HTML = `<img src="${BASE}img/Quiz/Quiz1/Fisherman2.webp" alt="" class="char-silhouette q1g-char-fisher" decoding="async" />`;
 
-  const DOCTOR_CHAR_HTML = `<img src="/img/Quiz/Quiz1/Lab3.webp" alt="" class="char-silhouette q1g-char-lab" decoding="async" />`;
+  const DOCTOR_CHAR_HTML = `<img src="${BASE}img/Quiz/Quiz1/Lab3.webp" alt="" class="char-silhouette q1g-char-lab" decoding="async" />`;
 
   /* ════════════════════════════════════════════════
    SCENE DATA
@@ -1443,7 +1444,7 @@ export function initQuiz1Game(root: HTMLElement): () => void {
     <div class="char-area">
       ${charVisual}
     </div>
-    <div class="dialogue-box">
+    <div class="dialogue-box" style="--q1g-black-paper-url:url('${BASE}img/Quiz/Quiz1/BlackPaper3.webp');">
       <div class="dialogue-name">${s.charLabel || ""}</div>
       <div class="dialogue-text q1g-dtext"></div>
     </div>

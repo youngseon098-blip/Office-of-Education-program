@@ -1,6 +1,7 @@
 import { useEffect, useMemo, useRef, useState } from "react";
 import { Link } from "react-router-dom";
 import "./UcQuiz.css";
+import { BASE } from "../../utils/base";
 
 type Choice = {
   id: string;
@@ -222,7 +223,7 @@ export default function UcQuiz() {
             <figure className="ucq-modal-figure">
               <img
                 className="ucq-modal-img"
-                src="/img/UcQuiz/%EC%84%B1%EC%9D%B8%EB%B4%89.webp"
+                src={BASE + "img/UcQuiz/%EC%84%B1%EC%9D%B8%EB%B4%89.webp"}
                 alt="성인봉(해발 986.5m) 안내 표지"
                 loading="eager"
                 decoding="async"
