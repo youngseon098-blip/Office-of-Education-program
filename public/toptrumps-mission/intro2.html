@@ -1,0 +1,508 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Top Trumps Quiz - Intro 2</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Noto+Serif+KR:wght@400;600;700&family=Open+Sans:wght@600;700&family=Oswald:wght@500;700&display=swap"
+      rel="stylesheet"
+    />
+    <style>
+      @font-face {
+        font-family: "MYHaemalgeunSangsang";
+        src: url("./images/music/MYHaemalgeunSangsang.ttf") format("truetype");
+        font-weight: 400;
+        font-style: normal;
+      }
+
+      *, *::before, *::after {
+        box-sizing: border-box;
+        margin: 0;
+        padding: 0;
+      }
+
+      body {
+        height: 100dvh;
+        position: relative;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        font-family: "Oswald", sans-serif;
+        background: #000 url("./images/grunge-paper-background.jpg") center top / cover no-repeat;
+        color: #fff;
+        overflow: hidden;
+      }
+
+      .intro-start-button {
+        position: absolute;
+        bottom: clamp(34px, 7vh, 70px);
+        left: 50%;
+        transform: translateX(-50%);
+        z-index: 10;
+        border: 2px solid rgba(255, 255, 255, 0.95);
+        border-radius: 999px;
+        min-width: clamp(170px, 34vw, 280px);
+        padding: clamp(13px, 2.1vw, 18px) clamp(24px, 4.2vw, 40px);
+        background: rgba(15, 20, 28, 0.85);
+        color: #f6f1e7;
+        font-family: "Open Sans", sans-serif;
+        font-weight: 800;
+        font-size: clamp(1.05rem, 3vw, 1.45rem);
+        letter-spacing: 0.03em;
+        box-shadow: 0 8px 18px rgba(0, 0, 0, 0.45), inset 0 0 0 1px rgba(255, 255, 255, 0.14);
+        cursor: pointer;
+      }
+
+      .credit-roll {
+        position: absolute;
+        left: 50%;
+        /* 빨간선 영역(시작/끝) 기준으로 클리핑 */
+        top: 0;
+        bottom: clamp(150px, 22vh, 240px);
+        transform: translateX(-50%);
+        width: min(92vw, 980px);
+        overflow-x: hidden;
+        overflow-y: auto;
+        z-index: 1;
+        padding: 0;
+      }
+
+      .credit-roll-inner {
+        transform: translateY(0);
+        will-change: transform;
+      }
+
+      .credit-text {
+        white-space: pre-wrap;
+        font-family: "MYHaemalgeunSangsang", "KCC 안창호체", "Courier New", Courier, monospace;
+        font-size: clamp(24px, 3.9vw, 52px);
+        line-height: 1.35;
+        color: rgba(0, 0, 0, 0.92);
+        text-shadow: none;
+        padding: 0;
+        border-radius: 0;
+        background: transparent;
+        border: none;
+        letter-spacing: 0.01em;
+        will-change: transform;
+      }
+
+      .big-line {
+        font-weight: 900;
+        font-size: clamp(34px, 6.5vw, 80px);
+        letter-spacing: 0.02em;
+        display: inline-block;
+      }
+
+      .intro-title {
+        width: 100%;
+        text-align: center;
+        font-weight: 900;
+        font-size: clamp(32px, 6.4vw, 74px);
+        line-height: 1.05;
+        margin: 0 0 10px 0;
+      }
+
+      #typeCursor {
+        display: inline-block;
+        width: 0.6ch;
+        color: rgba(0, 0, 0, 0.92);
+        animation: cursor-blink 500ms steps(1) infinite;
+      }
+
+      @keyframes cursor-blink {
+        50% {
+          opacity: 0;
+        }
+      }
+
+      @media (prefers-reduced-motion: reduce) {
+        .credit-roll-inner { animation: none !important; }
+        #typeCursor {
+          animation: none;
+          opacity: 1;
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <video
+      id="introBgmVideo"
+      src="./videos/mission-intro.mp4"
+      preload="auto"
+      playsinline
+      loop
+      style="position: absolute; width: 0; height: 0; opacity: 0; pointer-events: none; clip: rect(0, 0, 0, 0)"
+      aria-hidden="true"
+    ></video>
+    <div class="credit-roll" aria-hidden="false">
+      <div class="credit-roll-inner">
+        <div class="credit-text">
+          <div id="introTitle" class="intro-title">HWASUNG COMPANY<br/>EDUCATION</div>
+          <span id="typeText"></span><span id="typeCursor">|</span>
+        </div>
+      </div>
+    </div>
+    <button id="introStartButton" class="intro-start-button" type="button">시   작</button>
+
+    <script>
+      (function () {
+        try {
+          const navEntries =
+            typeof performance.getEntriesByType === "function"
+              ? performance.getEntriesByType("navigation")
+              : [];
+          const navType = navEntries.length > 0 ? navEntries[0].type : "";
+          window.addEventListener("keydown", (event) => {
+            const key = String(event.key || "").toLowerCase();
+            const isReloadHotkey =
+              key === "f5" || ((event.ctrlKey || event.metaKey) && key === "r");
+            if (!isReloadHotkey) return;
+            event.preventDefault();
+            event.stopPropagation();
+          });
+          let comingFromIntroVideo = false;
+          try {
+            comingFromIntroVideo = sessionStorage.getItem("toptrumps_pending_intro2") === "1";
+          } catch (_) {}
+          if (comingFromIntroVideo) {
+            try {
+              sessionStorage.removeItem("toptrumps_pending_intro2");
+            } catch (_) {}
+          }
+          // Skip redirect when arriving from intro video (1p); some browsers mis-report that as reload.
+          // Only true intro2 refresh (no pending flag) jumps back to the mission start page.
+          if (navType === "reload" && !comingFromIntroVideo) {
+            // 사용자 새로고침은 단축키에서 차단되며, 현재 화면을 유지합니다.
+          }
+        } catch (_) {}
+      })();
+
+      const SKIP_INTRO_OVERLAY_KEY = "toptrumps_skip_intro_overlay";
+      const INTRO_BGM_RESUME_KEY = "toptrumps_intro_bgm_resume_s";
+      const introBgmVideoEl = document.getElementById("introBgmVideo");
+      const introStartButtonElement = document.getElementById("introStartButton");
+
+      let introBgmAudioContext = null;
+      let introBgmGainNode = null;
+      let introBgmMediaSourceNode = null;
+
+      function ensureIntroBgmLoudGain() {
+        try {
+          const Ctx = window.AudioContext || window.webkitAudioContext;
+          if (!Ctx || !introBgmVideoEl) return;
+          if (!introBgmAudioContext) introBgmAudioContext = new Ctx();
+          if (introBgmAudioContext.state === "suspended") introBgmAudioContext.resume().catch(() => {});
+          if (!introBgmGainNode) {
+            introBgmGainNode = introBgmAudioContext.createGain();
+            introBgmGainNode.gain.value = 20.0;
+            introBgmGainNode.connect(introBgmAudioContext.destination);
+          }
+          if (!introBgmMediaSourceNode) {
+            introBgmMediaSourceNode = introBgmAudioContext.createMediaElementSource(introBgmVideoEl);
+            introBgmMediaSourceNode.connect(introBgmGainNode);
+          }
+        } catch (_) {}
+      }
+
+      function readIntroBgmResumeSeconds() {
+        try {
+          const raw = sessionStorage.getItem(INTRO_BGM_RESUME_KEY);
+          if (raw == null) return 0;
+          const n = Number(raw);
+          return Number.isFinite(n) && n >= 0 ? n : 0;
+        } catch (_) {
+          return 0;
+        }
+      }
+
+      function startIntro2BgmFromResume() {
+        if (!introBgmVideoEl) return;
+        const resume = readIntroBgmResumeSeconds();
+        const applyTimeAndPlay = () => {
+          try {
+            if (
+              resume > 0 &&
+              Number.isFinite(introBgmVideoEl.duration) &&
+              resume < introBgmVideoEl.duration
+            ) {
+              introBgmVideoEl.currentTime = resume;
+            }
+          } catch (_) {}
+          ensureIntroBgmLoudGain();
+          introBgmVideoEl.muted = false;
+          introBgmVideoEl.volume = 1;
+          const p = introBgmVideoEl.play();
+          if (p && typeof p.catch === "function") {
+            p.catch(() => {
+              const kick = () => {
+                ensureIntroBgmLoudGain();
+                introBgmVideoEl.muted = false;
+                introBgmVideoEl.volume = 1;
+                introBgmVideoEl.play().catch(() => {});
+              };
+              document.addEventListener("pointerdown", kick, { once: true });
+              document.addEventListener("keydown", kick, { once: true });
+            });
+          }
+        };
+        if (introBgmVideoEl.readyState >= 1) applyTimeAndPlay();
+        else introBgmVideoEl.addEventListener("loadedmetadata", applyTimeAndPlay, { once: true });
+      }
+
+      function stopIntro2Bgm() {
+        if (!introBgmVideoEl) return;
+        try {
+          introBgmVideoEl.pause();
+          introBgmVideoEl.muted = true;
+          introBgmVideoEl.volume = 0;
+        } catch (_) {}
+        try {
+          sessionStorage.removeItem(INTRO_BGM_RESUME_KEY);
+        } catch (_) {}
+      }
+
+      const typeTextEl = document.getElementById("typeText");
+      const typeCursorEl = document.getElementById("typeCursor");
+      const creditRollInnerEl = document.querySelector(".credit-roll-inner");
+      const creditRollEl = document.querySelector(".credit-roll");
+      const creditTextEl = document.querySelector(".credit-text");
+
+      let intro2TypewriterTimerId = null;
+      let intro2PenSfxAudio = null;
+
+      function stopIntro2PenSfx() {
+        const a = intro2PenSfxAudio;
+        if (!a) return;
+        try {
+          a.pause();
+          a.currentTime = 0;
+        } catch (_) {}
+      }
+
+      function startIntro2PenSfx() {
+        if (!intro2PenSfxAudio) {
+          intro2PenSfxAudio = new Audio("./images/music/Writing%20With%20A%20Pen.wav");
+          intro2PenSfxAudio.loop = true;
+          intro2PenSfxAudio.preload = "auto";
+        }
+        try {
+          intro2PenSfxAudio.currentTime = 0;
+          const p = intro2PenSfxAudio.play();
+          if (p && typeof p.catch === "function") p.catch(() => {});
+        } catch (_) {}
+      }
+
+      function updateCreditScroll() {
+        if (!creditRollEl) return;
+        // Auto-scroll to the bottom as text grows.
+        const maxScrollTop = Math.max(0, creditRollEl.scrollHeight - creditRollEl.clientHeight);
+        creditRollEl.scrollTop = maxScrollTop;
+      }
+
+      const fullText = `
+대항해시대의 울릉도!
+
+나침반은 정해진 길을 가리키지 않습니다.
+오직 당신이 나아가는 발자취가 곧 새로운 항로가 될 것입니다.
+울릉도와 독도의 푸른 바다를 가르며
+새로운 길을 개척할 당신의 용기를 응원합니다.
+
+[게임 설명]
+‘대항해시대의 울릉도’는 주요 사진과 키워드를 활용해
+수행하는 미션 프로그램입니다.
+
+사진 속 숨겨진 단서를 찾고 다양한 퀴즈를 해결해 보세요.
+
+정답은 점수가 되고 오답은 기록이 됩니다.
+
+점수가 같다면 가장 빠르게 항해를 마친 팀이
+승리의 영광을 차지합니다.
+
+자, 미지의 항로를 향해 돛을 올리십시오!`;
+
+      const bigLine = "대항해시대의 울릉도!";
+      let bigStart = -1;
+      let bigEnd = -1;
+
+      function ensureBigRange() {
+        if (bigStart >= 0) return;
+        bigStart = fullText.indexOf(bigLine);
+        bigEnd = bigStart >= 0 ? bigStart + bigLine.length : -1;
+      }
+
+      function renderTyped(upto) {
+        ensureBigRange();
+        // If for some reason the substring isn't found, fall back to plain typing.
+        if (bigStart < 0) {
+          typeTextEl.textContent = fullText.slice(0, upto);
+          return;
+        }
+
+        typeTextEl.textContent = "";
+        const frag = document.createDocumentFragment();
+
+        const beforeEnd = Math.min(upto, bigStart);
+        if (beforeEnd > 0) {
+          frag.appendChild(document.createTextNode(fullText.slice(0, beforeEnd)));
+        }
+
+        if (upto > bigStart) {
+          const midEnd = Math.min(upto, bigEnd);
+          const mid = fullText.slice(bigStart, midEnd);
+          const span = document.createElement("span");
+          span.className = "big-line";
+          span.textContent = mid;
+          frag.appendChild(span);
+        }
+
+        if (upto > bigEnd) {
+          frag.appendChild(document.createTextNode(fullText.slice(bigEnd, upto)));
+        }
+
+        typeTextEl.appendChild(frag);
+      }
+
+      function startTypewriter() {
+        if (intro2TypewriterTimerId) {
+          clearTimeout(intro2TypewriterTimerId);
+          intro2TypewriterTimerId = null;
+        }
+        stopIntro2PenSfx();
+        if (introStartButtonElement) {
+          introStartButtonElement.disabled = true;
+          introStartButtonElement.style.opacity = "0.5";
+          introStartButtonElement.style.pointerEvents = "none";
+        }
+
+        const reduced = window.matchMedia && window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+        if (reduced) {
+          renderTyped(fullText.length);
+          typeCursorEl.style.display = "none";
+          updateCreditScroll();
+          stopIntro2PenSfx();
+          if (introStartButtonElement) {
+            introStartButtonElement.disabled = false;
+            introStartButtonElement.style.opacity = "";
+            introStartButtonElement.style.pointerEvents = "";
+          }
+          return;
+        }
+
+        typeTextEl.textContent = "";
+
+        let i = 0;
+        const baseDelay = 55; // 타자기 느낌: 더 더 느리게
+
+        const tick = () => {
+          if (i >= fullText.length) {
+            typeCursorEl.style.display = "none";
+            updateCreditScroll();
+            intro2TypewriterTimerId = null;
+            stopIntro2PenSfx();
+            if (introStartButtonElement) {
+              introStartButtonElement.disabled = false;
+              introStartButtonElement.style.opacity = "";
+              introStartButtonElement.style.pointerEvents = "";
+            }
+            return;
+          }
+
+          i += 1;
+          renderTyped(i);
+          updateCreditScroll();
+          const jitter = Math.random() * 18;
+          const isNewLine = fullText[i - 1] === "\n";
+          const nlDelay = isNewLine ? 140 : 0;
+          intro2TypewriterTimerId = setTimeout(tick, baseDelay + jitter + nlDelay);
+        };
+
+        // 아주 짧게 텍스트 앞부분부터 시작
+        intro2TypewriterTimerId = setTimeout(() => {
+          startIntro2PenSfx();
+          tick();
+        }, 260);
+      }
+
+      startTypewriter();
+      startIntro2BgmFromResume();
+
+      introStartButtonElement.addEventListener("click", () => {
+        if (introStartButtonElement.disabled) return;
+        if (intro2TypewriterTimerId) {
+          clearTimeout(intro2TypewriterTimerId);
+          intro2TypewriterTimerId = null;
+        }
+        stopIntro2PenSfx();
+        stopIntro2Bgm();
+        try {
+          localStorage.setItem("toptrumps_shared_correct_count", "0");
+          localStorage.setItem("toptrumps_shared_wrong_count", "0");
+          localStorage.setItem("toptrumps_shared_bonus_score", "0");
+          localStorage.removeItem("toptrumps_shared_cannon_count");
+        } catch (_) {}
+        window.location.replace("mission01.html");
+      });
+    </script>
+    <script>
+      (function () {
+        const HOME_PASSWORD = "0000";
+
+        function clearTopTrumpsStorage() {
+          try {
+            Object.keys(localStorage).forEach((key) => {
+              if (key.startsWith("toptrumps_")) localStorage.removeItem(key);
+            });
+          } catch (_) {}
+          try {
+            Object.keys(sessionStorage).forEach((key) => {
+              if (key.startsWith("toptrumps_")) sessionStorage.removeItem(key);
+            });
+          } catch (_) {}
+        }
+
+        if (document.getElementById("toptrumpsHomeResetBtn")) return;
+        const btn = document.createElement("button");
+        btn.id = "toptrumpsHomeResetBtn";
+        btn.type = "button";
+        btn.textContent = "⌂";
+        Object.assign(btn.style, {
+          position: "fixed",
+          top: "14px",
+          right: "14px",
+          zIndex: "260",
+          border: "none",
+          borderRadius: "0",
+          padding: "0",
+          width: "42px",
+          height: "42px",
+          background: "transparent",
+          color: "rgba(255,255,255,0.52)",
+          fontWeight: "900",
+          fontSize: "30px",
+          lineHeight: "1",
+          letterSpacing: "0",
+          cursor: "pointer",
+          opacity: "0.72"
+        });
+
+        btn.addEventListener("click", () => {
+          const entered = window.prompt("처음으로 돌아가려면 비밀번호를 입력하세요.");
+          if (entered === null) return;
+          if (entered !== HOME_PASSWORD) {
+            window.alert("비밀번호가 올바르지 않습니다.");
+            return;
+          }
+          clearTopTrumpsStorage();
+          window.top.location.href = "/";
+        });
+
+        document.body.appendChild(btn);
+      })();
+    </script>
+  </body>
+</html>
+
