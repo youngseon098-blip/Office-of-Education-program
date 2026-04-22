@@ -1725,8 +1725,40 @@
         } catch (_) {}
       }
 
+      function installMission1BgmUnlockFallback() {
+        const audio = mission1BgmVideoElement;
+        if (!audio) return;
+
+        document.addEventListener(
+          "touchstart",
+          function unlock() {
+            audio.muted = false;
+            audio.volume = 0.7;
+            if (audio.paused) {
+              audio.play().catch(() => {});
+            }
+            document.removeEventListener("touchstart", unlock);
+          },
+          { once: true },
+        );
+
+        document.addEventListener(
+          "click",
+          function unlock() {
+            audio.muted = false;
+            audio.volume = 0.7;
+            if (audio.paused) {
+              audio.play().catch(() => {});
+            }
+            document.removeEventListener("click", unlock);
+          },
+          { once: true },
+        );
+      }
+
       function startMission1Bgm() {
         if (!mission1BgmVideoElement) return;
+        if (!mission1BgmVideoElement.paused) return;
         mission1BgmVideoElement.loop = true;
         mission1BgmVideoElement.muted = false;
         mission1BgmVideoElement.volume = 0.7;
@@ -1737,6 +1769,7 @@
             // Autoplay policy fallback
             mission1BgmVideoElement.muted = true;
             mission1BgmVideoElement.play().catch(() => {});
+            installMission1BgmUnlockFallback();
           });
         }
       }
