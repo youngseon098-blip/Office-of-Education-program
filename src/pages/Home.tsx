@@ -122,65 +122,272 @@ export default function Home() {
                 goToTopTrumpsMission();
               }}
             >
-              <div className="center-bg">
-                <div className="wave-lines" aria-hidden="true">
-                  <svg
-                    viewBox="0 0 300 400"
-                    preserveAspectRatio="xMidYMid slice"
+              <div
+                style={{
+                  position: "relative",
+                  borderRadius: "16px",
+                  overflow: "hidden",
+                  aspectRatio: "1.65",
+                  cursor: "pointer",
+                  background:
+                    "linear-gradient(175deg,#0e2233 0%,#162f45 25%,#1a3a52 45%,#0f1e2e 70%,#080f18 100%)",
+                }}
+              >
+                {/* 수평선 빛 */}
+                <div
+                  style={{
+                    position: "absolute",
+                    top: "28%",
+                    left: 0,
+                    right: 0,
+                    height: 180,
+                    background:
+                      "radial-gradient(ellipse at 52% 0%,rgba(255,200,120,0.18) 0%,rgba(180,140,80,0.08) 40%,transparent 70%)",
+                    pointerEvents: "none",
+                  }}
+                />
+
+                {/* 구름 */}
+                <svg
+                  style={{
+                    position: "absolute",
+                    top: 0,
+                    left: 0,
+                    width: "100%",
+                    height: "55%",
+                    opacity: 0.18,
+                  }}
+                  viewBox="0 0 800 280"
+                  preserveAspectRatio="none"
+                >
+                  <ellipse cx="200" cy="80" rx="180" ry="55" fill="#c8d8e8" />
+                  <ellipse cx="420" cy="60" rx="220" ry="45" fill="#d0dde8" />
+                  <ellipse cx="650" cy="90" rx="160" ry="50" fill="#c0d0e0" />
+                  <ellipse cx="100" cy="110" rx="120" ry="35" fill="#b8cad8" />
+                  <ellipse cx="580" cy="50" rx="140" ry="38" fill="#ccdae6" />
+                </svg>
+
+                {/* 바다 물결 */}
+                <svg
+                  style={{
+                    position: "absolute",
+                    bottom: 0,
+                    left: 0,
+                    width: "100%",
+                    height: "50%",
+                    opacity: 0.35,
+                  }}
+                  viewBox="0 0 800 250"
+                  preserveAspectRatio="none"
+                >
+                  <path
+                    d="M0,60 C120,40 240,80 380,55 C520,30 640,70 800,50 L800,250 L0,250 Z"
+                    fill="#1a4060"
+                  />
+                  <path
+                    d="M0,110 C140,88 280,128 420,105 C560,82 680,118 800,98 L800,250 L0,250 Z"
+                    fill="#122d45"
+                  />
+                  <path
+                    d="M0,155 C160,135 300,170 460,150 C600,132 710,162 800,145 L800,250 L0,250 Z"
+                    fill="#0c1f30"
+                  />
+                </svg>
+
+                {/* 범선 실루엣 */}
+                <svg
+                  style={{
+                    position: "absolute",
+                    bottom: "12%",
+                    left: "50%",
+                    transform: "translateX(-50%)",
+                    width: "48%",
+                    opacity: 0.72,
+                    filter: "blur(0.4px)",
+                  }}
+                  viewBox="0 0 320 300"
+                  fill="none"
+                >
+                  <path
+                    d="M85,230 Q160,248 235,230 L222,265 Q160,276 98,265 Z"
+                    fill="#0a1520"
+                  />
+                  <rect x="98" y="212" width="124" height="22" rx="3" fill="#0a1520" />
+                  <rect x="157" y="30" width="3.5" height="185" fill="#162535" rx="1" />
+                  <rect x="108" y="75" width="2.5" height="142" fill="#162535" rx="1" />
+                  <path
+                    d="M160,35 C185,60 210,95 205,130 C200,155 170,168 160,172 L160,35Z"
+                    fill="rgba(220,210,185,0.82)"
+                  />
+                  <path
+                    d="M157,35 C132,58 108,92 112,128 C116,153 145,166 157,170 L157,35Z"
+                    fill="rgba(215,205,180,0.78)"
+                  />
+                  <path
+                    d="M110,78 C130,100 148,128 145,158 C143,172 118,180 110,183 L110,78Z"
+                    fill="rgba(210,200,175,0.72)"
+                  />
+                  <rect x="108" y="90" width="100" height="2" rx="1" fill="#162535" opacity="0.6" />
+                  <rect x="108" y="140" width="97" height="1.5" rx="1" fill="#162535" opacity="0.5" />
+                  <path d="M160,30 L180,40 L160,50 Z" fill="rgba(160,50,50,0.85)" />
+                  <line
+                    x1="98"
+                    y1="215"
+                    x2="68"
+                    y2="195"
+                    stroke="#162535"
+                    strokeWidth="2"
+                    strokeLinecap="round"
+                  />
+                  <path
+                    d="M110,268 Q160,278 210,268"
+                    stroke="rgba(100,160,200,0.15)"
+                    strokeWidth="6"
+                    fill="none"
+                  />
+                </svg>
+
+                {/* 수면 반짝임 */}
+                <div
+                  style={{
+                    position: "absolute",
+                    bottom: "10%",
+                    left: 0,
+                    right: 0,
+                    height: 2,
+                    background:
+                      "linear-gradient(90deg,transparent 10%,rgba(180,220,255,0.12) 30%,rgba(220,240,255,0.25) 50%,rgba(180,220,255,0.12) 70%,transparent 90%)",
+                    pointerEvents: "none",
+                  }}
+                />
+
+                {/* 상단 라벨 */}
+                <div style={{ position: "absolute", top: 14, left: 18 }}>
+                  <span
+                    style={{
+                      fontFamily: "Cinzel, serif",
+                      fontSize: 9,
+                      letterSpacing: 4,
+                      color: "rgba(180,200,220,0.55)",
+                    }}
                   >
-                    <path
-                      d="M0 80 Q75 40 150 80 Q225 120 300 80"
-                      fill="none"
-                      stroke="#1a6090"
-                      strokeWidth="1.5"
-                    />
-                    <path
-                      d="M0 120 Q75 80 150 120 Q225 160 300 120"
-                      fill="none"
-                      stroke="#1a6090"
-                      strokeWidth="1.5"
-                    />
-                    <path
-                      d="M0 160 Q75 120 150 160 Q225 200 300 160"
-                      fill="none"
-                      stroke="#1a6090"
-                      strokeWidth="1.5"
-                    />
-                    <path
-                      d="M0 200 Q75 160 150 200 Q225 240 300 200"
-                      fill="none"
-                      stroke="#1a6090"
-                      strokeWidth="1.5"
-                    />
-                    <path
-                      d="M0 240 Q75 200 150 240 Q225 280 300 240"
-                      fill="none"
-                      stroke="#1a6090"
-                      strokeWidth="1.5"
-                    />
-                    <path
-                      d="M0 280 Q75 240 150 280 Q225 320 300 280"
-                      fill="none"
-                      stroke="#1a6090"
-                      strokeWidth="1.5"
-                    />
-                  </svg>
+                    MISSION 01 · VOYAGE
+                  </span>
                 </div>
-                <div className="pantone-visual">
-                  <div className="pantone-swatch" />
-                  <div className="pantone-brand">PANTONE®</div>
-                  <div className="pantone-code">
-                    19-4052
-                    <br />
-                    Classic Blue
+
+                {/* LIVE 배지 */}
+                <div
+                  style={{
+                    position: "absolute",
+                    top: 12,
+                    right: 14,
+                    background: "rgba(120,20,20,0.85)",
+                    borderRadius: 4,
+                    padding: "3px 9px",
+                    display: "flex",
+                    alignItems: "center",
+                    gap: 5,
+                    border: "1px solid rgba(180,60,60,0.4)",
+                  }}
+                >
+                  <div
+                    style={{
+                      width: 5,
+                      height: 5,
+                      borderRadius: "50%",
+                      background: "#ff5555",
+                      animation: "blink 1s step-end infinite",
+                      boxShadow: "0 0 5px #ff3333",
+                    }}
+                  />
+                  <span
+                    style={{
+                      fontSize: 9,
+                      letterSpacing: 2,
+                      color: "rgba(255,200,200,0.9)",
+                      fontFamily: "monospace",
+                    }}
+                  >
+                    LIVE
+                  </span>
+                </div>
+
+                {/* 하단 텍스트 */}
+                <div
+                  style={{
+                    position: "absolute",
+                    bottom: 0,
+                    left: 0,
+                    right: 0,
+                    padding: "16px 20px 18px",
+                    background:
+                      "linear-gradient(0deg,rgba(5,10,18,0.98) 55%,rgba(5,10,18,0.7) 80%,transparent)",
+                    textAlign: "left",
+                  }}
+                >
+                  <div
+                    style={{
+                      display: "flex",
+                      alignItems: "center",
+                      gap: 8,
+                      marginBottom: 26,
+                    }}
+                  >
+                    <div
+                      style={{
+                        flex: 1,
+                        height: 1,
+                        background:
+                          "linear-gradient(90deg,rgba(120,40,40,0.9),rgba(120,40,40,0.1))",
+                      }}
+                    />
+                    <span
+                      style={{
+                        fontSize: 8,
+                        letterSpacing: 3,
+                        color: "rgba(160,80,70,0.85)",
+                        fontFamily: "Cinzel, serif",
+                        whiteSpace: "nowrap",
+                      }}
+                    >
+                      HWASUNG COMPANY &amp; EDUCATION
+                    </span>
+                    <div
+                      style={{
+                        flex: 1,
+                        height: 1,
+                        background:
+                          "linear-gradient(90deg,rgba(120,40,40,0.1),rgba(120,40,40,0.9))",
+                      }}
+                    />
                   </div>
-                </div>
-              </div>
-              <div className="center-footer">
-                <div className="center-mission">Mission 01 · Color Sense</div>
-                <div className="center-title">Pantone Color</div>
-                <div className="center-desc">
-                  색채 감각 훈련 · 19-4052 Classic Blue를 찾아라
+                  <h2
+                    style={{
+                      fontFamily: "Cinzel, serif",
+                      fontSize: 20,
+                      fontWeight: 900,
+                      color: "#e8dfc8",
+                      margin: "0 0 4px",
+                      letterSpacing: 3,
+                      textShadow: "0 2px 12px rgba(100,140,180,0.3)",
+                      textAlign: "left",
+                    }}
+                  >
+                    Cruise Mission
+                  </h2>
+                  <p
+                    style={{
+                      fontFamily: "Noto Sans KR, sans-serif",
+                      fontSize: 11,
+                      fontWeight: 300,
+                      color: "rgba(160,180,200,0.7)",
+                      margin: 0,
+                      letterSpacing: 1,
+                      textAlign: "left",
+                    }}
+                  >
+                    대항해시대의 울릉도를 탐험하라
+                  </p>
                 </div>
               </div>
             </Link>

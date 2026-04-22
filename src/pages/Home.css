@@ -1,4 +1,4 @@
-@import url("https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Noto+Sans+KR:wght@300;400;700&family=Share+Tech+Mono&display=swap");
+@import url("https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Cinzel:wght@500;700&family=Noto+Sans+KR:wght@300;400;700&family=Share+Tech+Mono&display=swap");
 
 .home-screen {
   position: relative;
@@ -349,111 +349,178 @@
 .home-program-main .center-bg {
   position: absolute;
   inset: 0;
-  background: linear-gradient(160deg, #0a1a2e 0%, #081018 40%, #040810 100%);
+  background: linear-gradient(175deg,
+      #0e2233 0%,
+      #162f45 25%,
+      #1a3a52 45%,
+      #0f1e2e 70%,
+      #080f18 100%);
   display: flex;
   align-items: center;
   justify-content: center;
 }
 
-.home-program-main .wave-lines {
+.home-program-main .cruise-horizon-light {
   position: absolute;
-  inset: 0;
-  overflow: hidden;
-  opacity: 0.25;
+  left: 0;
+  right: 0;
+  top: 28%;
+  height: 46%;
+  background: radial-gradient(ellipse at 52% 0%,
+      rgba(255, 200, 120, 0.18),
+      transparent 70%);
+  pointer-events: none;
 }
 
-.home-program-main .wave-lines svg {
+.home-program-main .cruise-cloud-layer {
+  position: absolute;
+  left: 0;
+  right: 0;
+  top: 0;
+  height: 55%;
+  overflow: hidden;
+  opacity: 0.18;
+  pointer-events: none;
+}
+
+.home-program-main .cruise-cloud-layer svg {
   width: 100%;
   height: 100%;
 }
 
-.home-program-main .pantone-visual {
+.home-program-main .cruise-wave-layer {
   position: relative;
-  width: clamp(120px, 30%, 160px);
-  background: #fff;
-  border-radius: 2px;
-  padding: 8px 8px 30px;
-  box-shadow: 0 20px 60px rgba(0, 0, 0, 0.7);
-  transform: rotate(-3deg);
-}
-
-@media (min-width: 981px) {
-  .home-program-main .center-bg {
-    align-items: center;
-    justify-content: center;
-    padding-top: 0;
-  }
-
-  .home-program-main .pantone-visual {
-    width: clamp(120px, 30%, 160px);
-    padding: 8px 8px 30px;
-    box-shadow: 0 20px 60px rgba(0, 0, 0, 0.7);
-    transform: rotate(-3deg);
-  }
-}
-
-.home-program-main .pantone-swatch {
+  align-self: flex-end;
   width: 100%;
-  aspect-ratio: 1;
-  background: #19426a;
-  border-radius: 1px;
-  margin-bottom: 8px;
-  position: relative;
-  overflow: hidden;
+  height: 50%;
+  opacity: 0.35;
+  pointer-events: none;
 }
 
-.home-program-main .pantone-swatch::before {
-  content: "";
+.home-program-main .cruise-wave-layer svg {
+  width: 100%;
+  height: 100%;
+}
+
+.home-program-main .cruise-ship-layer {
   position: absolute;
-  inset: 0;
-  background: linear-gradient(135deg,
-      rgba(255, 255, 255, 0.08) 0%,
-      transparent 60%);
+  left: 50%;
+  bottom: 22%;
+  transform: translateX(-50%);
+  width: 48%;
+  opacity: 0.72;
+  filter: blur(0.4px);
+  pointer-events: none;
 }
 
-.home-program-main .pantone-brand {
-  font-family: "Bebas Neue", sans-serif;
-  font-size: 16px;
-  letter-spacing: 2px;
-  color: #111;
-  line-height: 1;
+.home-program-main .cruise-ship-layer svg {
+  width: 100%;
+  height: auto;
 }
 
-.home-program-main .pantone-code {
+.home-program-main .cruise-water-shimmer {
+  position: absolute;
+  left: 8%;
+  right: 8%;
+  bottom: 10%;
+  height: 1px;
+  background: linear-gradient(90deg,
+      transparent,
+      rgba(255, 255, 255, 0.42),
+      transparent);
+  box-shadow: 0 0 8px rgba(255, 255, 255, 0.22);
+  pointer-events: none;
+}
+
+.home-program-main .cruise-live {
+  position: absolute;
+  top: 12px;
+  right: 12px;
+  z-index: 3;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  background: rgba(180, 20, 20, 0.9);
+  border-radius: 4px;
+  padding: 3px 8px;
+  font-family: "Share Tech Mono", monospace;
   font-size: 9px;
-  color: #555;
-  font-family: Arial, sans-serif;
-  margin-top: 2px;
-  line-height: 1.4;
+  letter-spacing: 2px;
+  color: #fff;
+  text-transform: uppercase;
+  pointer-events: none;
+}
+
+.home-program-main .cruise-live-dot {
+  width: 5px;
+  height: 5px;
+  border-radius: 50%;
+  background: #ff8080;
+  animation: blink 0.7s infinite;
 }
 
 .home-program-main .center-footer {
   position: relative;
   z-index: 2;
   padding: 20px 22px;
-  background: linear-gradient(0deg, rgba(4, 8, 14, 0.98) 0%, transparent 100%);
+  background: linear-gradient(0deg, rgba(5, 10, 18, 0.98) 55%, transparent 100%);
+}
+
+.home-program-main .center-separator {
+  font-family: "Cinzel", serif;
+  font-size: 10px;
+  letter-spacing: 1.8px;
+  color: rgba(186, 78, 78, 0.88);
+  margin-bottom: 6px;
+  text-transform: uppercase;
 }
 
 .home-program-main .center-mission {
   font-family: "Share Tech Mono", monospace;
   font-size: 9px;
   letter-spacing: 2px;
-  color: #2a6a9a;
+  color: #6f8cab;
   text-transform: uppercase;
   margin-bottom: 5px;
 }
 
 .home-program-main .center-title {
-  font-family: "Bebas Neue", sans-serif;
-  font-size: 28px;
+  font-family: "Cinzel", serif;
+  font-size: 20px;
   letter-spacing: 3px;
-  color: #d0e8ff;
+  color: #e8dfc8;
+  text-transform: none;
 }
 
 .home-program-main .center-desc {
+  font-family: "Noto Sans KR", sans-serif;
   font-size: 11px;
-  color: #2a4a6a;
-  margin-top: 4px;
+  color: rgba(160, 180, 200, 0.7);
+  margin-top: 6px;
+}
+
+.home-program-main .center-enter {
+  position: absolute;
+  right: 18px;
+  bottom: 16px;
+  padding: 6px 12px;
+  border-radius: 999px;
+  border: 1px solid rgba(232, 223, 200, 0.55);
+  background: rgba(10, 20, 34, 0.72);
+  color: #e8dfc8;
+  font-family: "Noto Sans KR", sans-serif;
+  font-size: 11px;
+  letter-spacing: 0.2px;
+  opacity: 0;
+  transform: translateY(6px);
+  transition: opacity 0.2s ease, transform 0.2s ease;
+  pointer-events: none;
+}
+
+.home-program-main.card.center-card:hover .center-enter,
+.home-program-main.card.center-card:focus-within .center-enter {
+  opacity: 1;
+  transform: translateY(0);
 }
 
 .home-side {
@@ -651,13 +718,14 @@
   display: flex;
   align-items: center;
   gap: 6px;
-  background: rgba(180, 20, 20, 0.9);
+  background: rgba(120, 20, 20, 0.85);
   border-radius: 4px;
   padding: 3px 8px;
+  border: 1px solid rgba(180, 60, 60, 0.4);
   font-family: "Share Tech Mono", monospace;
   font-size: 9px;
   letter-spacing: 2px;
-  color: #fff;
+  color: rgba(255, 200, 200, 0.9);
   text-transform: uppercase;
   pointer-events: none;
 }
@@ -677,8 +745,9 @@
   width: 5px;
   height: 5px;
   border-radius: 50%;
-  background: #ff8080;
-  animation: blink 0.7s infinite;
+  background: #ff5555;
+  animation: blink 1s step-end infinite;
+  box-shadow: 0 0 5px #ff3333;
 }
 
 @media (prefers-reduced-motion: reduce) {
