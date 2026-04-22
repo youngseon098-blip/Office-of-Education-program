@@ -2514,7 +2514,9 @@
           return;
         }
         clearTopTrumpsStorage();
-        window.top.location.href = "/";
+        const origin = window.location.origin;
+        const base = window.location.pathname.split('/toptrumps-mission')[0];
+        window.top.location.href = origin + base + '/';
       });
 
       document.body.appendChild(btn);
