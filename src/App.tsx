@@ -1,5 +1,5 @@
+import { useEffect } from "react";
 import Home from "./pages/Home";
-import PantoneHome from "./pages/Pantone/PantoneHome";
 import QuizHome from "./pages/Quiz/QuizHome";
 import Quiz1 from "./pages/Quiz/Quiz1/quiz1";
 import Quiz1Game from "./pages/Quiz/Quiz1/quiz1Game";
@@ -10,11 +10,19 @@ import Quiz3 from "./pages/Quiz/Quiz3/quiz3";
 import UcQuiz from "./pages/UcQuiz/UcQuiz";
 import { Navigate, Route, Routes } from "react-router-dom";
 
+function ToptrumpsMissionRedirect() {
+  useEffect(() => {
+    window.location.href = import.meta.env.BASE_URL + "toptrumps-mission/index.html";
+  }, []);
+
+  return null;
+}
+
 function App() {
   return (
     <Routes>
       <Route path="/" element={<Home />} />
-      <Route path="/pantone" element={<PantoneHome />} />
+      <Route path="/pantone" element={<ToptrumpsMissionRedirect />} />
       <Route path="/quiz" element={<QuizHome />} />
       <Route path="/quiz1" element={<Quiz1AudioLayout />}>
         <Route index element={<Quiz1 />} />
