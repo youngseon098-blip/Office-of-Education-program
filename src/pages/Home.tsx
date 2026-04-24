@@ -102,6 +102,13 @@ export default function Home() {
 
           <article
             className="home-program home-program-main card center-card"
+            style={{
+              position: "relative",
+              overflow: "hidden",
+              display: "flex",
+              alignItems: "center",
+              justifyContent: "center",
+            }}
             role="link"
             tabIndex={0}
             aria-label="팬톤 컬러 찾기 페이지로 이동"
@@ -123,11 +130,16 @@ export default function Home() {
               }}
             >
               <div
+                className="home-cruise-mission-card"
                 style={{
-                  position: "relative",
+                  position: "absolute",
+                  inset: 0,
                   borderRadius: "16px",
                   overflow: "hidden",
-                  aspectRatio: "1.65",
+                  width: "100%",
+                  maxWidth: "100%",
+                  maxHeight: "100%",
+                  flexShrink: 0,
                   cursor: "pointer",
                   background:
                     "linear-gradient(175deg,#0e2233 0%,#162f45 25%,#1a3a52 45%,#0f1e2e 70%,#080f18 100%)",
@@ -140,7 +152,8 @@ export default function Home() {
                     top: "28%",
                     left: 0,
                     right: 0,
-                    height: 180,
+                    height: "32%",
+                    maxHeight: 180,
                     background:
                       "radial-gradient(ellipse at 52% 0%,rgba(255,200,120,0.18) 0%,rgba(180,140,80,0.08) 40%,transparent 70%)",
                     pointerEvents: "none",
@@ -198,7 +211,7 @@ export default function Home() {
                 <svg
                   style={{
                     position: "absolute",
-                    bottom: "12%",
+                    bottom: "8%",
                     left: "50%",
                     transform: "translateX(-50%)",
                     width: "48%",

@@ -157,7 +157,7 @@
       font-family: "Algerian", "Bebas Neue", "Oswald", sans-serif;
     }
 
-    /* BONUS ?�에 붙는 ?�스?��? 붙어??보이??�?방�? */
+    /* BONUS ?�에 붙는 ?�스?��? 붙어??보이??�?방�? */
     .mission-banner-impact-digit + .mission-banner-word {
       margin-left: 0.34em;
     }
@@ -309,7 +309,7 @@
     }
 
     .zoom-button::before {
-      content: "?��?지 ?�인?�기";
+      content: "?��?지 ?�인?�기";
       position: absolute;
       top: calc(-1 * clamp(40px, 5.3vw, 51px));
       left: 50%;
@@ -880,7 +880,7 @@
 <body>
   <div class="intro-overlay" id="introOverlay" aria-hidden="true">
     <video id="introVideo" class="intro-video" src="/videos/mission-intro.mp4" preload="auto" playsinline loop></video>
-    <img id="introOverlayImage" class="intro-overlay-image" src="/images/intro-overlay-logo.png" alt="?�트�?로고">
+    <img id="introOverlayImage" class="intro-overlay-image" src="/images/intro-overlay-logo.png" alt="?�트�?로고">
     <button id="introStartButton" class="intro-start-button" type="button">??  ??/button>
   </div>
   <video id="mission1BgmVideo" src="./images/music/kaeribianyihaejeogost-1sigan-hes-a-pirate-ytshorts.savetube.vip.mp4" preload="auto" playsinline loop muted style="display:none"></video>
@@ -903,7 +903,7 @@
         <figure class="card">
           <img src="./images/SHIP_IMG.png" alt="Pirate ship silhouette">
         </figure>
-        <button class="zoom-button" id="openProblemModalButton" type="button" aria-label="?�제 문제 보기">?��</button>
+        <button class="zoom-button" id="openProblemModalButton" type="button" aria-label="?�제 문제 보기">?��</button>
       </div>
 
       <div class="wood-banner fact">
@@ -912,28 +912,28 @@
 
       <section class="fact-grid" aria-label="Top trumps fact file fields">
         <div class="cell cell-left">
-          <p class="question-title">?�내?�서 ?��?지??
-<span class="answer-emphasis">?�답</span>??맞추?�요.</p>
+          <p class="question-title">?�내?�서 ?��?지??
+<span class="answer-emphasis">?�답</span>??맞추?�요.</p>
           <div class="question-options">
-            <button class="question-option" data-answer="false">1. ?�이 102.4km</button>
-            <button class="question-option" data-answer="true">2. ?�발 986.5m</button>
-            <button class="question-option" data-answer="false">3. ?�선 2만년??/button>
+            <button class="question-option" data-answer="false">1. ?�이 102.4km</button>
+            <button class="question-option" data-answer="true">2. ?�발 986.5m</button>
+            <button class="question-option" data-answer="false">3. ?�선 2만년??/button>
           </div>
         </div>
-        <div class="cell cell-r1 cell-label"><span class="label-name">?�답 ??/span><span class="label-value" id="correctCount">0</span></div>
-        <div class="cell cell-r2 cell-label"><span class="label-name">?�답 ??/span><span class="label-value" id="wrongCount">0</span></div>
-        <div class="cell cell-r3 cell-label"><span class="label-name">보너???�수</span><span class="label-value" id="bonusScore">0</span></div>
-        <div class="cell cell-b2"><button class="action-button" id="submitAnswerButton" type="button">?�답 ?�출</button></div>
+        <div class="cell cell-r1 cell-label"><span class="label-name">?�답 ??/span><span class="label-value" id="correctCount">0</span></div>
+        <div class="cell cell-r2 cell-label"><span class="label-name">?�답 ??/span><span class="label-value" id="wrongCount">0</span></div>
+        <div class="cell cell-r3 cell-label"><span class="label-name">보너???�수</span><span class="label-value" id="bonusScore">0</span></div>
+        <div class="cell cell-b2"><button class="action-button" id="submitAnswerButton" type="button">?�답 ?�출</button></div>
       </section>
     </section>
   </main>
 
     <div class="problem-modal" id="problemModal" aria-hidden="true">
-    <div class="problem-modal-card" id="problemModalCard" role="dialog" aria-modal="true" aria-label="?�제 문제">
-      <button class="problem-modal-close" id="closeProblemModalButton" type="button" aria-label="?�기">×</button>
+    <div class="problem-modal-card" id="problemModalCard" role="dialog" aria-modal="true" aria-label="?�제 문제">
+      <button class="problem-modal-close" id="closeProblemModalButton" type="button" aria-label="?�기">×</button>
       <div class="problem-modal-body">
-        <img class="problem-modal-image" src="./images/problem-popup-mission01.png" alt="1�?문제 ?��?지">
-        <p class="problem-modal-question">?�음 ?�진??(  ?  ) ???�답?�?</p>
+        <img class="problem-modal-image" src="./images/problem-popup-mission01.png" alt="1�?문제 ?��?지">
+        <p class="problem-modal-question">?�음 ?�진??(  ?  ) ???�답?�?</p>
       </div>
     </div>
   </div>
@@ -965,7 +965,7 @@
       ? performance.getEntriesByType("navigation")
       : [];
     const navType = navEntries.length > 0 ? navEntries[0].type : "";
-    const WRONG_CRACK_IMAGE_SRC = "./images/깨�????��?지3.png";
+    const WRONG_CRACK_IMAGE_SRC = "./images/깨�????��?지3.png";
     const MAX_WRONG_CRACK_MARKS = 6;
     if (navType === "reload") {
       localStorage.setItem(SHARED_COUNT_KEYS.correct, "0");
@@ -1479,14 +1479,14 @@
     let currentMissionNumber = getCurrentMissionNumber();
     let bonusGatePassedKey = `toptrumps_bonus_gate_passed_${currentMissionNumber}`;
     const missionDefaultConfig = {
-      questionTitleHtml: '?�내?�서 ?��?지??br><span class="answer-emphasis">?�답</span>??맞추?�요.',
-      popupQuestionText: "?�음 ?�진??(  ?  ) ???�답?�?",
+      questionTitleHtml: '?�내?�서 ?��?지??br><span class="answer-emphasis">?�답</span>??맞추?�요.',
+      popupQuestionText: "?�음 ?�진??(  ?  ) ???�답?�?",
       popupImageSrc: "./images/problem-popup-mission01.png",
-      popupImageAlt: "문제 ?��?지",
+      popupImageAlt: "문제 ?��?지",
       options: [
-        { label: "1. ?�이 102.4km", correct: false },
-        { label: "2. ?�발 986.5m", correct: true },
-        { label: "3. ?�선 2만년??, correct: false }
+        { label: "1. ?�이 102.4km", correct: false },
+        { label: "2. ?�발 986.5m", correct: true },
+        { label: "3. ?�선 2만년??, correct: false },
       ]
     };
     const missionConfigMap = window.MISSION_CONFIGS || {};
@@ -1519,7 +1519,7 @@
       }
 
       const passcodeLabel = document.createElement("p");
-      passcodeLabel.textContent = config.passcodeLabelText || "?�호 ?�력";
+      passcodeLabel.textContent = config.passcodeLabelText || "?�호 ?�력";
       passcodeLabel.style.color = "#352818";
       passcodeLabel.style.fontFamily = "\"Open Sans\", sans-serif";
       passcodeLabel.style.fontWeight = "800";
@@ -1529,7 +1529,7 @@
       const passcodeInput = document.createElement("input");
       passcodeInput.type = "text";
       passcodeInput.id = "bonusPasscodeInput";
-      passcodeInput.placeholder = config.passcodePlaceholder || "?�호 ?�력";
+      passcodeInput.placeholder = config.passcodePlaceholder || "?�호 ?�력";
       passcodeInput.autocomplete = "off";
       passcodeInput.spellcheck = false;
       passcodeInput.style.width = "min(70%, 250px)";
@@ -1546,7 +1546,7 @@
       passcodeButton.type = "button";
       passcodeButton.id = "bonusPasscodeConfirmButton";
       passcodeButton.className = "question-option";
-      passcodeButton.textContent = config.passcodeButtonText || "?�인";
+      passcodeButton.textContent = config.passcodeButtonText || "?�인";
       passcodeButton.style.minWidth = "min(70%, 250px)";
 
       const passcodeError = document.createElement("p");
@@ -1579,12 +1579,12 @@
           passcodeInput.disabled = true;
           passcodeButton.disabled = true;
           passcodeError.textContent = "";
-          passcodeSuccess.textContent = config.passcodeSuccessText || "?�호가 맞습?�다. ?�음 미션 버튼 ?�릭?�주?�요.";
+          passcodeSuccess.textContent = config.passcodeSuccessText || "?�호가 맞습?�다. ?�음 미션 버튼 ?�릭?�주?�요.";
           return;
         }
         passcodeInput.value = "";
         passcodeSuccess.textContent = "";
-        passcodeError.textContent = config.passcodeErrorText || "?�호가 ?�바르�? ?�습?�다.";
+        passcodeError.textContent = config.passcodeErrorText || "?�호가 ?�바르�? ?�습?�다.";
       };
 
       passcodeButton.addEventListener("click", validatePasscode);
@@ -1621,7 +1621,7 @@
 
       if (isBonusMission) {
         questionOptionsContainerElement.style.display = "none";
-        submitAnswerButton.textContent = config.submitButtonText || "?�답 ?�출";
+        submitAnswerButton.textContent = config.submitButtonText || "?�답 ?�출";
         submitAnswerButton.disabled = requiresPasscode
           ? localStorage.getItem(bonusGatePassedKey) !== "1"
           : false;
@@ -1634,7 +1634,7 @@
           bonusActions.style.display = "none";
           bonusActions.innerHTML = "";
         }
-        submitAnswerButton.textContent = "?�답 ?�출";
+        submitAnswerButton.textContent = "?�답 ?�출";
         submitAnswerButton.disabled = false;
       }
     }
@@ -1809,7 +1809,7 @@
       }
 
       if (!selectedOptionButton) return;
-      const isCorrect = selectedOptionButton.dataset.answer === "true"; // ?�번 문제 ?�답: 2�?
+      const isCorrect = selectedOptionButton.dataset.answer === "true"; // ?�번 문제 ?�답: 2�?
       if (isCorrect) {
         correctCount += 1;
       } else {
@@ -1899,7 +1899,7 @@
       if (problemModal.classList.contains("is-open")) positionProblemModalCard();
     });
 
-    // ?�음 ?�이지?�서 ?�요 ???�어?????�도�?공개
+    // ?�음 ?�이지?�서 ?�요 ???�어?????�도�?공개
     window.topTrumpsFinalTimer = {
       reset() {
         const now = Date.now();
