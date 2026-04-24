@@ -1,0 +1,1 @@
+if('serviceWorker' in navigator) {window.addEventListener('load', () => {navigator.serviceWorker.register('/Office-of-Education-program/sw.js', { scope: '/Office-of-Education-program/' })})}
