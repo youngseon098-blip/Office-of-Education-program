@@ -42,7 +42,7 @@ Please change the parent <Route path="${O}"> to <Route path="${O==="/"?"*":`${O}
     <div class="char-area">
       ${W}
     </div>
-    <div class="dialogue-box" style="--q1g-black-paper-url:url('${Ye}img/Quiz/Quiz1/BlackPaper3.webp');">
+    <div class="dialogue-box" style="--q1g-black-paper-url:url('${Ye}img/Quiz/Quiz1/BlackPaper4.webp');">
       <div class="dialogue-name">${z.charLabel||""}</div>
       <div class="dialogue-text q1g-dtext"></div>
     </div>
