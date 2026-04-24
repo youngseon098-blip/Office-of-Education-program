@@ -683,7 +683,7 @@
   border-top: none;
   padding: 12px 32px max(32px, env(safe-area-inset-bottom, 0px));
   margin-top: -18px;
-  min-height: clamp(220px, 44vw, 360px);
+  min-height: clamp(292px, 58vw, 480px);
   margin-bottom: 0;
   display: flex;
   flex-direction: column;
@@ -705,7 +705,7 @@
   top: -70px;
   bottom: -6px;
   background-image: var(--q1g-black-paper-url);
-  background-size: 108% 100%;
+  background-size: cover;
   background-position: center top;
   background-repeat: no-repeat;
   pointer-events: none;
@@ -732,7 +732,7 @@
 /* 화자 이름 — 한글+라틴 혼용 시 잘림 방지 */
 .dialogue-name {
   font-family: "Special Elite", "Noto Sans KR", serif, sans-serif;
-  font-size: clamp(19px, 4vw, 23px);
+  font-size: clamp(26px, 5.4vw, 31px);
   letter-spacing: 2.8px;
   text-transform: uppercase;
   font-weight: 700;
@@ -754,14 +754,14 @@
 .dialogue-name::after {
   content: "";
   flex: 1;
-  height: 1px;
+  height: 2.8px;
   background: linear-gradient(90deg, rgba(255, 255, 255, 0.08), transparent);
 }
 
 /* 대화 텍스트 — Image2 흰 텍스트 스타일 */
 .dialogue-text {
   font-family: "Noto Serif KR", serif;
-  font-size: clamp(21px, 4.6vw, 28px);
+  font-size: clamp(28px, 6.1vw, 36px);
   line-height: 1.6;
   color: rgba(228, 215, 188, 0.92);
   min-height: 58px;

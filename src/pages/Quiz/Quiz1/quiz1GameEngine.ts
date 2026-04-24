@@ -1444,7 +1444,7 @@ export function initQuiz1Game(root: HTMLElement): () => void {
     <div class="char-area">
       ${charVisual}
     </div>
-    <div class="dialogue-box" style="--q1g-black-paper-url:url('${BASE}img/Quiz/Quiz1/BlackPaper3.webp');">
+    <div class="dialogue-box" style="--q1g-black-paper-url:url('${BASE}img/Quiz/Quiz1/BlackPaper4.webp');">
       <div class="dialogue-name">${s.charLabel || ""}</div>
       <div class="dialogue-text q1g-dtext"></div>
     </div>
