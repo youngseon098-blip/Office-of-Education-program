@@ -4,7 +4,8 @@
     <script>
   const redirect = new URLSearchParams(window.location.search).get('redirect');
   if (redirect) {
-    window.history.replaceState(null, '', redirect);
+    const base = '/Office-of-Education-program';
+    window.history.replaceState(null, '', base + redirect);
   }
 </script>
     <meta charset="UTF-8" />
