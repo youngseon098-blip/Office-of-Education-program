@@ -517,6 +517,11 @@
   gap: 0;
 }
 
+.q2-dialogue-jisoo #char-area {
+  transform: translateY(-78px);
+  margin-bottom: 24px;
+}
+
 .q2-dialogue-agent #scene-content {
   max-width: none;
   width: 100vw;
@@ -2267,15 +2272,12 @@
 }
 
 .q2-dialogue-jisoo .dlg-box {
-  width: 100vw;
-  max-width: 100vw;
-  margin-left: calc(50% - 50vw);
-  margin-right: calc(50% - 50vw);
-  margin-top: -18px;
-  background-image: var(--q2-note-bg-url);
-  background-size: 115% auto;
-  background-position: center 12px;
-  background-repeat: no-repeat;
+  width: calc(100vw + 28px);
+  max-width: calc(100vw + 28px);
+  margin-left: calc(50% - 50vw - 14px);
+  margin-right: calc(50% - 50vw - 14px);
+  margin-top: -62px;
+  background-image: none;
   height: auto;
   min-height: clamp(420px, 52vw, 760px);
   padding: 0;
@@ -2326,15 +2328,27 @@
 .q2-dialogue-jisoo .dlg-box::after {
   content: "";
   position: absolute;
-  inset: 0;
+  top: -35px;
+  right: 0;
+  bottom: 0;
+  left: 0;
   pointer-events: none;
   z-index: 1;
-  background: linear-gradient(
-    180deg,
-    rgba(2, 10, 22, 0.44) 0%,
-    rgba(2, 10, 22, 0.52) 52%,
-    rgba(1, 8, 18, 0.6) 100%
-  );
+  background-image:
+    linear-gradient(
+      180deg,
+      rgba(2, 10, 22, 0.44) 0%,
+      rgba(2, 10, 22, 0.52) 52%,
+      rgba(1, 8, 18, 0.6) 100%
+    ),
+    var(--q2-note-bg-url);
+  background-size:
+    100% calc(100% + 35px),
+    115% auto;
+  background-position:
+    center 22px,
+    center 0;
+  background-repeat: no-repeat;
 }
 
 .q2-dialogue-jisoo .dlg-box.urgent,
@@ -2931,11 +2945,11 @@
   transform: none;
   min-height: 64px;
   z-index: 3;
-  font-size: 28px;
+  font-size: 34px;
   line-height: 1.7;
   color: #c8e8e0;
   padding: 18px 44px 0;
-  top: 78px;
+  top: 34px;
   text-shadow: 0 1px 8px rgba(90, 200, 180, 0.15);
 }
 
@@ -2950,14 +2964,14 @@
   z-index: 4;
   padding: 18px 44px 2px;
   font-family: "Special Elite", "Noto Sans KR", serif, sans-serif;
-  font-size: clamp(17px, 3.6vw, 22px);
+  font-size: clamp(21px, 4.4vw, 26px);
   letter-spacing: 2.2px;
   font-weight: 700;
   color: #7dd8cc;
   line-height: 1.45;
   text-transform: uppercase;
   display: block;
-  top: 78px;
+  top: 34px;
   text-shadow: 0 0 20px rgba(90, 200, 180, 0.4);
 }
 
