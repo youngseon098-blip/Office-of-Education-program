@@ -335,7 +335,7 @@ const TALKIE_SFX_SRC = `${BASE}mp3/Quiz2/Talkie2.mp3?v=20260420`;
 const AI_SFX_SRC = `${BASE}mp3/Quiz2/ai.mp3?v=20260420`;
 const DATA_SFX_SRC = `${BASE}mp3/Quiz2/data.mp3?v=20260420`;
 const STAGE_SFX_SRC = `${BASE}mp3/Quiz2/STAGE.mp3?v=20260420`;
-const DIALOGUE_NEXT_DELAY_MS = 500;
+const DIALOGUE_NEXT_DELAY_MS = 100;
 const ATMO_NEXT_DELAY_MS = 5000;
 
 function getInitialSceneIndex() {

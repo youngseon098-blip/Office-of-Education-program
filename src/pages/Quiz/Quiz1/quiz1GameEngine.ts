@@ -860,7 +860,7 @@ export function initQuiz1Game(root: HTMLElement): () => void {
     sceneApplyTimer = window.setTimeout(() => {
       sceneApplyTimer = null;
       apply();
-    }, 500);
+    }, 100);
   }
 
   function nextScene(force = false) {
@@ -904,7 +904,7 @@ export function initQuiz1Game(root: HTMLElement): () => void {
           startTypewriter(lines, el);
         };
       }
-    }, 500);
+    }, 100);
     syncPrevVisibility();
   }
 
@@ -1280,7 +1280,7 @@ export function initQuiz1Game(root: HTMLElement): () => void {
           startTypewriter(lines, el);
         };
       }
-    }, 500);
+    }, 100);
     syncPrevVisibility();
   }
 
