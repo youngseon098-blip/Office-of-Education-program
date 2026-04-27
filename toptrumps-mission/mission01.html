@@ -248,6 +248,7 @@
       padding: clamp(10px, 2.5dvh, 24px) 0;
       margin: 0 auto;
       --left-col-width: 40%;
+      transform-origin: top center;
     }
 
     .wood-banner {
@@ -1126,6 +1127,8 @@
     const questionOptionsContainerElement = document.querySelector(".question-options");
     const problemModalImageElement = document.querySelector(".problem-modal-image");
     const problemModalQuestionElement = document.querySelector(".problem-modal-question");
+    const pageElement = document.querySelector(".page");
+    const contentElement = document.querySelector(".content");
 
     const currentPageName = window.location.pathname.split("/").pop() || "";
     const navEntries = typeof performance.getEntriesByType === "function"
@@ -2177,6 +2180,7 @@
     }
 
     applyMissionConfig(missionConfig);
+    fitMissionContentToViewport();
     if (!window.location.hash) {
       window.location.hash = `mission${String(currentMissionNumber).padStart(2, "0")}`;
     }
@@ -2258,6 +2262,7 @@
       clearWrongCrackLayer();
 
       applyMissionConfig(missionConfig);
+      fitMissionContentToViewport();
 
       setTimeout(() => {
         playMissionStartImpact();
@@ -2410,6 +2415,23 @@
       problemModalCard.style.width = `${Math.min(window.innerWidth - 24, rect.width)}px`;
     }
 
+    function fitMissionContentToViewport() {
+      if (!pageElement || !contentElement) return;
+      contentElement.style.transform = "scale(1)";
+      contentElement.style.marginTop = "0";
+
+      const pageRect = pageElement.getBoundingClientRect();
+      const contentRect = contentElement.getBoundingClientRect();
+      const safeTop = 6;
+      const safeBottom = 6;
+      const availableHeight = Math.max(0, pageRect.height - safeTop - safeBottom);
+      const rawScale = availableHeight > 0 ? availableHeight / Math.max(contentRect.height, 1) : 1;
+      const nextScale = Math.min(1, Math.max(0.58, rawScale));
+
+      contentElement.style.transform = `scale(${nextScale})`;
+      contentElement.style.marginTop = `${safeTop}px`;
+    }
+
     function openProblemModal() {
       if (sfxPaperElement) {
         try {
@@ -2461,6 +2483,7 @@
       if (event.key === "Escape") closeProblemModal();
     });
     window.addEventListener("resize", () => {
+      fitMissionContentToViewport();
       if (problemModal.classList.contains("is-open")) positionProblemModalCard();
     });
 
