@@ -904,7 +904,7 @@ export function initQuiz1Game(root: HTMLElement): () => void {
           startTypewriter(lines, el);
         };
       }
-    }, 3000);
+    }, 500);
     syncPrevVisibility();
   }
 
@@ -1280,7 +1280,7 @@ export function initQuiz1Game(root: HTMLElement): () => void {
           startTypewriter(lines, el);
         };
       }
-    }, 3000);
+    }, 500);
     syncPrevVisibility();
   }
 
